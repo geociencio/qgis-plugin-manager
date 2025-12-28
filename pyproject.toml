@@ -32,8 +32,31 @@ qgis-plugin-analyzer = { git = "https://github.com/geociencio/qgis-plugin-analyz
 
 [dependency-groups]
 dev = [
+    "mypy>=1.19.1",
+    "pre-commit>=4.5.1",
     "pytest>=9.0.2",
     "pytest-mock>=3.15.1",
     "qgis-plugin-analyzer",
     "ruff>=0.14.10",
+    "types-setuptools>=80.9.0.20251223",
 ]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "I", "W", "UP", "N"]
+ignore = []
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-v --tb=short"
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+check_untyped_defs = true

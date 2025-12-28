@@ -1,10 +1,11 @@
+import logging
 import os
 import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
+
 from .discovery import get_plugin_metadata, get_source_files
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -13,22 +14,30 @@ def get_qgis_plugin_dir() -> Path:
     if sys.platform == "linux":
         return Path.home() / ".local/share/QGIS/QGIS3/profiles/default/python/plugins"
     elif sys.platform == "darwin":
-        return Path.home() / "Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins"
+        return (
+            Path.home()
+            / "Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins"
+        )
     elif sys.platform == "win32":
-        return Path(os.environ["APPDATA"]) / "QGIS/QGIS3/profiles/default/python/plugins"
+        return (
+            Path(os.environ["APPDATA"])
+            / "QGIS/QGIS3/profiles/default/python/plugins"
+        )
     else:
         raise OSError(f"Unsupported platform: {sys.platform}")
 
-def deploy_plugin(project_root: Path, dest_dir: Path = None, no_backup: bool = False):
+def deploy_plugin(
+    project_root: Path, dest_dir: Path | None = None, no_backup: bool = False
+):
     """Deploy the plugin to the QGIS directory."""
     metadata = get_plugin_metadata(project_root)
     slug = metadata["slug"]
-    
+
     if dest_dir is None:
         dest_dir = get_qgis_plugin_dir()
-    
+
     target_path = dest_dir / slug
-    
+
     print(f"🚀 Deploying '{metadata['name']}' ({slug}) to {target_path}")
 
     # Backup
@@ -47,7 +56,7 @@ def deploy_plugin(project_root: Path, dest_dir: Path = None, no_backup: bool = F
     # Exclusions for copytree
     def ignore_func(directory, contents):
         exclude_set = {
-             "__pycache__", ".git", ".venv", ".agent", ".ai-context", 
+             "__pycache__", ".git", ".venv", ".agent", ".ai-context",
              "tests", "research", "tools", "scripts"
         }
         return [c for c in contents if c in exclude_set or c.endswith(".pyc")]
@@ -72,7 +81,10 @@ def compile_qt_resources(project_root: Path, res_type="all"):
         for qrc in qrc_files:
             py_file = qrc.with_suffix(".py")
             py_file = qrc.with_suffix(".py")
-            logger.info(f"🔨 Compiling resource: {qrc.relative_to(project_root)} -> {py_file.relative_to(project_root)}")
+            logger.info(
+                f"🔨 Compiling resource: {qrc.relative_to(project_root)} -> "
+                f"{py_file.relative_to(project_root)}"
+            )
             if os.system(f"pyrcc5 -o {py_file} {qrc}") == 0:
                 logger.info("  ✅ Done.")
             else:
@@ -94,7 +106,7 @@ def clean_artifacts(project_root: Path):
     for item in project_root.rglob("__pycache__"):
         shutil.rmtree(item)
         logger.debug(f"  🗑️ {item.relative_to(project_root)}")
-    
+
     for item in project_root.rglob("*.pyc"):
         item.unlink()
         logger.debug(f"  🗑️ {item.relative_to(project_root)}")

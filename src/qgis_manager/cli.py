@@ -1,8 +1,11 @@
-import click
-from pathlib import Path
 import logging
-from .core import deploy_plugin, compile_qt_resources, clean_artifacts
+from pathlib import Path
+
+import click
+
+from .core import clean_artifacts, compile_qt_resources, deploy_plugin
 from .discovery import find_project_root
+
 
 @click.group()
 def main():
@@ -10,8 +13,12 @@ def main():
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 @main.command()
-@click.argument("path", default=".", type=click.Path(exists=True, file_okay=False, path_type=Path))
-@click.option("--no-backup", is_flag=True, help="Skip backup of existing installation.")
+@click.argument(
+    "path", default=".", type=click.Path(exists=True, file_okay=False, path_type=Path)
+)
+@click.option(
+    "--no-backup", is_flag=True, help="Skip backup of existing installation."
+)
 def deploy(path, no_backup):
     """Deploy the plugin to the local QGIS profile."""
     try:
@@ -21,8 +28,15 @@ def deploy(path, no_backup):
         click.echo(f"❌ Error: {e}", err=True)
 
 @main.command()
-@click.argument("path", default=".", type=click.Path(exists=True, file_okay=False, path_type=Path))
-@click.option("--type", "res_type", type=click.Choice(["resources", "translations", "all"]), default="all")
+@click.argument(
+    "path", default=".", type=click.Path(exists=True, file_okay=False, path_type=Path)
+)
+@click.option(
+    "--type",
+    "res_type",
+    type=click.Choice(["resources", "translations", "all"]),
+    default="all",
+)
 def compile(path, res_type):
     """Compile resources and translations."""
     try:
@@ -32,7 +46,9 @@ def compile(path, res_type):
         click.echo(f"❌ Error: {e}", err=True)
 
 @main.command()
-@click.argument("path", default=".", type=click.Path(exists=True, file_okay=False, path_type=Path))
+@click.argument(
+    "path", default=".", type=click.Path(exists=True, file_okay=False, path_type=Path)
+)
 def clean(path):
     """Clean build artifacts."""
     try:
