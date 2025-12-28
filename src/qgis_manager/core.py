@@ -30,6 +30,7 @@ Functions:
     deploy_plugin: Deploy plugin with automatic backup and file copying
     compile_qt_resources: Compile .qrc resources and .ts translations
     clean_artifacts: Remove __pycache__ and .pyc files
+    create_plugin_package: Create distributable ZIP package for plugin
 """
 
 import logging
@@ -169,3 +170,108 @@ def clean_artifacts(project_root: Path):
         item.unlink()
         logger.debug(f"  🗑️ {item.relative_to(project_root)}")
     logger.info("✨ Clean complete.")
+
+
+def create_plugin_package(
+    project_root: Path,
+    output_dir: Path | None = None,
+    include_dev: bool = False,
+) -> Path:
+    """
+    Create a distributable ZIP package for the plugin.
+
+    Args:
+        project_root: Root directory of the plugin project
+        output_dir: Output directory for the ZIP file (default: project_root/dist)
+        include_dev: Include development files in the package
+
+    Returns:
+        Path to the created ZIP file
+    """
+    import hashlib
+    import zipfile
+
+    metadata = get_plugin_metadata(project_root)
+    slug = metadata["slug"]
+    version = metadata.get("version", "0.0.0")
+
+    # Determine output directory
+    if output_dir is None:
+        output_dir = project_root / "dist"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Create ZIP filename
+    zip_filename = f"{slug}.{version}.zip"
+    zip_path = output_dir / zip_filename
+
+    logger.info(f"📦 Creating package: {zip_filename}")
+
+    # Files/directories to exclude
+    exclude_patterns = {
+        "__pycache__",
+        ".git",
+        ".venv",
+        ".agent",
+        ".ai-context",
+        "venv",
+        "env",
+        ".pytest_cache",
+        ".ruff_cache",
+        ".mypy_cache",
+        "*.pyc",
+        "*.bak*",
+        "dist",
+        "build",
+        "*.egg-info",
+    }
+
+    if not include_dev:
+        exclude_patterns.update(
+            {"tests", "research", "tools", "scripts", "docs", ".github"}
+        )
+
+    def should_exclude(path: Path) -> bool:
+        """Check if path should be excluded from package."""
+        # Check if any parent or the path itself matches exclude patterns
+        for part in path.parts:
+            if part in exclude_patterns:
+                return True
+            # Check wildcard patterns
+            if any(path.match(p) for p in exclude_patterns if "*" in p):
+                return True
+        return False
+
+    # Create ZIP file
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
+        for item in get_source_files(project_root):
+            if should_exclude(item):
+                continue
+
+            if item.is_file():
+                arcname = f"{slug}/{item.name}"
+                zipf.write(item, arcname)
+                logger.debug(f"  ✅ {item.name}")
+            elif item.is_dir():
+                for file_path in item.rglob("*"):
+                    if file_path.is_file() and not should_exclude(file_path):
+                        arcname = f"{slug}/{file_path.relative_to(project_root)}"
+                        zipf.write(file_path, arcname)
+                        logger.debug(f"  ✅ {file_path.relative_to(project_root)}")
+
+    # Generate SHA256 checksum
+    sha256_hash = hashlib.sha256()
+    with open(zip_path, "rb") as f:
+        for byte_block in iter(lambda: f.read(4096), b""):
+            sha256_hash.update(byte_block)
+
+    checksum = sha256_hash.hexdigest()
+    checksum_file = output_dir / f"{zip_filename}.sha256"
+
+    with open(checksum_file, "w") as f:
+        f.write(f"{checksum}  {zip_filename}\n")
+
+    logger.info(f"✨ Package created: {zip_path}")
+    logger.info(f"🔒 Checksum saved: {checksum_file}")
+    logger.info(f"📊 SHA256: {checksum}")
+
+    return zip_path

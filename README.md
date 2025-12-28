@@ -46,6 +46,21 @@ From your plugin project root:
 # Deploy to QGIS profile (with automatic backup)
 qgis-manage deploy
 
+# Deploy to a specific profile
+qgis-manage deploy --profile production
+
+# Validate metadata.txt
+qgis-manage validate
+
+# Validate with strict mode (fail on warnings)
+qgis-manage validate --strict
+
+# Create distributable ZIP package
+qgis-manage package
+
+# Create package in specific directory
+qgis-manage package --output ./releases
+
 # Compile all resources and translations
 qgis-manage compile
 
