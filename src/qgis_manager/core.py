@@ -1,6 +1,41 @@
+# /***************************************************************************
+#  QGIS Plugin Manager
+#                                  A CLI Tool
+#  Modern command-line interface for QGIS plugin development and deployment.
+#                               -------------------
+#         begin                : 2025-12-28
+#         git sha              : $Format:%H$
+#         copyright            : (C) 2025 by Juan M Bernales
+#         email                : juanbernales@gmail.com
+#  ***************************************************************************/
+#
+# /***************************************************************************
+#  *                                                                         *
+#  *   This program is free software; you can redistribute it and/or modify  *
+#  *   it under the terms of the GNU General Public License as published by  *
+#  *   the Free Software Foundation; either version 2 of the License, or     *
+#  *   (at your option) any later version.                                   *
+#  *                                                                         *
+#  ***************************************************************************/
+
+"""
+Core functionality for QGIS plugin deployment and management.
+
+This module provides functions to deploy QGIS plugins to local profiles,
+compile Qt resources and translations, and clean build artifacts. It handles
+cross-platform path detection for Linux, macOS, and Windows.
+
+Functions:
+    get_qgis_plugin_dir: Detect QGIS plugin directory based on OS and profile
+    deploy_plugin: Deploy plugin with automatic backup and file copying
+    compile_qt_resources: Compile .qrc resources and .ts translations
+    clean_artifacts: Remove __pycache__ and .pyc files
+"""
+
 import logging
 import os
 import shutil
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -9,32 +44,40 @@ from .discovery import get_plugin_metadata, get_source_files
 
 logger = logging.getLogger(__name__)
 
-def get_qgis_plugin_dir() -> Path:
+def get_qgis_plugin_dir(profile: str = "default") -> Path:
     """Detect the QGIS plugin directory based on the OS."""
     if sys.platform == "linux":
-        return Path.home() / ".local/share/QGIS/QGIS3/profiles/default/python/plugins"
+        return (
+            Path.home()
+            / f".local/share/QGIS/QGIS3/profiles/{profile}/python/plugins"
+        )
     elif sys.platform == "darwin":
         return (
             Path.home()
-            / "Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins"
+            / "Library/Application Support/QGIS/QGIS3/profiles"
+            / profile
+            / "python/plugins"
         )
     elif sys.platform == "win32":
         return (
             Path(os.environ["APPDATA"])
-            / "QGIS/QGIS3/profiles/default/python/plugins"
+            / f"QGIS/QGIS3/profiles/{profile}/python/plugins"
         )
     else:
         raise OSError(f"Unsupported platform: {sys.platform}")
 
 def deploy_plugin(
-    project_root: Path, dest_dir: Path | None = None, no_backup: bool = False
+    project_root: Path,
+    dest_dir: Path | None = None,
+    no_backup: bool = False,
+    profile: str = "default",
 ):
     """Deploy the plugin to the QGIS directory."""
     metadata = get_plugin_metadata(project_root)
     slug = metadata["slug"]
 
     if dest_dir is None:
-        dest_dir = get_qgis_plugin_dir()
+        dest_dir = get_qgis_plugin_dir(profile)
 
     target_path = dest_dir / slug
 
@@ -80,29 +123,44 @@ def compile_qt_resources(project_root: Path, res_type="all"):
         qrc_files = list(project_root.rglob("*.qrc"))
         for qrc in qrc_files:
             py_file = qrc.with_suffix(".py")
-            py_file = qrc.with_suffix(".py")
             logger.info(
                 f"🔨 Compiling resource: {qrc.relative_to(project_root)} -> "
                 f"{py_file.relative_to(project_root)}"
             )
-            if os.system(f"pyrcc5 -o {py_file} {qrc}") == 0:
+            try:
+                subprocess.run(
+                    ["pyrcc5", "-o", str(py_file), str(qrc)],
+                    check=True,
+                    capture_output=True,
+                    text=True
+                )
                 logger.info("  ✅ Done.")
-            else:
-                logger.error("  ❌ Error.")
+            except subprocess.CalledProcessError as e:
+                logger.error(f"  ❌ Error compiling {qrc.name}: {e.stderr}")
+            except FileNotFoundError:
+                logger.error("  ❌ pyrcc5 not found. Is it installed?")
 
     if res_type in ["translations", "all"]:
         # Look for .ts files
         ts_files = list(project_root.rglob("*.ts"))
         for ts in ts_files:
             logger.info(f"🌍 Compiling translation: {ts.relative_to(project_root)}")
-            if os.system(f"lrelease {ts}") == 0:
+            try:
+                subprocess.run(
+                    ["lrelease", str(ts)],
+                    check=True,
+                    capture_output=True,
+                    text=True
+                )
                 logger.info("  ✅ Done.")
-            else:
-                logger.error("  ❌ Error.")
+            except subprocess.CalledProcessError as e:
+                logger.error(f"  ❌ Error compiling {ts.name}: {e.stderr}")
+            except FileNotFoundError:
+                logger.error("  ❌ lrelease not found. Is it installed?")
 
 def clean_artifacts(project_root: Path):
     """Clean build artifacts."""
-    logger.info("清理 artifacts...")
+    logger.info("Cleaning artifacts...")
     for item in project_root.rglob("__pycache__"):
         shutil.rmtree(item)
         logger.debug(f"  🗑️ {item.relative_to(project_root)}")

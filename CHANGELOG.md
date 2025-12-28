@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-12-28
+
+### Added
+- Feature: Support for deploying to custom QGIS profiles via `--profile` flag in `deploy` command.
+- Testing: Comprehensive unit test suite for core module (`tests/test_core.py`).
+- CI: GitHub Actions workflow with matrix strategy (Linux, Windows, macOS / Python 3.10-3.12).
+- Docs: Status badges for CI, License, and Code Style in README.
+- Docs: Comprehensive module-level docstrings for all Python source files.
+- Docs: GPL v2+ license headers in all source files with Git SHA placeholder support.
+- Docs: Code quality badge (74.2/100) in README.
+- Docs: Important clarification note in README about being a CLI tool, not a QGIS plugin.
+- Config: `.gitattributes` file for Git keyword expansion and consistent line endings.
+
+### Changed
+- Refactor: Replaced insecure `os.system` calls with `subprocess.run` across the codebase.
+- Security: Improved error handling in external command execution.
+- Docs: Enhanced README with better project description and usage clarity.
+
+### Fixed
+- Localization: Fixed hardcoded Chinese log messages in artifact cleaning.
+
 ## [0.1.0] - 2025-12-28
 
 ### Added

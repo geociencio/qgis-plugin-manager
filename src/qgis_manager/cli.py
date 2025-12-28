@@ -1,3 +1,35 @@
+# /***************************************************************************
+#  QGIS Plugin Manager
+#                                  A CLI Tool
+#  Modern command-line interface for QGIS plugin development and deployment.
+#                               -------------------
+#         begin                : 2025-12-28
+#         git sha              : $Format:%H$
+#         copyright            : (C) 2025 by Juan M Bernales
+#         email                : juanbernales@gmail.com
+#  ***************************************************************************/
+#
+# /***************************************************************************
+#  *                                                                         *
+#  *   This program is free software; you can redistribute it and/or modify  *
+#  *   it under the terms of the GNU General Public License as published by  *
+#  *   the Free Software Foundation; either version 2 of the License, or     *
+#  *   (at your option) any later version.                                   *
+#  *                                                                         *
+#  ***************************************************************************/
+
+"""
+Command-line interface for QGIS plugin management.
+
+This module provides Click-based CLI commands for deploying plugins to QGIS,
+compiling Qt resources and translations, and cleaning build artifacts.
+
+Commands:
+    deploy: Deploy plugin to local QGIS profile with automatic backup
+    compile: Compile Qt resources (.qrc) and translations (.ts)
+    clean: Remove Python cache files and build artifacts
+"""
+
 import logging
 from pathlib import Path
 
@@ -19,11 +51,14 @@ def main():
 @click.option(
     "--no-backup", is_flag=True, help="Skip backup of existing installation."
 )
-def deploy(path, no_backup):
+@click.option(
+    "-p", "--profile", default="default", help="QGIS profile to deploy to."
+)
+def deploy(path, no_backup, profile):
     """Deploy the plugin to the local QGIS profile."""
     try:
         root = find_project_root(path)
-        deploy_plugin(root, no_backup=no_backup)
+        deploy_plugin(root, no_backup=no_backup, profile=profile)
     except Exception as e:
         click.echo(f"❌ Error: {e}", err=True)
 

@@ -1,0 +1,23 @@
+# Git attributes for QGIS Plugin Manager
+
+# Enable Git keyword expansion for Python files
+# This allows $Format:%H$ to be replaced with the actual commit SHA
+# when using git archive or creating releases
+*.py export-subst
+
+# Ensure consistent line endings
+* text=auto
+*.py text eol=lf
+*.md text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.zip binary

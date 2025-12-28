@@ -4,21 +4,33 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: Test on ${{ matrix.os }} with Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.10", "3.11", "3.12"]
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install uv
         uses: astral-sh/setup-uv@v5
 
-      - name: Set up Python
-        run: uv python install 3.10
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: uv sync --all-extras --dev
 
       - name: Lint with Ruff
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10'
         run: uv run ruff check .
+
+      - name: Type check with Mypy
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10'
+        run: uv run mypy .
 
       - name: Test with pytest
         run: uv run pytest

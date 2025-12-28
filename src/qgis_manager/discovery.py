@@ -1,3 +1,36 @@
+# /***************************************************************************
+#  QGIS Plugin Manager
+#                                  A CLI Tool
+#  Modern command-line interface for QGIS plugin development and deployment.
+#                               -------------------
+#         begin                : 2025-12-28
+#         git sha              : $Format:%H$
+#         copyright            : (C) 2025 by Juan M Bernales
+#         email                : juanbernales@gmail.com
+#  ***************************************************************************/
+#
+# /***************************************************************************
+#  *                                                                         *
+#  *   This program is free software; you can redistribute it and/or modify  *
+#  *   it under the terms of the GNU General Public License as published by  *
+#  *   the Free Software Foundation; either version 2 of the License, or     *
+#  *   (at your option) any later version.                                   *
+#  *                                                                         *
+#  ***************************************************************************/
+
+"""
+Plugin discovery and metadata extraction utilities.
+
+This module provides functions to automatically discover QGIS plugin projects,
+read metadata.txt files, and identify source files for deployment.
+
+Functions:
+    slugify: Convert plugin name to valid directory slug
+    find_project_root: Locate project root by searching for metadata.txt
+    get_plugin_metadata: Parse metadata.txt and extract plugin information
+    get_source_files: Discover source files to include in deployment
+"""
+
 import configparser
 import re
 from pathlib import Path

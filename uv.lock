@@ -388,7 +388,7 @@ source = { git = "https://github.com/geociencio/qgis-plugin-analyzer.git#276688e
 
 [[package]]
 name = "qgis-plugin-manager"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
