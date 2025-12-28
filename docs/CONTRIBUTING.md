@@ -23,9 +23,14 @@ Thank you for your interest in contributing to the QGIS Plugin Manager!
 ## 🛠️ Development Workflow
 
 ### Running Tests
-We use `pytest` for testing:
+We use `pytest` for testing. Ensure you are in the virtual environment:
 ```bash
 uv run pytest
+```
+
+To run only specific tests (e.g., config tests):
+```bash
+uv run pytest tests/test_config.py
 ```
 
 ### Linting and Formatting

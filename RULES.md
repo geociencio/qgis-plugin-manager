@@ -25,7 +25,13 @@ The project aims for a high compliance score with QGIS development best practice
 ### 3. Safety and Deployment
 - **Rule**: Never overwrite a user's existing plugin folder without a backup.
 - **Guideline**: Use the built-in backup mechanism (`.bak.[timestamp]`) before deployment.
+- **Rule**: Critical operations (deploy, delete) should support an `--interactive` confirmation flag.
+- **Guideline**: Implement interactive prompts for any step that modifies the file system or environment.
 
-### 4. Cleanup
+### 4. Configuration
+- **Rule**: Follow a strict configuration hierarchy: CLI Arguments > `pyproject.toml` > Global `config.toml` > Defaults.
+- **Guideline**: Always provide a fallback to sensible defaults if configuration files are missing.
+
+### 5. Cleanup
 - **Rule**: Keep the repository clean of build artifacts.
 - **Guideline**: Regularly use `qgis-manage clean` before committing or packaging.

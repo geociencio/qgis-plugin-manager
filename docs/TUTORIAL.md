@@ -28,9 +28,29 @@ qgis-manage deploy
 
 # Or to a specific profile
 qgis-manage deploy --profile production
+
+# Interactive deployment for more control
+qgis-manage deploy --interactive
 ```
 
-## 3. Validating your Plugin
+## 3. Persistent Configuration
+
+You can customize your workflow by adding a `[tool.qgis-manager]` section to your `pyproject.toml`:
+
+```toml
+[tool.qgis-manager]
+profile = "dev"
+backup = true
+auto_compile = true
+
+[tool.qgis-manager.hooks]
+pre-deploy = "echo 'Starting deployment...'"
+post-deploy = "echo 'Deployment finished!'"
+```
+
+Alternatively, set global defaults in `~/.config/qgis-manager/config.toml`.
+
+## 4. Validating your Plugin
 
 Before packaging, ensure your `metadata.txt` is compliant with QGIS repository standards:
 
@@ -41,7 +61,7 @@ qgis-manage validate
 qgis-manage validate --strict
 ```
 
-## 4. Packaging for Distribution
+## 5. Packaging for Distribution
 
 Once you are ready to share your plugin, create a ZIP package:
 
@@ -51,7 +71,7 @@ qgis-manage package
 
 The package will be created in the `dist/` directory, along with a SHA256 checksum file.
 
-## 5. Cleaning up
+## 6. Cleaning up
 
 Remove build artifacts and temporary files:
 
