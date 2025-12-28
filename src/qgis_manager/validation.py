@@ -155,18 +155,14 @@ def validate_metadata(metadata: dict[str, Any]) -> ValidationResult:
     # Validate email format
     if "email" in metadata:
         if not validate_email(metadata["email"]):
-            errors.append(
-                f"Invalid email format: '{metadata['email']}'"
-            )
+            errors.append(f"Invalid email format: '{metadata['email']}'")
 
     # Validate optional URL fields
     url_fields = ["homepage", "tracker", "repository"]
     for field in url_fields:
         if field in metadata and metadata[field]:
             if not validate_url(metadata[field]):
-                warnings.append(
-                    f"Invalid URL format in '{field}': '{metadata[field]}'"
-                )
+                warnings.append(f"Invalid URL format in '{field}': '{metadata[field]}'")
 
     # Check for recommended fields
     if "homepage" not in metadata or not metadata["homepage"]:

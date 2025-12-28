@@ -43,6 +43,7 @@ def slugify(text: str) -> str:
     text = re.sub(r"[\s-]+", "_", text).strip("_")
     return text
 
+
 def find_project_root(start_path: Path) -> Path:
     """Find the project root by looking for metadata.txt."""
     current = start_path.resolve()
@@ -53,6 +54,7 @@ def find_project_root(start_path: Path) -> Path:
     raise FileNotFoundError(
         "Could not find a QGIS plugin project root (missing metadata.txt)."
     )
+
 
 def get_plugin_metadata(project_root: Path) -> dict:
     """Read metadata.txt and return as a dict."""
@@ -73,17 +75,30 @@ def get_plugin_metadata(project_root: Path) -> dict:
     metadata["slug"] = slugify(metadata["name"])
     return metadata
 
+
 def get_source_files(project_root: Path):
     """Dynamically discover source files and directories to copy."""
     # Common exclusions
     exclude_patterns = {
-        "__pycache__", ".git", ".venv", ".agent", ".ai-context",
-        "venv", "env", "tests", ".pytest_cache", ".ruff_cache",
-        "*.pyc", "*.bak*", "build", "dist", "*.egg-info",
-        "scripts", "tools", "research"
+        "__pycache__",
+        ".git",
+        ".venv",
+        ".agent",
+        ".ai-context",
+        "venv",
+        "env",
+        "tests",
+        ".pytest_cache",
+        ".ruff_cache",
+        "*.pyc",
+        "*.bak*",
+        "build",
+        "dist",
+        "*.egg-info",
+        "scripts",
+        "tools",
+        "research",
     }
-
-
 
     # We copy everything except excluded items
     for item in project_root.iterdir():

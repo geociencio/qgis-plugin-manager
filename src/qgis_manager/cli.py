@@ -82,12 +82,8 @@ def main(verbose, log_file):
 @click.argument(
     "path", default=".", type=click.Path(exists=True, file_okay=False, path_type=Path)
 )
-@click.option(
-    "--no-backup", is_flag=True, help="Skip backup of existing installation."
-)
-@click.option(
-    "-p", "--profile", help="QGIS profile to deploy to (overrides config)"
-)
+@click.option("--no-backup", is_flag=True, help="Skip backup of existing installation.")
+@click.option("-p", "--profile", help="QGIS profile to deploy to (overrides config)")
 @click.option(
     "-i", "--interactive", is_flag=True, help="Ask for confirmation before each step"
 )
@@ -162,6 +158,7 @@ def deploy(path, no_backup, profile, interactive):
                 )
         raise click.Abort() from e
 
+
 @main.command()
 @click.argument(
     "path", default=".", type=click.Path(exists=True, file_okay=False, path_type=Path)
@@ -181,6 +178,7 @@ def compile(path, res_type):
     except Exception as e:
         click.echo(click.style(f"❌ Error: {e}", fg="red", bold=True), err=True)
         raise click.Abort() from e
+
 
 @main.command()
 @click.argument(
@@ -204,15 +202,14 @@ def clean(path):
 @click.option(
     "--output", "-o", type=click.Path(path_type=Path), help="Output directory for ZIP"
 )
-@click.option(
-    "--dev", is_flag=True, help="Include development files in package"
-)
+@click.option("--dev", is_flag=True, help="Include development files in package")
 def package(path, output, dev):
     """Create distributable ZIP package."""
     try:
         root = find_project_root(path)
 
         with click.progressbar(length=0, label="📦 Packaging files") as bar:
+
             def update_bar(n):
                 if bar.length == 0:
                     bar.length = n
@@ -220,10 +217,7 @@ def package(path, output, dev):
                     bar.update(n)
 
             zip_path = create_plugin_package(
-                root,
-                output_dir=output,
-                include_dev=dev,
-                callback=update_bar
+                root, output_dir=output, include_dev=dev, callback=update_bar
             )
 
         click.echo(click.style(f"✅ Package created: {zip_path}", fg="green"))
@@ -236,9 +230,7 @@ def package(path, output, dev):
 @click.argument(
     "path", default=".", type=click.Path(exists=True, file_okay=False, path_type=Path)
 )
-@click.option(
-    "--strict", is_flag=True, help="Fail on warnings"
-)
+@click.option("--strict", is_flag=True, help="Fail on warnings")
 def validate(path, strict):
     """Validate metadata.txt compliance."""
     try:

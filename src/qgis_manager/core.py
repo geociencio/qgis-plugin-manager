@@ -49,12 +49,12 @@ from .discovery import get_plugin_metadata, get_source_files
 
 logger = logging.getLogger(__name__)
 
+
 def get_qgis_plugin_dir(profile: str = "default") -> Path:
     """Detect the QGIS plugin directory based on the OS."""
     if sys.platform == "linux":
         return (
-            Path.home()
-            / f".local/share/QGIS/QGIS3/profiles/{profile}/python/plugins"
+            Path.home() / f".local/share/QGIS/QGIS3/profiles/{profile}/python/plugins"
         )
     elif sys.platform == "darwin":
         return (
@@ -70,6 +70,7 @@ def get_qgis_plugin_dir(profile: str = "default") -> Path:
         )
     else:
         raise OSError(f"Unsupported platform: {sys.platform}")
+
 
 def deploy_plugin(
     project_root: Path,
@@ -105,8 +106,15 @@ def deploy_plugin(
     # Exclusions for copytree
     def ignore_func(directory, contents):
         exclude_set = {
-             "__pycache__", ".git", ".venv", ".agent", ".ai-context",
-             "tests", "research", "tools", "scripts"
+            "__pycache__",
+            ".git",
+            ".venv",
+            ".agent",
+            ".ai-context",
+            "tests",
+            "research",
+            "tools",
+            "scripts",
         }
         return [c for c in contents if c in exclude_set or c.endswith(".pyc")]
 
@@ -128,6 +136,7 @@ def deploy_plugin(
 
     logger.info("✨ Deployment complete.")
 
+
 def compile_qt_resources(project_root: Path, res_type="all"):
     """Compile Qt resources and translations."""
     if res_type in ["resources", "all"]:
@@ -144,7 +153,7 @@ def compile_qt_resources(project_root: Path, res_type="all"):
                     ["pyrcc5", "-o", str(py_file), str(qrc)],
                     check=True,
                     capture_output=True,
-                    text=True
+                    text=True,
                 )
                 logger.info("  ✅ Done.")
             except subprocess.CalledProcessError as e:
@@ -159,16 +168,14 @@ def compile_qt_resources(project_root: Path, res_type="all"):
             logger.info(f"🌍 Compiling translation: {ts.relative_to(project_root)}")
             try:
                 subprocess.run(
-                    ["lrelease", str(ts)],
-                    check=True,
-                    capture_output=True,
-                    text=True
+                    ["lrelease", str(ts)], check=True, capture_output=True, text=True
                 )
                 logger.info("  ✅ Done.")
             except subprocess.CalledProcessError as e:
                 logger.error(f"  ❌ Error compiling {ts.name}: {e.stderr}")
             except FileNotFoundError:
                 logger.error("  ❌ lrelease not found. Is it installed?")
+
 
 def clean_artifacts(project_root: Path):
     """Clean build artifacts."""
@@ -351,8 +358,8 @@ deprecated=False
 
 def classFactory(iface):
     \"\"\"Load the plugin class.\"\"\"
-    from .{slug} import {name.replace(' ', '')}
-    return {name.replace(' ', '')}(iface)
+    from .{slug} import {name.replace(" ", "")}
+    return {name.replace(" ", "")}(iface)
 """
     with open(project_dir / "__init__.py", "w") as f:
         f.write(init_py_content)

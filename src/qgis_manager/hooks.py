@@ -4,6 +4,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+
 def run_hook(name: str, command: str, project_root: Path) -> bool:
     """Run a shell command as a hook."""
     if not command:
@@ -18,7 +19,7 @@ def run_hook(name: str, command: str, project_root: Path) -> bool:
             cwd=project_root,
             capture_output=True,
             text=True,
-            check=False
+            check=False,
         )
 
         if result.returncode != 0:

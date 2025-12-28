@@ -16,6 +16,7 @@ def test_run_hook_success(tmp_path: Path):
     assert (tmp_path / "output.txt").exists()
     assert (tmp_path / "output.txt").read_text().strip() == "hello"
 
+
 def test_run_hook_failure(tmp_path: Path):
     # Setup
     hook_name = "fail-hook"
@@ -26,6 +27,7 @@ def test_run_hook_failure(tmp_path: Path):
 
     # Verify
     assert result is False
+
 
 def test_run_hook_empty(tmp_path: Path):
     assert run_hook("empty", "", tmp_path) is True

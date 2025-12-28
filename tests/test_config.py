@@ -10,16 +10,20 @@ def test_settings_defaults():
     assert settings.auto_compile is True
     assert settings.hooks == {}
 
+
 def test_load_project_config(tmp_path: Path):
     pyproject = tmp_path / "pyproject.toml"
-    pyproject.write_text("""
+    pyproject.write_text(
+        """
 [tool.qgis-manager]
 profile = "prod"
 backup = false
 auto_compile = false
 [tool.qgis-manager.hooks]
 pre-deploy = "echo 1"
-""", encoding="utf-8")
+""",
+        encoding="utf-8",
+    )
 
     settings = Settings()
     settings = load_project_config(tmp_path, settings)
@@ -28,6 +32,7 @@ pre-deploy = "echo 1"
     assert settings.backup is False
     assert settings.auto_compile is False
     assert settings.hooks["pre-deploy"] == "echo 1"
+
 
 def test_load_config_no_file(mocker):
     mocker.patch("pathlib.Path.home", return_value=Path("/nonexistent"))

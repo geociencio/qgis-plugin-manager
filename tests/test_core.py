@@ -17,10 +17,12 @@ def test_get_qgis_plugin_dir_linux(mocker: MockerFixture):
     expected = Path.home() / ".local/share/QGIS/QGIS3/profiles/default/python/plugins"
     assert get_qgis_plugin_dir() == expected
 
+
 def test_get_qgis_plugin_dir_linux_custom_profile(mocker: MockerFixture):
     mocker.patch("sys.platform", "linux")
     expected = Path.home() / ".local/share/QGIS/QGIS3/profiles/prod/python/plugins"
     assert get_qgis_plugin_dir(profile="prod") == expected
+
 
 def test_get_qgis_plugin_dir_darwin(mocker: MockerFixture):
     mocker.patch("sys.platform", "darwin")
@@ -30,17 +32,20 @@ def test_get_qgis_plugin_dir_darwin(mocker: MockerFixture):
     )
     assert get_qgis_plugin_dir() == expected
 
+
 def test_get_qgis_plugin_dir_win32(mocker: MockerFixture):
     mocker.patch("sys.platform", "win32")
     mocker.patch("os.environ", {"APPDATA": "/appdata"})
     expected = Path("/appdata") / "QGIS/QGIS3/profiles/default/python/plugins"
     assert get_qgis_plugin_dir() == expected
 
+
 def test_get_qgis_plugin_dir_win32_custom(mocker: MockerFixture):
     mocker.patch("sys.platform", "win32")
     mocker.patch("os.environ", {"APPDATA": "/appdata"})
     expected = Path("/appdata") / "QGIS/QGIS3/profiles/test/python/plugins"
     assert get_qgis_plugin_dir(profile="test") == expected
+
 
 def test_get_qgis_plugin_dir_unsupported(mocker: MockerFixture):
     mocker.patch("sys.platform", "unknown")
@@ -86,7 +91,7 @@ def test_deploy_plugin_with_backup(mocker: MockerFixture, tmp_path: Path):
 
     dest_dir = tmp_path / "plugins"
     dest_dir.mkdir()
-    (dest_dir / "test_plugin").mkdir() # simulate existing
+    (dest_dir / "test_plugin").mkdir()  # simulate existing
 
     # Execute
     deploy_plugin(tmp_path, dest_dir=dest_dir)

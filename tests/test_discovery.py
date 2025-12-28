@@ -10,6 +10,7 @@ def test_slugify():
     assert slugify("Plugin@#$") == "plugin"
     assert slugify("Café Plugin") == "café_plugin"
 
+
 def test_find_project_root_success(tmp_path):
     # Setup
     (tmp_path / "metadata.txt").touch()
@@ -19,6 +20,7 @@ def test_find_project_root_success(tmp_path):
 
     # Verify
     assert root == tmp_path
+
 
 def test_find_project_root_nested(tmp_path):
     # Setup
@@ -32,9 +34,11 @@ def test_find_project_root_nested(tmp_path):
     # Verify
     assert root == tmp_path
 
+
 def test_find_project_root_failure(tmp_path):
     with pytest.raises(FileNotFoundError):
         find_project_root(tmp_path)
+
 
 def test_get_plugin_metadata(tmp_path):
     metadata_file = tmp_path / "metadata.txt"
