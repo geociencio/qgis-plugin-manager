@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "qgis-plugin-manager"
+version = "0.1.0"
+description = "A modern CLI for managing QGIS plugin development, deployment, and packaging."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "GPL-2.0-or-later" }
+authors = [
+    { name = "Juan M Bernales", email = "juanbernales@gmail.com" }
+]
+dependencies = [
+    "click>=8.0",
+    "pathlib",
+]
+
+[project.scripts]
+qgis-manage = "qgis_manager.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qgis_manager"]
+
+[tool.uv]
+managed = true
+package = true
