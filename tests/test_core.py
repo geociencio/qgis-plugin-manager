@@ -8,6 +8,7 @@ from qgis_manager.core import (
     compile_qt_resources,
     deploy_plugin,
     get_qgis_plugin_dir,
+    init_plugin_project,
 )
 
 
@@ -124,3 +125,43 @@ def test_clean_artifacts(mocker: MockerFixture, tmp_path: Path):
     # Verify
     assert not pycache.exists()
     assert not pyc_file.exists()
+
+
+def test_init_plugin_project(tmp_path: Path):
+    # Setup
+    plugin_name = "My New Plugin"
+    author = "John Doe"
+    email = "john@example.com"
+    description = "Cool description"
+
+    # Execute
+    init_plugin_project(tmp_path, plugin_name, author, email, description)
+
+    # Verify directory
+    plugin_dir = tmp_path / "my_new_plugin"
+    assert plugin_dir.exists()
+    assert plugin_dir.is_dir()
+
+    # Verify metadata.txt
+    metadata_file = plugin_dir / "metadata.txt"
+    assert metadata_file.exists()
+    content = metadata_file.read_text()
+    assert "name=My New Plugin" in content
+    assert "author=John Doe" in content
+    assert "email=john@example.com" in content
+    assert "description=Cool description" in content
+
+    # Verify __init__.py
+    init_py = plugin_dir / "__init__.py"
+    assert init_py.exists()
+    assert "def classFactory(iface):" in init_py.read_text()
+
+    # Verify main plugin file
+    main_py = plugin_dir / "my_new_plugin.py"
+    assert main_py.exists()
+    assert "class MyNewPlugin:" in main_py.read_text()
+
+    # Verify resources.qrc
+    qrc = plugin_dir / "resources.qrc"
+    assert qrc.exists()
+    assert 'prefix="/plugins/my_new_plugin"' in qrc.read_text()

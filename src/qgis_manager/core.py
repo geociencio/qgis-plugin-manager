@@ -31,6 +31,7 @@ Functions:
     compile_qt_resources: Compile .qrc resources and .ts translations
     clean_artifacts: Remove __pycache__ and .pyc files
     create_plugin_package: Create distributable ZIP package for plugin
+    init_plugin_project: Scaffolding for a new QGIS plugin project
 """
 
 import logging
@@ -38,8 +39,11 @@ import os
 import shutil
 import subprocess
 import sys
+import zipfile
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from .discovery import get_plugin_metadata, get_source_files
 
@@ -72,6 +76,7 @@ def deploy_plugin(
     dest_dir: Path | None = None,
     no_backup: bool = False,
     profile: str = "default",
+    callback: Callable[[int], Any] | None = None,
 ):
     """Deploy the plugin to the QGIS directory."""
     metadata = get_plugin_metadata(project_root)
@@ -106,13 +111,19 @@ def deploy_plugin(
         return [c for c in contents if c in exclude_set or c.endswith(".pyc")]
 
     # Copy files
-    for item in get_source_files(project_root):
+    source_files = get_source_files(project_root)
+    if callback:
+        callback(len(source_files))
+
+    for item in source_files:
         dest_item = target_path / item.name
         if item.is_dir():
             shutil.copytree(item, dest_item, ignore=ignore_func, dirs_exist_ok=True)
         else:
             shutil.copy2(item, dest_item)
-            shutil.copy2(item, dest_item)
+
+        if callback:
+            callback(1)
         logger.debug(f"  ✅ {item.name}")
 
     logger.info("✨ Deployment complete.")
@@ -176,6 +187,7 @@ def create_plugin_package(
     project_root: Path,
     output_dir: Path | None = None,
     include_dev: bool = False,
+    callback: Callable[[int], Any] | None = None,
 ) -> Path:
     """
     Create a distributable ZIP package for the plugin.
@@ -189,7 +201,6 @@ def create_plugin_package(
         Path to the created ZIP file
     """
     import hashlib
-    import zipfile
 
     metadata = get_plugin_metadata(project_root)
     slug = metadata["slug"]
@@ -241,22 +252,30 @@ def create_plugin_package(
                 return True
         return False
 
+    # Collect items for ZIP
+    items_to_zip = []
+    for item in get_source_files(project_root):
+        if should_exclude(item):
+            continue
+
+        if item.is_file():
+            items_to_zip.append((item, f"{slug}/{item.name}"))
+        elif item.is_dir():
+            for file_path in item.rglob("*"):
+                if file_path.is_file() and not should_exclude(file_path):
+                    arcname = f"{slug}/{file_path.relative_to(project_root)}"
+                    items_to_zip.append((file_path, arcname))
+
+    if callback:
+        callback(len(items_to_zip))
+
     # Create ZIP file
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
-        for item in get_source_files(project_root):
-            if should_exclude(item):
-                continue
-
-            if item.is_file():
-                arcname = f"{slug}/{item.name}"
-                zipf.write(item, arcname)
-                logger.debug(f"  ✅ {item.name}")
-            elif item.is_dir():
-                for file_path in item.rglob("*"):
-                    if file_path.is_file() and not should_exclude(file_path):
-                        arcname = f"{slug}/{file_path.relative_to(project_root)}"
-                        zipf.write(file_path, arcname)
-                        logger.debug(f"  ✅ {file_path.relative_to(project_root)}")
+        for item, arcname in items_to_zip:
+            zipf.write(item, arcname)
+            if callback:
+                callback(1)
+            logger.debug(f"  ✅ {arcname}")
 
     # Generate SHA256 checksum
     sha256_hash = hashlib.sha256()
@@ -267,11 +286,111 @@ def create_plugin_package(
     checksum = sha256_hash.hexdigest()
     checksum_file = output_dir / f"{zip_filename}.sha256"
 
-    with open(checksum_file, "w") as f:
-        f.write(f"{checksum}  {zip_filename}\n")
+    with open(checksum_file, "w") as cf:
+        cf.write(f"{checksum}  {zip_filename}\n")
 
     logger.info(f"✨ Package created: {zip_path}")
     logger.info(f"🔒 Checksum saved: {checksum_file}")
     logger.info(f"📊 SHA256: {checksum}")
 
     return zip_path
+
+
+def init_plugin_project(
+    path: Path,
+    name: str,
+    author: str,
+    email: str,
+    description: str = "A QGIS plugin.",
+) -> None:
+    """
+    Initialize a new QGIS plugin project with basic scaffolding.
+
+    Args:
+        path: Directory where the project will be created
+        name: Name of the plugin
+        author: Author name
+        email: Author email
+        description: Short description of the plugin
+    """
+    from .discovery import slugify
+
+    slug = slugify(name)
+    project_dir = path / slug
+    project_dir.mkdir(parents=True, exist_ok=False)
+
+    logger.info(f"🚀 Initializing new QGIS plugin: {name} in {project_dir}")
+
+    # 1. Create metadata.txt
+    metadata_content = f"""; QGIS Plugin Metadata
+[general]
+name={name}
+description={description}
+about={description}
+version=0.1
+qgisMinimumVersion=3.0
+author={author}
+email={email}
+repository=
+tracker=
+homepage=
+category=Plugins
+tags=
+icon=icon.png
+experimental=False
+deprecated=False
+"""
+    with open(project_dir / "metadata.txt", "w") as f:
+        f.write(metadata_content)
+    logger.debug("  ✅ Created metadata.txt")
+
+    # 2. Create __init__.py
+    init_py_content = f"""\"\"\"
+{name} initialization.
+\"\"\"
+
+def classFactory(iface):
+    \"\"\"Load the plugin class.\"\"\"
+    from .{slug} import {name.replace(' ', '')}
+    return {name.replace(' ', '')}(iface)
+"""
+    with open(project_dir / "__init__.py", "w") as f:
+        f.write(init_py_content)
+    logger.debug("  ✅ Created __init__.py")
+
+    # 3. Create main plugin file
+    class_name = name.replace(" ", "")
+    main_py_content = f"""\"\"\"
+Main plugin class for {name}.
+\"\"\"
+
+class {class_name}:
+    \"\"\"QGIS Plugin Implementation.\"\"\"
+
+    def __init__(self, iface):
+        \"\"\"Initialize the plugin.\"\"\"
+        self.iface = iface
+
+    def initGui(self):
+        \"\"\"Initialize the GUI.\"\"\"
+        pass
+
+    def unload(self):
+        \"\"\"Unload the plugin.\"\"\"
+        pass
+"""
+    with open(project_dir / f"{slug}.py", "w") as f:
+        f.write(main_py_content)
+    logger.debug(f"  ✅ Created {slug}.py")
+
+    # 4. Create empty resources.qrc
+    qrc_content = f"""<RCC>
+    <qroot prefix="/plugins/{slug}">
+    </qroot>
+</RCC>
+"""
+    with open(project_dir / "resources.qrc", "w") as f:
+        f.write(qrc_content)
+    logger.debug("  ✅ Created resources.qrc")
+
+    logger.info(f"✨ Project {name} initialized successfully.")

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 from qgis_manager.discovery import find_project_root, get_plugin_metadata, slugify
 
@@ -44,3 +46,19 @@ def test_get_plugin_metadata(tmp_path):
     assert meta["name"] == "Test Plugin"
     assert meta["slug"] == "test_plugin"
     assert meta["version"] == "1.0"
+
+
+def test_get_source_files(tmp_path: Path):
+    from qgis_manager.discovery import get_source_files
+
+    # Setup structure
+    (tmp_path / "plugin.py").touch()
+    (tmp_path / "metadata.txt").touch()
+    (tmp_path / "resources.qrc").touch()
+
+    files = get_source_files(tmp_path)
+    basenames = [f.name for f in files]
+
+    assert "plugin.py" in basenames
+    assert "metadata.txt" in basenames
+    assert "resources.qrc" in basenames
