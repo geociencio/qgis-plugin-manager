@@ -5,24 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.0] - 2025-12-28
 
 ### Added
-- Feature: `package` command to create distributable ZIP files with SHA256 checksums
-- Feature: `validate` command to check metadata.txt compliance with QGIS standards
-- Module: New `validation.py` module for comprehensive metadata verification
-- Tests: 13 new tests for validation functionality (28 total tests)
-- Validation: Email format checking (RFC 5322)
-- Validation: URL format checking (http/https)
-- Validation: Version format checking (X.Y.Z)
-- Validation: Required and optional field detection
-- Package: Automatic exclusion of development files
-- Package: SHA256 checksum generation for packages
+- **Plugin Scaffolding**: New `init` command to create a standardized QGIS plugin structure.
+- **Persistent Configuration**:
+  - Support for global defaults in `~/.config/qgis-manager/config.toml`.
+  - Project-level overrides in `pyproject.toml` via `[tool.qgis-manager]` section.
+- **Customizable Hooks**:
+  - Implementation of `pre-deploy` and `post-deploy` shell hooks.
+  - Configurable via `pyproject.toml`.
+- **Enhanced UX/UI**:
+  - Interactive mode (`--interactive`) for step-by-step deployment confirmation.
+  - Progress bars (`click.progressbar`) for deployment and packaging operations.
+  - Standardized colorized output and emoji feedback for improved terminal readability.
+  - Intelligent "💡 Hint" suggestions for common error scenarios.
+- **Advanced Logging**:
+  - Global verbosity control (`-v`, `-vv`) for detailed debug information.
+  - Support for logging to persistent files via `--log-file`.
+- **Packaging & Validation**:
+  - `package` command to create distributable ZIP files with SHA256 checksums.
+  - `validate` command for strict `metadata.txt` compliance checking.
+- **Documentation**:
+  - New `CONTRIBUTING.md` guide for developers.
+  - Comprehensive `TUTORIAL.md` for end-users.
+- **Testing**:
+  - Expanded test suite to 40 unit tests with 100% pass rate.
+  - New dedicated test modules for config and hooks.
 
 ### Changed
-- Docs: Updated README with new command examples
-- CLI: Enhanced help messages for all commands
+- **Code Quality**: Full adoption of `Ruff` and `Mypy` for static analysis and type checking.
+- **CLI Design**: Standardized error handling using `click.Abort` for consistent return codes.
+- **Refactor**: Improved `core.py` architecture to support progress callbacks and hook execution.
 
+### Fixed
+- Fixed redundant file copy operation in `deploy_plugin`.
+- Resolved multiple linting and type hint warnings across the codebase.
 
 ## [0.2.0] - 2025-12-28
 
