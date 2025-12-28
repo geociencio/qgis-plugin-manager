@@ -39,6 +39,11 @@ qgis-manage compile
 qgis-manage clean
 ```
 
+## 📖 Documentation
+
+- [CHANGELOG.md](CHANGELOG.md): History of changes and releases.
+- [RULES.md](RULES.md): Coding standards and project rules.
+
 ## 📄 License
 
 GPL-2.0-or-later

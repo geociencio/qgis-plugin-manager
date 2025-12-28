@@ -26,3 +26,14 @@ packages = ["src/qgis_manager"]
 [tool.uv]
 managed = true
 package = true
+
+[tool.uv.sources]
+qgis-plugin-analyzer = { git = "https://github.com/geociencio/qgis-plugin-analyzer.git" }
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "pytest-mock>=3.15.1",
+    "qgis-plugin-analyzer",
+    "ruff>=0.14.10",
+]

@@ -1,12 +1,13 @@
 import click
 from pathlib import Path
+import logging
 from .core import deploy_plugin, compile_qt_resources, clean_artifacts
 from .discovery import find_project_root
 
 @click.group()
 def main():
     """Modern CLI for QGIS plugin development."""
-    pass
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 @main.command()
 @click.argument("path", default=".", type=click.Path(exists=True, file_okay=False, path_type=Path))
