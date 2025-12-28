@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from pytest_mock import MockerFixture
+
 from qgis_manager.core import (
     clean_artifacts,
     compile_qt_resources,

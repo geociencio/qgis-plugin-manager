@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+
 from qgis_manager.discovery import find_project_root, get_plugin_metadata, slugify
 
 

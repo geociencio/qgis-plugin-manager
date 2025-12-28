@@ -49,6 +49,10 @@ target-version = "py310"
 select = ["E", "F", "B", "I", "W", "UP", "N"]
 ignore = []
 
+[tool.ruff.lint.isort]
+known-first-party = ["qgis_manager"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "-v --tb=short"

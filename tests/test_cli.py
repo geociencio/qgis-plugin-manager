@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from click.testing import CliRunner
+
 from qgis_manager.cli import main
 
 
