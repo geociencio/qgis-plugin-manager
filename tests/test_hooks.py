@@ -6,9 +6,10 @@ from qgis_manager.hooks import run_hook
 def test_run_hook_success(tmp_path: Path):
     # Setup
     hook_name = "test-hook"
-    # Use a command that works on both Windows and Linux.
-    # We avoid single quotes because cmd.exe handles them literally.
-    command = "echo hello > output.txt"
+    # Use a Python one-liner to avoid shell-specific quoting issues.
+    command = (
+        "python -c \"from pathlib import Path; Path('output.txt').write_text('hello')\""
+    )
 
     # Execute
     result = run_hook(hook_name, command, tmp_path)
