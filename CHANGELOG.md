@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2025-12-28
+
+### Fixed
+- Fixed crash in `deploy` command when using progress bar (generator len error).
+
 ## [0.3.0] - 2025-12-28
 
 ### Added
@@ -39,7 +44,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Refactor**: Improved `core.py` architecture to support progress callbacks and hook execution.
 
 ### Fixed
-- Fixed crash in `deploy` command when using progress bar (generator len error).
 - Fixed redundant file copy operation in `deploy_plugin`.
 - Resolved multiple linting and type hint warnings across the codebase.
 
