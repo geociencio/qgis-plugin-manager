@@ -172,6 +172,7 @@ def test_init_plugin_project(tmp_path: Path):
     assert qrc.exists()
     assert 'prefix="/plugins/my_new_plugin"' in qrc.read_text()
 
+
 def test_deploy_plugin_with_callback(mocker: MockerFixture, tmp_path: Path):
     # Mocks
     mock_metadata = {"name": "Test Plugin", "slug": "test_plugin"}
@@ -191,6 +192,7 @@ def test_deploy_plugin_with_callback(mocker: MockerFixture, tmp_path: Path):
     dest_dir.mkdir()
 
     callback_calls = []
+
     def callback(n):
         callback_calls.append(n)
 

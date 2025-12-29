@@ -111,10 +111,6 @@ def deploy_plugin(
             ".venv",
             ".agent",
             ".ai-context",
-            "tests",
-            "research",
-            "tools",
-            "scripts",
         }
         return [c for c in contents if c in exclude_set or c.endswith(".pyc")]
 
@@ -251,9 +247,18 @@ def create_plugin_package(
     def should_exclude(path: Path) -> bool:
         """Check if path should be excluded from package."""
         # Check if any parent or the path itself matches exclude patterns
-        for part in path.parts:
+        rel_path = path.relative_to(project_root)
+        parts = rel_path.parts
+
+        for i, part in enumerate(parts):
+            # Critical exclusions (env, VCS, etc.) are always applied recursively
             if part in exclude_patterns:
+                # If it's a dev-only directory, only exclude if it's at the root
+                dev_only = {"tests", "research", "tools", "scripts", "docs", ".github"}
+                if part in dev_only and i > 0:
+                    continue
                 return True
+
             # Check wildcard patterns
             if any(path.match(p) for p in exclude_patterns if "*" in p):
                 return True
