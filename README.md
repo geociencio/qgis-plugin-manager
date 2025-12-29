@@ -21,7 +21,7 @@ A professional CLI for managing QGIS plugin development, deployment, and packagi
 - **Dynamic Deployment**: Automatically detects your QGIS profile directory (Linux, Windows, macOS).
 - **Smart Discovery**: Reads `metadata.txt` to identify your plugin and automatically selects source files.
 - **Safety First**: Automatically creates timestamped backups of your plugin folder before every deployment.
-- **Qt Integration**: Compiles `.qrc` resources and `.ts` translations with simple commands.
+- **Qt & Documentation Integration**: Compiles `.qrc` resources, `.ts` translations, and Sphinx documentation automatically.
 - **Clean Workflow**: Removes `__pycache__` and artifacts recursively.
 - **Interactive Mode**: Option for step-by-step confirmation of critical steps.
 - **Customizable Hooks**: Support for shell commands before and after deployment.
@@ -67,8 +67,11 @@ qgis-manage package
 # Create package in specific directory
 qgis-manage package --output ./releases
 
-# Compile all resources and translations
+# Compile all resources, translations, and documentation
 qgis-manage compile
+
+# Compile only documentation
+qgis-manage compile --type docs
 
 # Clean Python artifacts
 qgis-manage clean
