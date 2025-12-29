@@ -51,3 +51,13 @@ def test_cli_package_no_project(tmp_path: Path):
         result = runner.invoke(main, ["package"])
         assert result.exit_code != 0
         assert "Error:" in result.output
+
+
+def test_cli_compile_docs(tmp_path: Path, mocker):
+    runner = CliRunner()
+    mock_compile = mocker.patch("qgis_manager.cli.compile_qt_resources")
+    mocker.patch("qgis_manager.cli.find_project_root", return_value=tmp_path)
+
+    result = runner.invoke(main, ["compile", "--type", "docs"])
+    assert result.exit_code == 0
+    mock_compile.assert_called_once_with(tmp_path, "docs")

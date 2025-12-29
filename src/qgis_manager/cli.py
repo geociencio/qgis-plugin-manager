@@ -87,7 +87,8 @@ def main(verbose, log_file):
 @click.option(
     "-i", "--interactive", is_flag=True, help="Ask for confirmation before each step"
 )
-def deploy(path, no_backup, profile, interactive):
+@click.option("--no-compile", is_flag=True, help="Saltar compilación automática.")
+def deploy(path, no_backup, profile, interactive, no_compile):
     """Deploy the plugin to the local QGIS profile."""
     try:
         root = find_project_root(path)
@@ -116,6 +117,11 @@ def deploy(path, no_backup, profile, interactive):
             if not click.confirm(f"🚀 Deploy to profile '{target_profile}'?"):
                 click.echo("Aborted by user.")
                 raise click.Abort()
+
+        # Execute automatic compilation BEFORE deployment
+        if not no_compile and settings.auto_compile:
+            click.echo("🔨 Compilando recursos y documentación...")
+            compile_qt_resources(root, "all")
 
         # Logic with progress bar
         with click.progressbar(length=0, label="🚀 Deploying files") as bar:
@@ -166,7 +172,7 @@ def deploy(path, no_backup, profile, interactive):
 @click.option(
     "--type",
     "res_type",
-    type=click.Choice(["resources", "translations", "all"]),
+    type=click.Choice(["resources", "translations", "docs", "all"]),
     default="all",
 )
 def compile(path, res_type):

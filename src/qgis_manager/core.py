@@ -133,8 +133,48 @@ def deploy_plugin(
     logger.info("✨ Deployment complete.")
 
 
+def compile_docs(project_root: Path):
+    """Compila la documentación Sphinx si el proyecto tiene una carpeta docs/source."""
+    docs_source = project_root / "docs" / "source"
+    if not (docs_source / "conf.py").exists():
+        return
+
+    # Ruta estándar para la ayuda en plugins de QGIS
+    help_target = project_root / "help" / "html"
+
+    logger.info(f"📚 Compilando documentación: {docs_source} -> {help_target}")
+
+    try:
+        # Limpiar y regenerar carpeta destino
+        if help_target.exists():
+            shutil.rmtree(help_target)
+        help_target.mkdir(parents=True, exist_ok=True)
+
+        # Ejecutar sphinx-build (usando uv si está disponible)
+        # Intentamos con uv run si detectamos entorno uv, o sphinx-build directamente
+        cmd = ["sphinx-build", "-b", "html", str(docs_source), str(help_target)]
+        if (project_root / "pyproject.toml").exists():
+            # Recommendation to use uv if available for consistency with project rules
+            cmd = ["uv", "run"] + cmd
+
+        subprocess.run(
+            cmd,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+        # Limpieza de archivos innecesarios para el despliegue
+        shutil.rmtree(help_target / "_sources", ignore_errors=True)
+        (help_target / ".buildinfo").unlink(missing_ok=True)
+
+        logger.info("  ✅ Documentación compilada con éxito.")
+    except Exception as e:
+        logger.error(f"  ❌ Error al compilar documentación: {e}")
+
+
 def compile_qt_resources(project_root: Path, res_type="all"):
-    """Compile Qt resources and translations."""
+    """Compile Qt resources, translations, and documentation."""
     if res_type in ["resources", "all"]:
         # Look for .qrc files
         qrc_files = list(project_root.rglob("*.qrc"))
@@ -171,6 +211,9 @@ def compile_qt_resources(project_root: Path, res_type="all"):
                 logger.error(f"  ❌ Error compiling {ts.name}: {e.stderr}")
             except FileNotFoundError:
                 logger.error("  ❌ lrelease not found. Is it installed?")
+
+    if res_type in ["docs", "all"]:
+        compile_docs(project_root)
 
 
 def clean_artifacts(project_root: Path):

@@ -6,6 +6,7 @@ from pytest_mock import MockerFixture
 
 from qgis_manager.core import (
     clean_artifacts,
+    compile_docs,
     compile_qt_resources,
     deploy_plugin,
     get_qgis_plugin_dir,
@@ -202,3 +203,31 @@ def test_deploy_plugin_with_callback(mocker: MockerFixture, tmp_path: Path):
     # Verify
     # Initial call with total length (1), then 1 per file (1)
     assert callback_calls == [1, 1]
+
+
+def test_compile_docs(mocker: MockerFixture, tmp_path: Path):
+    # Setup
+    docs_source = tmp_path / "docs" / "source"
+    docs_source.mkdir(parents=True)
+    (docs_source / "conf.py").touch()
+
+    mock_run = mocker.patch("subprocess.run")
+
+    # Execute
+    compile_docs(tmp_path)
+
+    # Verify
+    mock_run.assert_called_once()
+    args = mock_run.call_args[0][0]
+    # Should use 'uv run sphinx-build' if pyproject.toml exists
+    # (which it does in tmp_path setup if we create it)
+    # But here we didn't create it, so it might use 'sphinx-build' directly
+    # or 'uv run' if detected.
+    # Let's create pyproject.toml to ensure uv run is used
+    (tmp_path / "pyproject.toml").touch()
+    compile_docs(tmp_path)
+    assert mock_run.call_count == 2
+    args = mock_run.call_args[0][0]
+    assert args[0] == "uv"
+    assert args[1] == "run"
+    assert args[2] == "sphinx-build"
