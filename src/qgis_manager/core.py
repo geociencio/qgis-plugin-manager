@@ -119,7 +119,7 @@ def deploy_plugin(
         return [c for c in contents if c in exclude_set or c.endswith(".pyc")]
 
     # Copy files
-    source_files = get_source_files(project_root)
+    source_files = list(get_source_files(project_root))
     if callback:
         callback(len(source_files))
 

@@ -171,3 +171,32 @@ def test_init_plugin_project(tmp_path: Path):
     qrc = plugin_dir / "resources.qrc"
     assert qrc.exists()
     assert 'prefix="/plugins/my_new_plugin"' in qrc.read_text()
+
+def test_deploy_plugin_with_callback(mocker: MockerFixture, tmp_path: Path):
+    # Mocks
+    mock_metadata = {"name": "Test Plugin", "slug": "test_plugin"}
+    mocker.patch("qgis_manager.core.get_plugin_metadata", return_value=mock_metadata)
+
+    def mock_gen(_):
+        file1 = MagicMock(spec=Path)
+        file1.name = "f1.py"
+        file1.is_dir.return_value = False
+        yield file1
+
+    mocker.patch("qgis_manager.core.get_source_files", side_effect=mock_gen)
+    mocker.patch("shutil.copy2")
+    mocker.patch("shutil.rmtree")
+
+    dest_dir = tmp_path / "plugins"
+    dest_dir.mkdir()
+
+    callback_calls = []
+    def callback(n):
+        callback_calls.append(n)
+
+    # Execute
+    deploy_plugin(tmp_path, dest_dir=dest_dir, callback=callback)
+
+    # Verify
+    # Initial call with total length (1), then 1 per file (1)
+    assert callback_calls == [1, 1]

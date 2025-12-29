@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Refactor**: Improved `core.py` architecture to support progress callbacks and hook execution.
 
 ### Fixed
+- Fixed crash in `deploy` command when using progress bar (generator len error).
 - Fixed redundant file copy operation in `deploy_plugin`.
 - Resolved multiple linting and type hint warnings across the codebase.
 
