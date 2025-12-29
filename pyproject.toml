@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "qgis-plugin-manager"
-version = "0.3.3"
+version = "0.4.0"
 description = "A modern CLI for managing QGIS plugin development, deployment, and packaging."
 readme = "README.md"
 requires-python = ">=3.10"

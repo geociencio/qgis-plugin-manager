@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-12-28
+
+### Added
+- **Native Help Compilation**:
+  - Integrated native Sphinx documentation compilation as a built-in feature.
+  - Automatically detects `docs/source/conf.py` and compiles to `help/html`.
+  - Supports `uv run sphinx-build` for consistent environment execution.
+  - New `--type docs` option for the `compile` command.
+- **Enhanced Deployment Workflow**:
+  - `deploy` command now performs automatic compilation of resources, translations, and documentation before deployment (configurable via `auto_compile` setting).
+  - New `--no-compile` flag for `deploy` command to bypass automatic compilation when needed.
+
+### Improved
+- **Testing**: Added unit tests for `compile_docs` and CLI `compile --type docs` integration, bringing total test count to 45 passing tests.
+
+## [0.3.3] - 2025-12-28
+
+### Fixed
+- Improved recursive exclusion logic for `tools`, `tests`, `research`, and `scripts` directories to prevent accidental exclusion of nested project files (e.g., `gui/tools`).
+
+## [0.3.2] - 2025-12-28
+
+### Fixed
+- Fixed deployment exclusion logic to ensure development-only directories are only ignored at the first level of the project path.
+
 ## [0.3.1] - 2025-12-28
 
 ### Fixed
