@@ -79,26 +79,10 @@ def get_plugin_metadata(project_root: Path) -> dict:
 def get_source_files(project_root: Path):
     """Dynamically discover source files and directories to copy."""
     # Common exclusions
-    exclude_patterns = {
-        "__pycache__",
-        ".git",
-        ".venv",
-        ".agent",
-        ".ai-context",
-        "venv",
-        "env",
-        "tests",
-        ".pytest_cache",
-        ".ruff_cache",
-        "*.pyc",
-        "*.bak*",
-        "build",
-        "dist",
-        "*.egg-info",
-        "scripts",
-        "tools",
-        "research",
-    }
+    from .constants import DEFAULT_EXCLUDE_PATTERNS, DEV_DIRECTORIES
+
+    # Common exclusions
+    exclude_patterns = DEFAULT_EXCLUDE_PATTERNS | DEV_DIRECTORIES
 
     # We copy everything except excluded items
     for item in project_root.iterdir():

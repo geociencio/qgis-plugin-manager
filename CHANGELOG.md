@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2025-12-31
+
+### Fixed
+- **Packaging Logic**: Fixed a bug where nested directories matching wildcard exclusion patterns (e.g., `src/my_lib.egg-info`) were not being excluded from the package.
+- **Improved Exclusions**: Centralized and expanded the default list of excluded files to prevent development artifacts from leaking into production packages. Now consistently ignores:
+  - IDE files (`.vscode`, `.idea`, `.settings`)
+  - Dependency lock files (`uv.lock`, `poetry.lock`, `Pipfile`, `Pipfile.lock`)
+  - Testing and linting caches (`.mypy_cache`, `.pre-commit-config.yaml`, `.ruff_cache`)
+  - Internal artifacts (`.agent`, `.ai-context`, `analysis_results`)
+
 ## [0.4.0] - 2025-12-28
 
 ### Added

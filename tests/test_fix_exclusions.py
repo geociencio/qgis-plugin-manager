@@ -72,3 +72,46 @@ def test_package_preserves_nested_tools(tmp_path: Path):
         names = zf.namelist()
         assert "my_plugin/gui/tools/util.py" in names
         assert "my_plugin/tools/dev_tool.py" not in names
+
+def test_package_excludes_nested_wildcard_directories(tmp_path: Path):
+    """Test that nested directories matching wildcard patterns are excluded."""
+    # Setup project structure
+    project_root = tmp_path / "test_plugin_wildcard"
+    project_root.mkdir()
+
+    # Metadata
+    metadata_content = """[general]
+name=Test Plugin Wildcard
+qgisMinimumVersion=3.0
+description=Test
+version=0.1
+author=Me
+email=me@example.com
+"""
+    (project_root / "metadata.txt").write_text(metadata_content)
+
+    # Valid source file
+    src_dir = project_root / "src"
+    src_dir.mkdir()
+    (src_dir / "plugin.py").write_text("print('hello')")
+
+    # Nested ignored directory (matching *.egg-info)
+    bad_dir = src_dir / "my_lib.egg-info"
+    bad_dir.mkdir()
+    (bad_dir / "PKG-INFO").write_text("trash")
+
+    # Run packing
+    zip_path = create_plugin_package(project_root, output_dir=tmp_path / "dist")
+
+    assert zip_path.exists()
+
+    # Verify zip content
+    with zipfile.ZipFile(zip_path, "r") as zf:
+        files = zf.namelist()
+        slug = "test_plugin_wildcard"
+
+        # Valid file should be there
+        assert f"{slug}/src/plugin.py" in files
+
+        # Wildcard match exclusion checks
+        assert f"{slug}/src/my_lib.egg-info/PKG-INFO" not in files

@@ -263,29 +263,16 @@ def create_plugin_package(
 
     logger.info(f"📦 Creating package: {zip_filename}")
 
-    # Files/directories to exclude
-    exclude_patterns = {
-        "__pycache__",
-        ".git",
-        ".venv",
-        ".agent",
-        ".ai-context",
-        "venv",
-        "env",
-        ".pytest_cache",
-        ".ruff_cache",
-        ".mypy_cache",
-        "*.pyc",
-        "*.bak*",
-        "dist",
-        "build",
-        "*.egg-info",
-    }
+    from .constants import DEFAULT_EXCLUDE_PATTERNS, DEV_DIRECTORIES
 
+    # Start with default patterns
+    exclude_patterns = DEFAULT_EXCLUDE_PATTERNS.copy()
+
+    # If we are NOT including dev files, add them to the set to be checked
     if not include_dev:
-        exclude_patterns.update(
-            {"tests", "research", "tools", "scripts", "docs", ".github"}
-        )
+        # We don't add them to exclude_patterns immediately for the recursive check
+        # because the logic below handles dev dirs specifically (checking root only).
+        pass
 
     def should_exclude(path: Path) -> bool:
         """Check if path should be excluded from package."""
@@ -293,18 +280,29 @@ def create_plugin_package(
         rel_path = path.relative_to(project_root)
         parts = rel_path.parts
 
+        wildcard_patterns = {p for p in exclude_patterns if "*" in p}
+
         for i, part in enumerate(parts):
             # Critical exclusions (env, VCS, etc.) are always applied recursively
             if part in exclude_patterns:
-                # If it's a dev-only directory, only exclude if it's at the root
-                dev_only = {"tests", "research", "tools", "scripts", "docs", ".github"}
-                if part in dev_only and i > 0:
+                return True
+
+            # Dev directories are excluded only if include_dev is False
+            if not include_dev and part in DEV_DIRECTORIES:
+                # If it's a dev directory, we usually exclude it ONLY if it is at root
+                # (i.e. 'tests' at root). But if 'tests' is nested inside 'src',
+                # we might want to keep it?
+                # Previous logic:
+                #   if part in dev_only and i > 0: continue
+                # Meaning: if nested, it is NOT excluded.
+                if i > 0:
                     continue
                 return True
 
-            # Check wildcard patterns
-            if any(path.match(p) for p in exclude_patterns if "*" in p):
+            # Check wildcard patterns against the current part (directory or file name)
+            if any(Path(part).match(p) for p in wildcard_patterns):
                 return True
+
         return False
 
     # Collect items for ZIP

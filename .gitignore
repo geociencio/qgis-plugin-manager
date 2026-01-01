@@ -35,3 +35,4 @@ env/
 # Project specific
 analysis_results/
 *.bak.*
+generator_export/
