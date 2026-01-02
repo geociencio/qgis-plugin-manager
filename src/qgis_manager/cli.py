@@ -44,6 +44,7 @@ from .core import (
     compile_qt_resources,
     create_plugin_package,
     deploy_plugin,
+    get_qgis_plugin_dir,
     init_plugin_project,
 )
 from .discovery import find_project_root, get_plugin_metadata
@@ -131,12 +132,29 @@ def deploy(path, no_backup, profile, interactive, no_compile):
 
                 compile_qt_resources(root, "all", callback=doc_callback)
 
+        # Pre-info
+        metadata = get_plugin_metadata(root)
+        slug = metadata["slug"]
+        target_path = (
+            Path(profile)
+            if profile and Path(profile).is_absolute()
+            else get_qgis_plugin_dir(target_profile) / slug
+        )
+        click.echo(f"🚀 Deploying '{metadata['name']}' ({slug}) to {target_path}")
+
         # Logic with progress bar
-        with click.progressbar(length=0, label="🚀 Deploying files") as bar:
+        with click.progressbar(
+            length=100,
+            label="📦 Copying files",
+            fill_char="#",
+            empty_char="-",
+            show_pos=True,
+        ) as bar:
 
             def update_bar(n):
-                if bar.length == 0:
+                if bar.length == 100:  # Initial dummy length
                     bar.length = n
+                    bar.update(0)  # Initial refresh
                 else:
                     bar.update(n)
 
@@ -235,11 +253,18 @@ def package(path, output, dev):
     try:
         root = find_project_root(path)
 
-        with click.progressbar(length=0, label="📦 Packaging files") as bar:
+        with click.progressbar(
+            length=100,
+            label="📦 Packaging files",
+            fill_char="#",
+            empty_char="-",
+            show_pos=True,
+        ) as bar:
 
             def update_bar(n):
-                if bar.length == 0:
+                if bar.length == 100:
                     bar.length = n
+                    bar.update(0)
                 else:
                     bar.update(n)
 

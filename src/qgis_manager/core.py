@@ -88,7 +88,6 @@ def deploy_plugin(
 
     target_path = dest_dir / slug
 
-    print(f"🚀 Deploying '{metadata['name']}' ({slug}) to {target_path}")
 
     # Backup
     if target_path.exists() and not no_backup:
