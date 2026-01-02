@@ -132,23 +132,30 @@ def deploy(path, no_backup, profile, interactive, no_compile):
                     label="📚 Compilando recursos y docus",
                     show_pos=True,
                 ) as bar:
-                    last_msg = ""
 
                     def comp_callback(line):
-                        nonlocal last_msg
-                        # Si la línea empieza por un icono conocido, es un nuevo paso
-                        new_step = any(line.startswith(icon) for icon in ["🔨", "🌍"])
-                        # Para Sphinx, actualizamos label.
-                        msg = line[:40] + "..." if len(line) > 40 else line
-                        bar.label = f"📚 {msg}"
+                        import time
 
-                        if new_step:
-                            bar.update(1)
-                        elif "Preparando help" in line:
-                            bar.update(1)
-                        else:
+                        icons = {"Recurso": "🔨", "Trad": "🌍", "Documentación": "📚"}
+                        msg = line.split(":", 1)[1] if ":" in line else line
+                        short_msg = msg[:40] + "..." if len(msg) > 40 else msg
+
+                        if line.startswith("START:"):
+                            # Buscar icono adecuado
+                            icon = "🛠️"
+                            for k, v in icons.items():
+                                if k in msg:
+                                    icon = v
+                                    break
+                            bar.label = f"{icon} {short_msg}"
                             bar.update(0)
-                        last_msg = line
+                        elif line.startswith("PROGRESS:"):
+                            spinner = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+                            s = spinner[int(time.time() * 5) % len(spinner)]
+                            bar.label = f"📚 {s} {short_msg}"
+                            bar.update(0)
+                        elif line.startswith("DONE:"):
+                            bar.update(1)
 
                     compile_qt_resources(root, "all", callback=comp_callback)
 
@@ -236,13 +243,27 @@ def compile(path, res_type):
             ) as bar:
 
                 def comp_callback(line):
-                    msg = line[:40] + "..." if len(line) > 40 else line
-                    bar.label = f"📚 {msg}"
-                    new_step = any(line.startswith(icon) for icon in ["🔨", "🌍"])
-                    if new_step or "Preparando help" in line:
-                        bar.update(1)
-                    else:
+                    import time
+
+                    icons = {"Recurso": "🔨", "Trad": "🌍", "Documentación": "📚"}
+                    msg = line.split(":", 1)[1] if ":" in line else line
+                    short_msg = msg[:40] + "..." if len(msg) > 40 else msg
+
+                    if line.startswith("START:"):
+                        icon = "🛠️"
+                        for k, v in icons.items():
+                            if k in msg:
+                                icon = v
+                                break
+                        bar.label = f"{icon} {short_msg}"
                         bar.update(0)
+                    elif line.startswith("PROGRESS:"):
+                        spinner = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+                        s = spinner[int(time.time() * 5) % len(spinner)]
+                        bar.label = f"📚 {s} {short_msg}"
+                        bar.update(0)
+                    elif line.startswith("DONE:"):
+                        bar.update(1)
 
                 compile_qt_resources(root, res_type, callback=comp_callback)
         else:

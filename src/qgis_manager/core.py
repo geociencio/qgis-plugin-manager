@@ -142,7 +142,7 @@ def compile_docs(project_root: Path, callback: Callable[[str], Any] | None = Non
     help_target = project_root / "help" / "html"
 
     if callback:
-        callback(f"Preparando help: {help_target.name}")
+        callback(f"START:Documentación ({help_target.name})")
     logger.debug(f"📚 Compilando documentación: {docs_source} -> {help_target}")
 
     try:
@@ -171,7 +171,7 @@ def compile_docs(project_root: Path, callback: Callable[[str], Any] | None = Non
                 line = line.strip()
                 if line:
                     if callback:
-                        callback(line)
+                        callback(f"PROGRESS:{line}")
                     logger.debug(f"Sphinx: {line}")
 
         process.wait()
@@ -183,7 +183,7 @@ def compile_docs(project_root: Path, callback: Callable[[str], Any] | None = Non
         (help_target / ".buildinfo").unlink(missing_ok=True)
 
         if callback:
-            callback("✅ Documentación ok")
+            callback("DONE:Documentación")
         logger.debug("  ✅ Documentación compilada con éxito.")
     except Exception as e:
         logger.error(f"  ❌ Error al compilar documentación: {e}")
@@ -201,9 +201,8 @@ def compile_qt_resources(
         for qrc in qrc_files:
             py_file = qrc.with_suffix(".py")
             rel_qrc = qrc.relative_to(project_root)
-            msg = f"🔨 Recurso: {rel_qrc.name}"
             if callback:
-                callback(msg)
+                callback(f"START:Recurso {rel_qrc.name}")
             logger.debug(f"🔨 Compiling resource: {rel_qrc} -> {py_file.name}")
 
             try:
@@ -213,6 +212,8 @@ def compile_qt_resources(
                     capture_output=True,
                     text=True,
                 )
+                if callback:
+                    callback(f"DONE:Recurso {rel_qrc.name}")
                 logger.debug("  ✅ Done.")
             except subprocess.CalledProcessError as e:
                 logger.error(f"  ❌ Error compiling {qrc.name}: {e.stderr}")
@@ -224,15 +225,16 @@ def compile_qt_resources(
         ts_files = list(project_root.rglob("*.ts"))
         for ts in ts_files:
             rel_ts = ts.relative_to(project_root)
-            msg = f"🌍 Trad: {rel_ts.name}"
             if callback:
-                callback(msg)
+                callback(f"START:Trad {rel_ts.name}")
             logger.debug(f"🌍 Compiling translation: {rel_ts}")
 
             try:
                 subprocess.run(
                     ["lrelease", str(ts)], check=True, capture_output=True, text=True
                 )
+                if callback:
+                    callback(f"DONE:Trad {rel_ts.name}")
                 logger.debug("  ✅ Done.")
             except subprocess.CalledProcessError as e:
                 logger.error(f"  ❌ Error compiling {ts.name}: {e.stderr}")

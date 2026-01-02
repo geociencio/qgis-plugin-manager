@@ -252,8 +252,10 @@ class TestCore(unittest.TestCase):
             compile_docs(tmp_path, callback=callback)
 
             # Verify
-            self.assertIn("building documents...", callback_lines)
-            self.assertIn("done", callback_lines)
+            self.assertIn("PROGRESS:building documents...", callback_lines)
+            self.assertIn("PROGRESS:done", callback_lines)
+            self.assertIn("DONE:Documentación", callback_lines)
+            self.assertIn("START:Documentación (html)", callback_lines)
 
 
 if __name__ == "__main__":
