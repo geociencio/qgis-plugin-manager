@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "qgis-plugin-manager"
-version = "0.4.1"
+version = "0.5.0"
 description = "A modern CLI for managing QGIS plugin development, deployment, and packaging."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -34,8 +34,6 @@ qgis-plugin-analyzer = { git = "https://github.com/geociencio/qgis-plugin-analyz
 dev = [
     "mypy>=1.19.1",
     "pre-commit>=4.5.1",
-    "pytest>=9.0.2",
-    "pytest-mock>=3.15.1",
     "qgis-plugin-analyzer",
     "ruff>=0.14.10",
     "types-setuptools>=80.9.0.20251223",
@@ -53,10 +51,7 @@ ignore = []
 known-first-party = ["qgis_manager"]
 section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
 
-[tool.pytest.ini_options]
-minversion = "6.0"
-addopts = "-v --tb=short"
-testpaths = ["tests"]
+
 
 [tool.mypy]
 python_version = "3.10"

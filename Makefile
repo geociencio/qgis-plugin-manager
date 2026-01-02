@@ -4,7 +4,7 @@ deploy:
 	uv run qgis-manage deploy
 
 test:
-	uv run pytest
+	uv run python -m unittest discover tests
 
 lint:
 	uv run ruff check .

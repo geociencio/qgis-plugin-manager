@@ -133,7 +133,7 @@ def deploy_plugin(
     logger.info("✨ Deployment complete.")
 
 
-def compile_docs(project_root: Path):
+def compile_docs(project_root: Path, callback: Callable[[str], Any] | None = None):
     """Compila la documentación Sphinx si el proyecto tiene una carpeta docs/source."""
     docs_source = project_root / "docs" / "source"
     if not (docs_source / "conf.py").exists():
@@ -150,19 +150,31 @@ def compile_docs(project_root: Path):
             shutil.rmtree(help_target)
         help_target.mkdir(parents=True, exist_ok=True)
 
-        # Ejecutar sphinx-build (usando uv si está disponible)
         # Intentamos con uv run si detectamos entorno uv, o sphinx-build directamente
         cmd = ["sphinx-build", "-b", "html", str(docs_source), str(help_target)]
         if (project_root / "pyproject.toml").exists():
             # Recommendation to use uv if available for consistency with project rules
             cmd = ["uv", "run"] + cmd
 
-        subprocess.run(
+        process = subprocess.Popen(
             cmd,
-            check=True,
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
             text=True,
+            bufsize=1,
+            universal_newlines=True,
         )
+
+        if process.stdout:
+            for line in process.stdout:
+                line = line.strip()
+                if line and callback:
+                    callback(line)
+                logger.debug(f"Sphinx: {line}")
+
+        process.wait()
+        if process.returncode != 0:
+            raise subprocess.CalledProcessError(process.returncode, cmd)
 
         # Limpieza de archivos innecesarios para el despliegue
         shutil.rmtree(help_target / "_sources", ignore_errors=True)
@@ -173,7 +185,9 @@ def compile_docs(project_root: Path):
         logger.error(f"  ❌ Error al compilar documentación: {e}")
 
 
-def compile_qt_resources(project_root: Path, res_type="all"):
+def compile_qt_resources(
+    project_root: Path, res_type="all", callback: Callable[[str], Any] | None = None
+):
     """Compile Qt resources, translations, and documentation."""
     if res_type in ["resources", "all"]:
         # Look for .qrc files
@@ -213,7 +227,7 @@ def compile_qt_resources(project_root: Path, res_type="all"):
                 logger.error("  ❌ lrelease not found. Is it installed?")
 
     if res_type in ["docs", "all"]:
-        compile_docs(project_root)
+        compile_docs(project_root, callback=callback)
 
 
 def clean_artifacts(project_root: Path):

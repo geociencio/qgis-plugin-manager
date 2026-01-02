@@ -118,10 +118,18 @@ def deploy(path, no_backup, profile, interactive, no_compile):
                 click.echo("Aborted by user.")
                 raise click.Abort()
 
-        # Execute automatic compilation BEFORE deployment
         if not no_compile and settings.auto_compile:
-            click.echo("🔨 Compilando recursos y documentación...")
-            compile_qt_resources(root, "all")
+            with click.progressbar(
+                length=0, label="📚 Compilando recursos y docus", show_percent=False
+            ) as bar:
+
+                def doc_callback(line):
+                    # Truncar línea para el label si es muy larga
+                    msg = line[:40] + "..." if len(line) > 40 else line
+                    bar.label = f"📚 {msg}"
+                    bar.update(0)
+
+                compile_qt_resources(root, "all", callback=doc_callback)
 
         # Logic with progress bar
         with click.progressbar(length=0, label="🚀 Deploying files") as bar:
@@ -179,7 +187,20 @@ def compile(path, res_type):
     """Compile resources and translations."""
     try:
         root = find_project_root(path)
-        compile_qt_resources(root, res_type)
+        if res_type in ["docs", "all"]:
+            with click.progressbar(
+                length=0, label="📚 Compilando documentación", show_percent=False
+            ) as bar:
+
+                def doc_callback(line):
+                    msg = line[:40] + "..." if len(line) > 40 else line
+                    bar.label = f"📚 {msg}"
+                    bar.update(0)
+
+                compile_qt_resources(root, res_type, callback=doc_callback)
+        else:
+            compile_qt_resources(root, res_type)
+
         click.echo(click.style("✨ Compilation complete!", fg="green", bold=True))
     except Exception as e:
         click.echo(click.style(f"❌ Error: {e}", fg="red", bold=True), err=True)

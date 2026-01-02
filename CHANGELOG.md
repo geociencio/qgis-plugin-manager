@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-01-02
+
+### Added
+- **Test Framework Migration**: Fully migrated the test suite from `pytest` to Python's standard `unittest` library.
+- **Dependency Optimization**: Removed `pytest` and `pytest-mock` from development dependencies.
+- **Modernized Documentation**: Updated the modernization guide and release notes.
+
+### Improved (UI/UX & Refactoring)
+- **Real-time Compilation Feedback**: Added progress bar integration for documentation and resource compilation.
+- **Architectural Refactoring**:
+  - `compile_docs` now uses `subprocess.Popen` for real-time output reporting via callbacks.
+  - Centralized compilation callbacks to provide better terminal feedback during long operations.
+- **IDE Integration**: Reconfigured `.vscode/settings.json` for `unittest`.
+
+### Changed
+- **Build System**: Updated `Makefile` to use `python -m unittest discover tests`.
+
 ## [0.4.1] - 2025-12-31
 
 ### Fixed
