@@ -32,5 +32,5 @@ jobs:
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10'
         run: uv run mypy .
 
-      - name: Test with pytest
-        run: uv run pytest
+      - name: Test with unittest
+        run: uv run python -m unittest discover tests
