@@ -141,7 +141,9 @@ def compile_docs(project_root: Path, callback: Callable[[str], Any] | None = Non
     # Ruta estándar para la ayuda en plugins de QGIS
     help_target = project_root / "help" / "html"
 
-    logger.info(f"📚 Compilando documentación: {docs_source} -> {help_target}")
+    if callback:
+        callback(f"Preparando help: {help_target.name}")
+    logger.debug(f"📚 Compilando documentación: {docs_source} -> {help_target}")
 
     try:
         # Limpiar y regenerar carpeta destino
@@ -167,9 +169,10 @@ def compile_docs(project_root: Path, callback: Callable[[str], Any] | None = Non
         if process.stdout:
             for line in process.stdout:
                 line = line.strip()
-                if line and callback:
-                    callback(line)
-                logger.debug(f"Sphinx: {line}")
+                if line:
+                    if callback:
+                        callback(line)
+                    logger.debug(f"Sphinx: {line}")
 
         process.wait()
         if process.returncode != 0:
@@ -179,13 +182,17 @@ def compile_docs(project_root: Path, callback: Callable[[str], Any] | None = Non
         shutil.rmtree(help_target / "_sources", ignore_errors=True)
         (help_target / ".buildinfo").unlink(missing_ok=True)
 
-        logger.info("  ✅ Documentación compilada con éxito.")
+        if callback:
+            callback("✅ Documentación ok")
+        logger.debug("  ✅ Documentación compilada con éxito.")
     except Exception as e:
         logger.error(f"  ❌ Error al compilar documentación: {e}")
 
 
 def compile_qt_resources(
-    project_root: Path, res_type="all", callback: Callable[[str], Any] | None = None
+    project_root: Path,
+    res_type: str = "all",
+    callback: Callable[[str], Any] | None = None,
 ):
     """Compile Qt resources, translations, and documentation."""
     if res_type in ["resources", "all"]:
@@ -193,10 +200,12 @@ def compile_qt_resources(
         qrc_files = list(project_root.rglob("*.qrc"))
         for qrc in qrc_files:
             py_file = qrc.with_suffix(".py")
-            logger.info(
-                f"🔨 Compiling resource: {qrc.relative_to(project_root)} -> "
-                f"{py_file.relative_to(project_root)}"
-            )
+            rel_qrc = qrc.relative_to(project_root)
+            msg = f"🔨 Recurso: {rel_qrc.name}"
+            if callback:
+                callback(msg)
+            logger.debug(f"🔨 Compiling resource: {rel_qrc} -> {py_file.name}")
+
             try:
                 subprocess.run(
                     ["pyrcc5", "-o", str(py_file), str(qrc)],
@@ -204,7 +213,7 @@ def compile_qt_resources(
                     capture_output=True,
                     text=True,
                 )
-                logger.info("  ✅ Done.")
+                logger.debug("  ✅ Done.")
             except subprocess.CalledProcessError as e:
                 logger.error(f"  ❌ Error compiling {qrc.name}: {e.stderr}")
             except FileNotFoundError:
@@ -214,12 +223,17 @@ def compile_qt_resources(
         # Look for .ts files
         ts_files = list(project_root.rglob("*.ts"))
         for ts in ts_files:
-            logger.info(f"🌍 Compiling translation: {ts.relative_to(project_root)}")
+            rel_ts = ts.relative_to(project_root)
+            msg = f"🌍 Trad: {rel_ts.name}"
+            if callback:
+                callback(msg)
+            logger.debug(f"🌍 Compiling translation: {rel_ts}")
+
             try:
                 subprocess.run(
                     ["lrelease", str(ts)], check=True, capture_output=True, text=True
                 )
-                logger.info("  ✅ Done.")
+                logger.debug("  ✅ Done.")
             except subprocess.CalledProcessError as e:
                 logger.error(f"  ❌ Error compiling {ts.name}: {e.stderr}")
             except FileNotFoundError:

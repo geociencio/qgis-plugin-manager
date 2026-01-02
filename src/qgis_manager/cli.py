@@ -120,17 +120,37 @@ def deploy(path, no_backup, profile, interactive, no_compile):
                 raise click.Abort()
 
         if not no_compile and settings.auto_compile:
-            with click.progressbar(
-                length=0, label="📚 Compilando recursos y docus", show_percent=False
-            ) as bar:
+            # Calcular pasos: qrcs + ts + 1 (docs)
+            qrc_count = len(list(root.rglob("*.qrc")))
+            ts_count = len(list(root.rglob("*.ts")))
+            has_docs = (root / "docs" / "source" / "conf.py").exists()
+            total_steps = qrc_count + ts_count + (1 if has_docs else 0)
 
-                def doc_callback(line):
-                    # Truncar línea para el label si es muy larga
-                    msg = line[:40] + "..." if len(line) > 40 else line
-                    bar.label = f"📚 {msg}"
-                    bar.update(0)
+            if total_steps > 0:
+                with click.progressbar(
+                    length=total_steps,
+                    label="📚 Compilando recursos y docus",
+                    show_pos=True,
+                ) as bar:
+                    last_msg = ""
 
-                compile_qt_resources(root, "all", callback=doc_callback)
+                    def comp_callback(line):
+                        nonlocal last_msg
+                        # Si la línea empieza por un icono conocido, es un nuevo paso
+                        new_step = any(line.startswith(icon) for icon in ["🔨", "🌍"])
+                        # Para Sphinx, actualizamos label.
+                        msg = line[:40] + "..." if len(line) > 40 else line
+                        bar.label = f"📚 {msg}"
+
+                        if new_step:
+                            bar.update(1)
+                        elif "Preparando help" in line:
+                            bar.update(1)
+                        else:
+                            bar.update(0)
+                        last_msg = line
+
+                    compile_qt_resources(root, "all", callback=comp_callback)
 
         # Pre-info
         metadata = get_plugin_metadata(root)
@@ -206,16 +226,25 @@ def compile(path, res_type):
     try:
         root = find_project_root(path)
         if res_type in ["docs", "all"]:
+            qrc_count = len(list(root.rglob("*.qrc"))) if res_type == "all" else 0
+            ts_count = len(list(root.rglob("*.ts"))) if res_type == "all" else 0
+            has_docs = (root / "docs" / "source" / "conf.py").exists()
+            total_steps = qrc_count + ts_count + (1 if has_docs else 0)
+
             with click.progressbar(
-                length=0, label="📚 Compilando documentación", show_percent=False
+                length=total_steps, label="📚 Compilando", show_pos=True
             ) as bar:
 
-                def doc_callback(line):
+                def comp_callback(line):
                     msg = line[:40] + "..." if len(line) > 40 else line
                     bar.label = f"📚 {msg}"
-                    bar.update(0)
+                    new_step = any(line.startswith(icon) for icon in ["🔨", "🌍"])
+                    if new_step or "Preparando help" in line:
+                        bar.update(1)
+                    else:
+                        bar.update(0)
 
-                compile_qt_resources(root, res_type, callback=doc_callback)
+                compile_qt_resources(root, res_type, callback=comp_callback)
         else:
             compile_qt_resources(root, res_type)
 
