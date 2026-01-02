@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/geociencio/qgis-plugin-manager/actions/workflows/main.yml/badge.svg)](https://github.com/geociencio/qgis-plugin-manager/actions/workflows/main.yml)
 [![License: GPL v2+](https://img.shields.io/badge/License-GPL%20v2%2B-blue.svg)](LICENSE)
-[![Code Quality](https://img.shields.io/badge/Code%20Quality-61.1%2F100-brightgreen)](analysis_results/PROJECT_SUMMARY.md)
+[![Code Quality](https://img.shields.io/badge/Code%20Quality-66.6%2F100-brightgreen)](analysis_results/PROJECT_SUMMARY.md)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
@@ -46,7 +46,13 @@ uv add --group dev qgis-plugin-manager @ git+https://github.com/geociencio/qgis-
 From your plugin project root:
 
 ```bash
-# Deploy to QGIS profile (with automatic backup)
+# Initialize a new plugin project scaffolding
+qgis-manage init "My Plugin" --author "Juan" --email "juan@example.com" --template processing
+
+# Install external dependencies to local libs/ folder
+qgis-manage install-deps
+
+# Deploy to QGIS profile (with automatic backup and compilation)
 qgis-manage deploy
 
 # Deploy to a specific profile
@@ -55,17 +61,17 @@ qgis-manage deploy --profile production
 # Deploy with interactive step-by-step confirmation
 qgis-manage deploy --interactive
 
-# Initialize a new plugin project scaffolding
-qgis-manage init "My Plugin" --author "Juan" --email "juan@example.com"
-
-# Validate with strict mode (fail on warnings)
-qgis-manage validate --strict
-
-# Create distributable ZIP package
+# Create distributable ZIP package (automatically installs dependencies)
 qgis-manage package
 
-# Create package in specific directory
+# Create package without dev files
 qgis-manage package --output ./releases
+
+# Run QGIS Plugin Analyzer on the project
+qgis-manage analyze
+
+# Validate metadata.txt compliance
+qgis-manage validate --strict
 
 # Compile all resources, translations, and documentation
 qgis-manage compile
@@ -73,9 +79,39 @@ qgis-manage compile
 # Compile only documentation
 qgis-manage compile --type docs
 
-# Clean Python artifacts
+# Clean Python artifacts and build files
 qgis-manage clean
 ```
+
+## ⚙️ Configuration
+
+### Robust Exclusions (`.qgisignore`)
+You can control which files are excluded from deployment and packaging by creating a `.qgisignore` file in your project root. It supports gitignore-style patterns:
+
+```text
+# Exclude CSV data files
+data/*.csv
+
+# Exclude specific folders
+temp/
+tests/data/
+
+# Recursive match (anywhere in the project)
+debug.log
+```
+
+### Dependency Management
+Define your plugin's external Python dependencies in `pyproject.toml`:
+
+```toml
+[tool.qgis-manager]
+dependencies = [
+    "requests",
+    "six",
+    "pandas"
+]
+```
+Running `qgis-manage install-deps` will install these into a local `libs/` folder. Remember to add this folder to `sys.path` in your plugin's `__init__.py`.
 
 ## 📖 Documentation
 
