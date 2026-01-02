@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/geociencio/qgis-plugin-manager/actions/workflows/main.yml/badge.svg)](https://github.com/geociencio/qgis-plugin-manager/actions/workflows/main.yml)
 [![License: GPL v2+](https://img.shields.io/badge/License-GPL%20v2%2B-blue.svg)](LICENSE)
-[![Code Quality](https://img.shields.io/badge/code%20quality-67.7%2F100-yellow)](analysis_results/PROJECT_SUMMARY.md)
+[![Code Quality](https://img.shields.io/badge/Code%20Quality-61.1%2F100-brightgreen)](analysis_results/PROJECT_SUMMARY.md)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 

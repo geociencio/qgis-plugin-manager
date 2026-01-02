@@ -5,7 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.0] - 2026-01-02
+## [0.6.0] - 2026-01-02
+
+### Added
+- **.qgisignore support**: Implemented gitignore-style exclusion logic for better control over deployment and packaging.
+- **Dependency Management**: New `install-deps` command to install third-party libraries into a local `libs/` folder within the plugin.
+- **Enhanced Scaffolding**: Refactored `init` to use a template-based system, supporting multiple types of plugins (default, processing).
+- **Python Native Hooks**: Support for executing `.py` files as hooks with automatic project context (`QGIS_PROJECT_ROOT`).
+- **Unified Analyzer Command**: Integrated `qgis-analyzer` directly as `qgis-manage analyze`.
+
+### Improved
+- **Exclusion Logic**: Replaced hardcoded sets with a robust `IgnoreMatcher` class.
+- **Scaffolding Automation**: Better prompt interaction for `init` command.
+
+## [0.5.0] - 2026-01-01
 
 ### Added
 - **Test Framework Migration**: Fully migrated the test suite from `pytest` to Python's standard `unittest` library.

@@ -1,0 +1,18 @@
+from qgis.core import QgsProcessingProvider
+from .{{ slug }}_algorithm import {{ class_name }}Algorithm
+
+class {{ class_name }}Provider(QgsProcessingProvider):
+    def __init__(self):
+        super().__init__()
+
+    def loadAlgorithms(self):
+        self.addAlgorithm({{ class_name }}Algorithm())
+
+    def id(self):
+        return "{{ slug }}"
+
+    def name(self):
+        return "{{ name }}"
+
+    def icon(self):
+        return super().icon()

@@ -1,5 +1,7 @@
 import logging
+import os
 import subprocess
+import sys
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -11,15 +13,30 @@ def run_hook(name: str, command: str, project_root: Path) -> bool:
         return True
 
     logger.info(f"🪝 Running hook: {name} ({command})")
+    logger.info(f"🪝 Running hook: {name} ({command})")
+
+    # Check if command is a python script
+    is_python = command.strip().endswith(".py")
+    env = os.environ.copy()
+    env["QGIS_PROJECT_ROOT"] = str(project_root)
+
     try:
-        # Run command in shell, with project root as cwd
+        if is_python:
+            # Run via current python interpreter
+            full_cmd = [sys.executable, command]
+            is_shell = False
+        else:
+            full_cmd = command
+            is_shell = True
+
         result = subprocess.run(
-            command,
-            shell=True,
+            full_cmd,
+            shell=is_shell,
             cwd=project_root,
             capture_output=True,
             text=True,
             check=False,
+            env=env
         )
 
         if result.returncode != 0:

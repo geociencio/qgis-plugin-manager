@@ -45,7 +45,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from .discovery import get_plugin_metadata, get_source_files
+from .discovery import IgnoreMatcher, get_plugin_metadata, get_source_files
 
 logger = logging.getLogger(__name__)
 
@@ -102,16 +102,9 @@ def deploy_plugin(
         shutil.rmtree(target_path)
     target_path.mkdir(parents=True, exist_ok=True)
 
-    # Exclusions for copytree
-    def ignore_func(directory, contents):
-        exclude_set = {
-            "__pycache__",
-            ".git",
-            ".venv",
-            ".agent",
-            ".ai-context",
-        }
-        return [c for c in contents if c in exclude_set or c.endswith(".pyc")]
+    # Exclusions
+    # Always exclude dev files on deploy
+    matcher = IgnoreMatcher(project_root, include_dev=False)
 
     # Copy files
     source_files = list(get_source_files(project_root))
@@ -121,7 +114,12 @@ def deploy_plugin(
     for item in source_files:
         dest_item = target_path / item.name
         if item.is_dir():
-            shutil.copytree(item, dest_item, ignore=ignore_func, dirs_exist_ok=True)
+            shutil.copytree(
+                item,
+                dest_item,
+                ignore=matcher.get_ignore_func(),
+                dirs_exist_ok=True,
+            )
         else:
             shutil.copy2(item, dest_item)
 
@@ -292,59 +290,17 @@ def create_plugin_package(
 
     logger.info(f"📦 Creating package: {zip_filename}")
 
-    from .constants import DEFAULT_EXCLUDE_PATTERNS, DEV_DIRECTORIES
+    matcher = IgnoreMatcher(project_root, include_dev=include_dev)
 
-    # Start with default patterns
-    exclude_patterns = DEFAULT_EXCLUDE_PATTERNS.copy()
-
-    # If we are NOT including dev files, add them to the set to be checked
-    if not include_dev:
-        # We don't add them to exclude_patterns immediately for the recursive check
-        # because the logic below handles dev dirs specifically (checking root only).
-        pass
-
-    def should_exclude(path: Path) -> bool:
-        """Check if path should be excluded from package."""
-        # Check if any parent or the path itself matches exclude patterns
-        rel_path = path.relative_to(project_root)
-        parts = rel_path.parts
-
-        wildcard_patterns = {p for p in exclude_patterns if "*" in p}
-
-        for i, part in enumerate(parts):
-            # Critical exclusions (env, VCS, etc.) are always applied recursively
-            if part in exclude_patterns:
-                return True
-
-            # Dev directories are excluded only if include_dev is False
-            if not include_dev and part in DEV_DIRECTORIES:
-                # If it's a dev directory, we usually exclude it ONLY if it is at root
-                # (i.e. 'tests' at root). But if 'tests' is nested inside 'src',
-                # we might want to keep it?
-                # Previous logic:
-                #   if part in dev_only and i > 0: continue
-                # Meaning: if nested, it is NOT excluded.
-                if i > 0:
-                    continue
-                return True
-
-            # Check wildcard patterns against the current part (directory or file name)
-            if any(Path(part).match(p) for p in wildcard_patterns):
-                return True
-
-        return False
 
     # Collect items for ZIP
     items_to_zip = []
-    for item in get_source_files(project_root):
-        if should_exclude(item):
-            continue
-
+    for item in get_source_files(project_root, include_dev=include_dev):
         if item.is_file():
             items_to_zip.append((item, f"{slug}/{item.name}"))
         elif item.is_dir():
             for file_path in item.rglob("*"):
-                if file_path.is_file() and not should_exclude(file_path):
+                if file_path.is_file() and not matcher.should_exclude(file_path):
                     arcname = f"{slug}/{file_path.relative_to(project_root)}"
                     items_to_zip.append((file_path, arcname))
 
@@ -384,9 +340,10 @@ def init_plugin_project(
     author: str,
     email: str,
     description: str = "A QGIS plugin.",
+    template: str = "default",
 ) -> None:
     """
-    Initialize a new QGIS plugin project with basic scaffolding.
+    Initialize a new QGIS plugin project with scaffolding.
 
     Args:
         path: Directory where the project will be created
@@ -394,17 +351,58 @@ def init_plugin_project(
         author: Author name
         email: Author email
         description: Short description of the plugin
+        template: Template name to use (default, processing, dockwidget)
     """
     from .discovery import slugify
 
     slug = slugify(name)
     project_dir = path / slug
-    project_dir.mkdir(parents=True, exist_ok=False)
+    if project_dir.exists():
+        raise FileExistsError(f"Directory {project_dir} already exists.")
 
-    logger.info(f"🚀 Initializing new QGIS plugin: {name} in {project_dir}")
+    project_dir.mkdir(parents=True)
 
-    # 1. Create metadata.txt
-    metadata_content = f"""; QGIS Plugin Metadata
+    logger.info(
+        f"🚀 Initializing new QGIS plugin: {name} in {project_dir} "
+        f"(Template: {template})"
+    )
+
+    # Template data
+    class_name = name.replace(" ", "")
+    context = {
+        "name": name,
+        "author": author,
+        "email": email,
+        "description": description,
+        "slug": slug,
+        "class_name": class_name
+    }
+
+    template_base = Path(__file__).parent / "templates" / template
+    if not template_base.exists():
+        # Fallback to default if template not found
+        logger.warning(f"Template '{template}' not found, falling back to 'default'")
+        template_base = Path(__file__).parent / "templates" / "default"
+
+    # Minimal implementation: we still handle some files manually if template
+    # folder is empty but the goal is to favor the folder.
+
+    def render_template(content: str, ctx: dict) -> str:
+        for k, v in ctx.items():
+            content = content.replace(f"{{{{ {k} }}}}", str(v))
+        return content
+
+    # 1. metadata.txt
+    meta_tmpl = template_base / "metadata.txt.tmpl"
+    if meta_tmpl.exists():
+        with open(meta_tmpl) as f:
+            content = render_template(f.read(), context)
+        with open(project_dir / "metadata.txt", "w") as f:
+            f.write(content)
+        logger.debug("  ✅ Created metadata.txt from template")
+    else:
+        # Fallback to hardcoded if no template
+        metadata_content = f"""; QGIS Plugin Metadata
 [general]
 name={name}
 description={description}
@@ -422,12 +420,21 @@ icon=icon.png
 experimental=False
 deprecated=False
 """
-    with open(project_dir / "metadata.txt", "w") as f:
-        f.write(metadata_content)
-    logger.debug("  ✅ Created metadata.txt")
+        with open(project_dir / "metadata.txt", "w") as f:
+            f.write(metadata_content)
+        logger.debug("  ✅ Created metadata.txt (hardcoded)")
 
-    # 2. Create __init__.py
-    init_py_content = f"""\"\"\"
+    # 2. __init__.py
+    init_tmpl = template_base / "__init__.py.tmpl"
+    if init_tmpl.exists():
+        with open(init_tmpl) as f:
+            content = render_template(f.read(), context)
+        with open(project_dir / "__init__.py", "w") as f:
+            f.write(content)
+        logger.debug("  ✅ Created __init__.py from template")
+    else:
+        # Fallback to hardcoded if no template
+        init_py_content = f"""\"\"\"
 {name} initialization.
 \"\"\"
 
@@ -436,13 +443,22 @@ def classFactory(iface):
     from .{slug} import {name.replace(" ", "")}
     return {name.replace(" ", "")}(iface)
 """
-    with open(project_dir / "__init__.py", "w") as f:
-        f.write(init_py_content)
-    logger.debug("  ✅ Created __init__.py")
+        with open(project_dir / "__init__.py", "w") as f:
+            f.write(init_py_content)
+        logger.debug("  ✅ Created __init__.py (hardcoded)")
 
-    # 3. Create main plugin file
-    class_name = name.replace(" ", "")
-    main_py_content = f"""\"\"\"
+    # 3. Main plugin file
+    plugin_tmpl = template_base / "plugin.py.tmpl"
+    if plugin_tmpl.exists():
+        with open(plugin_tmpl) as f:
+            content = render_template(f.read(), context)
+        # Use slug as filename for the main login
+        with open(project_dir / f"{slug}.py", "w") as f:
+            f.write(content)
+        logger.debug(f"  ✅ Created {slug}.py from template")
+    else:
+        # Fallback to hardcoded if no template
+        main_py_content = f"""\"\"\"
 Main plugin class for {name}.
 \"\"\"
 
@@ -461,14 +477,14 @@ class {class_name}:
         \"\"\"Unload the plugin.\"\"\"
         pass
 """
-    with open(project_dir / f"{slug}.py", "w") as f:
-        f.write(main_py_content)
-    logger.debug(f"  ✅ Created {slug}.py")
+        with open(project_dir / f"{slug}.py", "w") as f:
+            f.write(main_py_content)
+        logger.debug(f"  ✅ Created {slug}.py (hardcoded)")
 
     # 4. Create empty resources.qrc
     qrc_content = f"""<RCC>
-    <qroot prefix="/plugins/{slug}">
-    </qroot>
+    <qresource prefix="/plugins/{slug}">
+    </qresource>
 </RCC>
 """
     with open(project_dir / "resources.qrc", "w") as f:

@@ -34,6 +34,8 @@ Commands:
 """
 
 import logging
+import subprocess
+import sys
 from pathlib import Path
 
 import click
@@ -47,6 +49,7 @@ from .core import (
     get_qgis_plugin_dir,
     init_plugin_project,
 )
+from .dependencies import install_external_libs
 from .discovery import find_project_root, get_plugin_metadata
 from .hooks import run_hook
 from .validation import validate_metadata
@@ -276,6 +279,22 @@ def compile(path, res_type):
 
 
 @main.command()
+@click.option("--path", default=".", help="Project root directory")
+@click.option("--target", default="libs", help="Target directory for libraries")
+def install_deps(path, target):
+    """Install plugin dependencies to a local folder."""
+    try:
+        root = find_project_root(Path(path))
+        if install_external_libs(root, target):
+            click.echo("✨ Dependencies ready.")
+        else:
+            sys.exit(1)
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        sys.exit(1)
+
+
+@main.command()
 @click.argument(
     "path", default=".", type=click.Path(exists=True, file_okay=False, path_type=Path)
 )
@@ -301,7 +320,10 @@ def clean(path):
 def package(path, output, dev):
     """Create distributable ZIP package."""
     try:
-        root = find_project_root(path)
+        root = find_project_root(Path(path))
+
+        # Auto-install deps if any are defined
+        install_external_libs(root)
 
         with click.progressbar(
             length=100,
@@ -326,6 +348,39 @@ def package(path, output, dev):
     except Exception as e:
         click.echo(click.style(f"❌ Error: {e}", fg="red"), err=True)
         raise click.Abort() from e
+
+
+
+@main.command()
+@click.argument(
+    "path", default=".", type=click.Path(exists=True, file_okay=False, path_type=Path)
+)
+def analyze(path):
+    """Run QGIS Plugin Analyzer on the project."""
+    try:
+        root = find_project_root(path)
+        click.echo(f"🔍 Analyzing project at {root}...")
+
+        # Check if qgis-analyzer is installed
+        try:
+            subprocess.run(
+                ["qgis-analyzer", "--version"],
+                capture_output=True,
+                check=True
+            )
+            cmd = ["qgis-analyzer", "analyze", str(root)]
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            # Try via uv run
+            cmd = ["uv", "run", "qgis-analyzer", "analyze", str(root)]
+
+        result = subprocess.run(cmd, check=False)
+        if result.returncode != 0:
+            click.echo("❌ Analysis failed.")
+            sys.exit(result.returncode)
+
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        sys.exit(1)
 
 
 @main.command()
@@ -381,13 +436,18 @@ def validate(path, strict):
     type=click.Path(exists=True, file_okay=False, path_type=Path),
     help="Directory where the project folder will be created",
 )
-@click.option("--author", required=True, help="Author of the plugin")
-@click.option("--email", required=True, help="Author email")
-@click.option("--description", default="A QGIS plugin.", help="Plug-in description")
-def init(name, path, author, email, description):
+@click.option("--author", prompt="Author name", help="Author of the plugin")
+@click.option("--email", prompt="Author email", help="Author email")
+@click.option("--description", default="A QGIS plugin.", help="Plugin description")
+@click.option(
+    "--template",
+    default="default",
+    help="Project template (default, processing, dockwidget)",
+)
+def init(name, path, author, email, description, template):
     """Initialize a new QGIS plugin project scaffolding."""
     try:
-        init_plugin_project(path, name, author, email, description=description)
+        init_plugin_project(Path(path), name, author, email, description, template)
         msg = click.style(
             f"✅ Plugin '{name}' initialized successfully.", fg="green", bold=True
         )
