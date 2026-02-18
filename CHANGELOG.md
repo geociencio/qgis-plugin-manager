@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1] - 2026-02-18
+
+### Added
+- **Advanced Hooks System**: New `hooks` command to manage native Python hooks. Features `hooks list`, `hooks init` (template generation), and `hooks test` (isolated execution with mock context).
+- **Automated Versioning**: New `bump` command supporting Semantic Versioning (`major`, `minor`, `patch`) with automatic file synchronization (`bump sync`).
+- **Professional Metadata**: Expanded project classifiers (GIS, CLI, Spanish) and status badges (CI, Ruff, MyPy, Maintenance) in `README.md`.
+- **Tool-only Project Support**: `qgis-manage` now supports Python projects without `metadata.txt` by using `pyproject.toml` as a root marker.
+
+### Improved
+- **Modular CLI Architecture**: Refactored the entire command system into a high-performance, class-based architecture for better extensibility and AI-agent compatibility.
+- **Hierarchical Documentation**: Completely reorganized `docs/` into specialized subdirectories (`research`, `plans`, `walkthroughs`, `releases`).
+- **RCC Modernization**: Improved dynamic tool detection and automatic relative import patching for compiled resources.
+- **Structural Validation Deepening**: Enhanced the `validate` command with strict official repository compliance checks.
+
+### Fixed
+- **Type Safety**: Resolved 10+ Mypy type safety errors across the core codebase.
+- **Import Resolution**: Fixed relative import issues and cleaned up redundant imports.
+- **Ignore Logic**: Fixed recursive exclusion bugs in complex directory structures.
+
 ## [0.6.0] - 2026-01-02
 
 ### Added

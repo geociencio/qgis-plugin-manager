@@ -29,7 +29,7 @@ try:
     from importlib.metadata import PackageNotFoundError, version
 except ImportError:
     # Fallback for Python < 3.8 (though we require 3.10)
-    from importlib_metadata import PackageNotFoundError, version
+    from importlib_metadata import PackageNotFoundError, version  # type: ignore
 
 try:
     __version__ = version("qgis-manage")

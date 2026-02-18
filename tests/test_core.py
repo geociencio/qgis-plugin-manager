@@ -52,22 +52,13 @@ class TestCore(unittest.TestCase):
             get_qgis_plugin_dir()
 
     @patch("qgis_manager.core.get_plugin_metadata")
-    @patch("qgis_manager.core.get_source_files")
-    @patch("shutil.copy2")
-    @patch("shutil.rmtree")
-    def test_deploy_plugin(
-        self, mock_rmtree, mock_copy2, mock_get_source, mock_get_meta
-    ):
+    @patch("qgis_manager.core.sync_directory")
+    def test_deploy_plugin(self, mock_sync, mock_get_meta):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
             # Mocks
             mock_metadata = {"name": "Test Plugin", "slug": "test_plugin"}
             mock_get_meta.return_value = mock_metadata
-
-            mock_source_file = MagicMock(spec=Path)
-            mock_source_file.name = "source.py"
-            mock_source_file.is_dir.return_value = False
-            mock_get_source.return_value = [mock_source_file]
 
             dest_dir = tmp_path / "plugins"
             dest_dir.mkdir()
@@ -78,21 +69,20 @@ class TestCore(unittest.TestCase):
             # Verify
             target_path = dest_dir / "test_plugin"
             self.assertTrue(target_path.exists())
-            mock_copy2.assert_called()
+            mock_sync.assert_called_once()
 
     @patch("qgis_manager.core.get_plugin_metadata")
-    @patch("qgis_manager.core.get_source_files")
     @patch("shutil.copytree")
     @patch("qgis_manager.core.datetime")
+    @patch("qgis_manager.core.sync_directory")
     def test_deploy_plugin_with_backup(
-        self, mock_datetime, mock_copytree, mock_get_source, mock_get_meta
+        self, mock_sync, mock_datetime, mock_copytree, mock_get_meta
     ):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
             # Mocks
             mock_metadata = {"name": "Test Plugin", "slug": "test_plugin"}
             mock_get_meta.return_value = mock_metadata
-            mock_get_source.return_value = []
 
             mock_datetime.now.return_value.strftime.return_value = "20230101"
 
@@ -118,9 +108,9 @@ class TestCore(unittest.TestCase):
             compile_qt_resources(tmp_path, res_type="resources")
 
             # Verify
-            mock_run.assert_called_once()
+            self.assertEqual(mock_run.call_count, 2)
             args = mock_run.call_args[0][0]
-            self.assertEqual(args[0], "pyrcc5")
+            self.assertEqual(args[0], "pyside6-rcc")
             self.assertEqual(args[-1], str(qrc_file))
 
     def test_clean_artifacts(self):
@@ -166,25 +156,15 @@ class TestCore(unittest.TestCase):
             self.assertIn("description=Cool description", content)
 
     @patch("qgis_manager.core.get_plugin_metadata")
-    @patch("qgis_manager.core.get_source_files")
-    @patch("shutil.copy2")
-    @patch("shutil.rmtree")
+    @patch("qgis_manager.core.sync_directory")
     def test_deploy_plugin_with_callback(
-        self, mock_rmtree, mock_copy2, mock_get_source, mock_get_meta
+        self, mock_sync, mock_get_meta
     ):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
             # Mocks
             mock_metadata = {"name": "Test Plugin", "slug": "test_plugin"}
             mock_get_meta.return_value = mock_metadata
-
-            def mock_gen(_):
-                file1 = MagicMock(spec=Path)
-                file1.name = "f1.py"
-                file1.is_dir.return_value = False
-                yield file1
-
-            mock_get_source.side_effect = mock_gen
 
             dest_dir = tmp_path / "plugins"
             dest_dir.mkdir()
@@ -198,7 +178,7 @@ class TestCore(unittest.TestCase):
             deploy_plugin(tmp_path, dest_dir=dest_dir, callback=callback)
 
             # Verify
-            self.assertEqual(callback_calls, [1, 1])
+            self.assertEqual(callback_calls, [100])
 
     @patch("subprocess.Popen")
     def test_compile_docs(self, mock_popen):

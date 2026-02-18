@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from src.qgis_manager.core import rotate_backups, sync_directory
-from src.qgis_manager.ignore import PathFilter
+from src.qgis_manager.ignore import IgnoreMatcher
 
 
 class TestDeploymentOptimization(unittest.TestCase):
@@ -16,8 +16,8 @@ class TestDeploymentOptimization(unittest.TestCase):
         self.src.mkdir()
         self.dst.mkdir()
 
-        # Empty PathFilter (don't ignore anything for testing sync)
-        self.matcher = PathFilter(self.src, [])
+        # Empty IgnoreMatcher (don't ignore anything for testing sync)
+        self.matcher = IgnoreMatcher(self.src, [])
 
     def tearDown(self):
         shutil.rmtree(self.test_dir)

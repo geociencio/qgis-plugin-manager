@@ -30,7 +30,7 @@ from pathlib import Path
 
 # tomllib is 3.11+, fallback to a simple parser for 3.10
 if sys.version_info >= (3, 11):
-    pass
+    import tomllib
 else:
     # Minimal TOML parser for the specific 'ignore' list in pyproject.toml
     # This avoids adding 'tomli' as a dependency.
@@ -40,7 +40,18 @@ else:
             content = f.read().decode("utf-8")
             import re
 
-            # Very basic extraction of tool.qgis-manager.ignore list
+            # Try [tool.qgis-manager.ignore] section first
+            match = re.search(
+                r"\[tool\.qgis-manager\.ignore\]\s*ignore\s*=\s*\[(.*?)\]",
+                content,
+                re.DOTALL,
+            )
+            if match:
+                items_raw = match.group(1)
+                items = re.findall(r'"(.*?)"', items_raw)
+                return {"tool": {"qgis-manager": {"ignore": items}}}
+
+            # Fallback to [tool.qgis-manager] ignore key
             match = re.search(
                 r"\[tool\.qgis-manager\]\s*ignore\s*=\s*\[(.*?)\]",
                 content,
@@ -73,31 +84,35 @@ def load_ignore_patterns(project_root: Path, include_dev: bool = False):
         from .constants import DEV_DIRECTORIES
 
         for d in DEV_DIRECTORIES:
-            # Standard library fnmatch needs proper directory handling
-            patterns.append(str(d))
-            patterns.append(f"{d}/**/*")
+            # Root-level only dev dirs
+            patterns.append(f"/{d}")
+            patterns.append(f"/{d}/**/*")
 
-    # 1. Try to load from .gitignore
-    gitignore = project_root / ".gitignore"
-    if gitignore.exists():
-        try:
-            with open(gitignore, encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if line and not line.startswith("#"):
-                        patterns.append(line)
-        except Exception:
-            pass
+    # 1. Try to load from .gitignore or .qgisignore
+    for ignore_name in [".gitignore", ".qgisignore"]:
+        ignore_file = project_root / ignore_name
+        if ignore_file.exists():
+            try:
+                with open(ignore_file, encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith("#"):
+                            patterns.append(line)
+            except Exception:
+                pass
 
     # 2. Try to load from pyproject.toml
     pyproject = project_root / "pyproject.toml"
     if pyproject.exists():
         try:
             with open(pyproject, "rb") as f:
-                data = TomlLoaderShim.load(f)
-                custom_ignores = (
-                    data.get("tool", {}).get("qgis-manager", {}).get("ignore", [])
-                )
+                if sys.version_info >= (3, 11):
+                    data = tomllib.load(f)
+                else:
+                    data = TomlLoaderShim.load(f)
+
+                tool_config = data.get("tool", {}).get("qgis-manager", {})
+                custom_ignores = tool_config.get("ignore", [])
                 if isinstance(custom_ignores, list):
                     patterns.extend(custom_ignores)
         except Exception:
@@ -106,12 +121,12 @@ def load_ignore_patterns(project_root: Path, include_dev: bool = False):
     return patterns
 
 
-class PathFilter:
+class IgnoreMatcher:
     """Helper class to filter paths against ignore patterns using standard fnmatch."""
 
-    def __init__(self, project_root: Path, patterns: list[str]):
+    def __init__(self, project_root: Path, include_dev: bool = False):
         self.project_root = project_root
-        self.patterns = patterns
+        self.patterns = load_ignore_patterns(project_root, include_dev)
 
     def should_exclude(self, path: Path) -> bool:
         """Determines if a path should be excluded using fnmatch."""
@@ -120,34 +135,23 @@ class PathFilter:
         except ValueError:
             return False
 
-        path_str = str(rel_path)
+        path_str = str(rel_path).replace("\\", "/")
         parts = rel_path.parts
 
         for pattern in self.patterns:
-            # Normalize pattern for matching
             p = pattern.rstrip("/")
-            # is_dir_pattern = pattern.endswith("/")
-            is_root_relative = pattern.startswith("/")
-
+            is_root_relative = p.startswith("/")
             if is_root_relative:
                 p = p[1:]
 
-            # 1. Exact match or prefix match for directories
             if is_root_relative:
-                # Must match from the root
-                if (
-                    fnmatch.fnmatch(path_str, p)
-                    or fnmatch.fnmatch(path_str, f"{p}/*")
-                    or path_str.startswith(f"{p}/")
-                ):
+                if fnmatch.fnmatch(path_str, p) or path_str.startswith(p + "/"):
                     return True
             else:
-                # Match anywhere
-                if (
-                    fnmatch.fnmatch(path_str, f"*{p}")
-                    or fnmatch.fnmatch(path_str, f"*{p}/*")
-                    or any(fnmatch.fnmatch(part, p) for part in parts)
-                ):
+                # Global matching (matches any part of the path or the whole path)
+                if any(fnmatch.fnmatch(part, p) for part in parts):
+                    return True
+                if fnmatch.fnmatch(path_str, p) or fnmatch.fnmatch(path_str, f"*/{p}"):
                     return True
 
         return False

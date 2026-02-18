@@ -85,6 +85,7 @@ def run_hook(
     env = os.environ.copy()
     env["QGIS_PROJECT_ROOT"] = str(project_root)
 
+    full_cmd: str | list[str]
     try:
         if is_python:
             # Run via current python interpreter

@@ -128,8 +128,8 @@ def validate_official_compliance(project_root: Path) -> ValidationResult:
     Returns:
         ValidationResult with compliance status
     """
-    errors = []
-    warnings = []
+    errors: list[str] = []
+    warnings: list[str] = []
 
     # 1. Prohibited binary extensions
     prohibited = [".so", ".dll", ".exe", ".dylib", ".pyd", ".pyc", ".pyo"]
@@ -175,8 +175,8 @@ def validate_project_structure(
     Returns:
         ValidationResult with validation status and messages
     """
-    errors = []
-    warnings = []
+    errors: list[str] = []
+    warnings: list[str] = []
 
     # 1. Essential files
     init_py = project_root / "__init__.py"
@@ -215,8 +215,8 @@ def validate_metadata(metadata: dict[str, Any]) -> ValidationResult:
     Returns:
         ValidationResult with validation status and messages
     """
-    errors = []
-    warnings = []
+    errors: list[str] = []
+    warnings: list[str] = []
 
     # Check required fields
     required = get_required_fields()

@@ -21,7 +21,9 @@ def get_dependencies(project_root: Path) -> list[str]:
         with open(pyproject_path, "rb") as f:
             data = tomllib.load(f)
             # We look for [tool.qgis-manager.dependencies]
-            return data.get("tool", {}).get("qgis-manager", {}).get("dependencies", [])
+            tool_config = data.get("tool", {}).get("qgis-manager", {})
+            deps = tool_config.get("dependencies", [])
+            return [str(d) for d in deps] if isinstance(deps, list) else []
     except Exception as e:
         logger.error(f"Error reading dependencies from pyproject.toml: {e}")
         return []

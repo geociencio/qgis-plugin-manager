@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from qgis_manager.discovery import IgnoreMatcher
+from qgis_manager.ignore import IgnoreMatcher
 
 
 class TestIgnoreMatcher(unittest.TestCase):

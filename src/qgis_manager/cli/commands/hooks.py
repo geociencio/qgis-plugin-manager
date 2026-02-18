@@ -90,10 +90,10 @@ class HooksCommand(BaseCommand):
                         py_hooks.append(h)
 
         # 2. Check pyproject.toml
-        from ...config import load_project_config
+        from ...config import Settings, load_project_config
 
-        config = load_project_config(root, {})
-        toml_hooks = config.get("hooks", {})
+        config = load_project_config(root, Settings())
+        toml_hooks = config.hooks
 
         if not py_hooks and not toml_hooks:
             click.echo("  (No hooks found)")

@@ -64,14 +64,14 @@ class PackageCommand(BaseCommand):
 
             # 2. Compliance Check (Optional)
             if getattr(args, "repo_check", False):
+                from ...discovery import get_plugin_metadata as fetch_metadata
                 from ...validation import (
-                    get_plugin_metadata,
                     validate_metadata,
                     validate_official_compliance,
                 )
 
                 click.echo("🔍 Running official repository compliance check...")
-                metadata = get_plugin_metadata(root)
+                metadata = fetch_metadata(root)
                 meta_res = validate_metadata(metadata)
                 repo_res = validate_official_compliance(root)
 

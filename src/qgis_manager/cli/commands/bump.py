@@ -123,7 +123,8 @@ class BumpCommand(BaseCommand):
         try:
             with open(pyproj, "rb") as f:
                 data = tomllib.load(f)
-                return data.get("project", {}).get("version")
+                version = data.get("project", {}).get("version")
+                return str(version) if version else None
         except Exception:
             return None
 

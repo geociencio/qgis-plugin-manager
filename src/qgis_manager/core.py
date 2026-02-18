@@ -46,7 +46,7 @@ from pathlib import Path
 from typing import Any
 
 from .discovery import get_plugin_metadata, get_source_files
-from .ignore import PathFilter, load_ignore_patterns
+from .ignore import IgnoreMatcher
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +95,7 @@ def rotate_backups(parent_dir: Path, slug: str, limit: int):
             shutil.rmtree(old_bak)
 
 
-def sync_directory(src: Path, dst: Path, matcher: PathFilter):
+def sync_directory(src: Path, dst: Path, matcher: IgnoreMatcher):
     """Sync source to destination only copying changed files (rsync-like)."""
     if not dst.exists():
         dst.mkdir(parents=True)
@@ -104,6 +104,16 @@ def sync_directory(src: Path, dst: Path, matcher: PathFilter):
     for item in src.iterdir():
         if matcher.should_exclude(item):
             continue
+
+        # Safeguard: Do not copy the destination directory into itself
+        # This prevents infinite recursion if deploying into a subfolder of the project
+        try:
+            is_same = item.resolve() == dst.resolve()
+            is_nested = dst.resolve().is_relative_to(item.resolve())
+            if is_same or is_nested:
+                continue
+        except Exception:
+            pass
 
         dest_item = dst / item.name
         if item.is_dir():
@@ -128,7 +138,6 @@ def sync_directory(src: Path, dst: Path, matcher: PathFilter):
     for item in dst.iterdir():
         source_item = src / item.name
         # If it doesn't exist in source AND is not ignored/dev file
-        # (Though matcher is based on project_root, so relative paths matter)
         if not source_item.exists() and not matcher.should_exclude(source_item):
             if item.is_dir():
                 shutil.rmtree(item)
@@ -167,11 +176,19 @@ def deploy_plugin(
     # Deployment using smart sync
     target_path.mkdir(parents=True, exist_ok=True)
 
-    spec = load_ignore_patterns(project_root, include_dev=False)
-    matcher = PathFilter(project_root, spec)
+    # Load ignore patterns
+    matcher = IgnoreMatcher(project_root, include_dev=False)
 
-    # Use a set for callback progress if we use iterative sync
-    # For now, we'll keep it simple and sync everything.
+    # Automatically ignore the target_path if it's inside project_root
+    # to avoid infinite recursion
+    try:
+        if target_path.resolve().is_relative_to(project_root.resolve()):
+            rel_target = target_path.resolve().relative_to(project_root.resolve())
+            matcher.patterns.append(str(rel_target))
+            matcher.patterns.append(f"/{rel_target}")
+    except (ValueError, Exception):
+        pass
+
     logger.info(f"🚀 Syncing files to {target_path}")
     sync_directory(project_root, target_path, matcher)
 
@@ -260,13 +277,9 @@ def patch_resource_file(py_file: Path) -> bool:
 
     try:
         content = py_file.read_text(encoding="utf-8")
-        # Pattern often found: 'import resources_rc' or similar
-        # We look for imports of other resource files that might have been compiled
-        # In a typical QGIS plugin, we might have multiple .qrc files.
         import re
 
         # Fix 'import <name>_rc' to 'from . import <name>_rc'
-        # This is a common issue when multiple resource files are used.
         patched_content = re.sub(
             r"^import (\w+_rc)", r"from . import \1", content, flags=re.MULTILINE
         )
@@ -396,8 +409,7 @@ def create_plugin_package(
 
     logger.info(f"📦 Creating package: {zip_filename}")
 
-    spec = load_ignore_patterns(project_root, include_dev=include_dev)
-    matcher = PathFilter(project_root, spec)
+    matcher = IgnoreMatcher(project_root, include_dev=include_dev)
 
     # Collect items for ZIP
     items_to_zip = []
@@ -450,14 +462,6 @@ def init_plugin_project(
 ) -> None:
     """
     Initialize a new QGIS plugin project with scaffolding.
-
-    Args:
-        path: Directory where the project will be created
-        name: Name of the plugin
-        author: Author name
-        email: Author email
-        description: Short description of the plugin
-        template: Template name to use (default, processing, dockwidget)
     """
     from .discovery import slugify
 
@@ -473,42 +477,10 @@ def init_plugin_project(
         f"(Template: {template})"
     )
 
-    # Template data
     class_name = name.replace(" ", "")
-    context = {
-        "name": name,
-        "author": author,
-        "email": email,
-        "description": description,
-        "slug": slug,
-        "class_name": class_name,
-    }
-
-    template_base = Path(__file__).parent / "templates" / template
-    if not template_base.exists():
-        # Fallback to default if template not found
-        logger.warning(f"Template '{template}' not found, falling back to 'default'")
-        template_base = Path(__file__).parent / "templates" / "default"
-
-    # Minimal implementation: we still handle some files manually if template
-    # folder is empty but the goal is to favor the folder.
-
-    def render_template(content: str, ctx: dict) -> str:
-        for k, v in ctx.items():
-            content = content.replace(f"{{{{ {k} }}}}", str(v))
-        return content
 
     # 1. metadata.txt
-    meta_tmpl = template_base / "metadata.txt.tmpl"
-    if meta_tmpl.exists():
-        with open(meta_tmpl) as f:
-            content = render_template(f.read(), context)
-        with open(project_dir / "metadata.txt", "w") as f:
-            f.write(content)
-        logger.debug("  ✅ Created metadata.txt from template")
-    else:
-        # Fallback to hardcoded if no template
-        metadata_content = f"""; QGIS Plugin Metadata
+    metadata_content = f"""; QGIS Plugin Metadata
 [general]
 name={name}
 description={description}
@@ -526,45 +498,24 @@ icon=icon.png
 experimental=False
 deprecated=False
 """
-        with open(project_dir / "metadata.txt", "w") as f:
-            f.write(metadata_content)
-        logger.debug("  ✅ Created metadata.txt (hardcoded)")
+    with open(project_dir / "metadata.txt", "w") as f:
+        f.write(metadata_content)
 
     # 2. __init__.py
-    init_tmpl = template_base / "__init__.py.tmpl"
-    if init_tmpl.exists():
-        with open(init_tmpl) as f:
-            content = render_template(f.read(), context)
-        with open(project_dir / "__init__.py", "w") as f:
-            f.write(content)
-        logger.debug("  ✅ Created __init__.py from template")
-    else:
-        # Fallback to hardcoded if no template
-        init_py_content = f"""\"\"\"
+    init_py_content = f"""\"\"\"
 {name} initialization.
 \"\"\"
 
 def classFactory(iface):
     \"\"\"Load the plugin class.\"\"\"
-    from .{slug} import {name.replace(" ", "")}
-    return {name.replace(" ", "")}(iface)
+    from .{slug} import {class_name}
+    return {class_name}(iface)
 """
-        with open(project_dir / "__init__.py", "w") as f:
-            f.write(init_py_content)
-        logger.debug("  ✅ Created __init__.py (hardcoded)")
+    with open(project_dir / "__init__.py", "w") as f:
+        f.write(init_py_content)
 
     # 3. Main plugin file
-    plugin_tmpl = template_base / "plugin.py.tmpl"
-    if plugin_tmpl.exists():
-        with open(plugin_tmpl) as f:
-            content = render_template(f.read(), context)
-        # Use slug as filename for the main login
-        with open(project_dir / f"{slug}.py", "w") as f:
-            f.write(content)
-        logger.debug(f"  ✅ Created {slug}.py from template")
-    else:
-        # Fallback to hardcoded if no template
-        main_py_content = f"""\"\"\"
+    main_py_content = f"""\"\"\"
 Main plugin class for {name}.
 \"\"\"
 
@@ -583,9 +534,8 @@ class {class_name}:
         \"\"\"Unload the plugin.\"\"\"
         pass
 """
-        with open(project_dir / f"{slug}.py", "w") as f:
-            f.write(main_py_content)
-        logger.debug(f"  ✅ Created {slug}.py (hardcoded)")
+    with open(project_dir / f"{slug}.py", "w") as f:
+        f.write(main_py_content)
 
     # 4. Create empty resources.qrc
     qrc_content = f"""<RCC>
@@ -595,6 +545,5 @@ class {class_name}:
 """
     with open(project_dir / "resources.qrc", "w") as f:
         f.write(qrc_content)
-    logger.debug("  ✅ Created resources.qrc")
 
     logger.info(f"✨ Project {name} initialized successfully.")
