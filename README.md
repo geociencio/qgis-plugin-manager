@@ -2,122 +2,130 @@
 
 [![CI](https://github.com/geociencio/qgis-plugin-manager/actions/workflows/main.yml/badge.svg)](https://github.com/geociencio/qgis-plugin-manager/actions/workflows/main.yml)
 [![License: GPL v2+](https://img.shields.io/badge/License-GPL%20v2%2B-blue.svg)](LICENSE)
-[![Code Quality](https://img.shields.io/badge/Code%20Quality-66.6%2F100-brightgreen)](analysis_results/PROJECT_SUMMARY.md)
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Code Quality](https://img.shields.io/badge/Code%20Quality-79.4%2F100-brightgreen)](analysis_results/PROJECT_SUMMARY.md)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
-A professional CLI for managing QGIS plugin development, deployment, and packaging. Modernized for Python 3.10+ and `uv`.
+**QGIS Plugin Manager** is a professional, high-performance CLI tool designed to manage the full lifecycle of QGIS plugins. From local development and smart synchronization to official repository compliance and automated versioning.
 
-> [!IMPORTANT]
-> **This is a CLI tool, not a QGIS plugin**
->
-> This project is a **command-line tool** for managing QGIS plugin development. It should be installed as a Python package using `uv` or `pip`, **not** as a plugin in QGIS.
->
-> - ✅ Use it to develop and deploy QGIS plugins
-> - ❌ Do NOT install it as a plugin in QGIS
+---
 
-## 🚀 Features
+## 🥇 The "Manager" Difference
 
-- **Dynamic Deployment**: Automatically detects your QGIS profile directory (Linux, Windows, macOS).
-- **Smart Discovery**: Reads `metadata.txt` to identify your plugin and automatically selects source files.
-- **Safety First**: Automatically creates timestamped backups of your plugin folder before every deployment.
-- **Qt & Documentation Integration**: Compiles `.qrc` resources, `.ts` translations, and Sphinx documentation automatically.
-- **Clean Workflow**: Removes `__pycache__` and artifacts recursively.
-- **Interactive Mode**: Option for step-by-step confirmation of critical steps.
-- **Customizable Hooks**: Support for shell commands before and after deployment.
-- **Persistent Config**: Global and project-level settings management.
+Unlike traditional tools like `pb_tool` or legacy Makefiles, `qgis-plugin-manager` is built for modern engineering workflows.
+
+### Why choose us?
+- **Smart Sync (rsync-like)**: No more "delete and copy". We only update modified files, drastically reducing deployment time and disk wear.
+- **Native Python Hooks**: Write your automation in pure Python. Hooks receive a rich context (metadata, paths, profiles) for advanced workflows.
+- **official Repository Compliance**: Built-in checks for prohibited binaries, mandatory files, and single-root folder structure.
+- **TOML-Native**: Pure PEP 621 compliance via `pyproject.toml`. No more legacy `.cfg` files.
+
+---
 
 ## 📦 Installation
 
-Install system-wide as a tool using `uv`:
-
+Install system-wide using `uv` (recommended):
 ```bash
 uv tool install git+https://github.com/geociencio/qgis-plugin-manager.git
 ```
 
-Or add it to your project's development dependencies:
-
+Or add as a dev-dependency:
 ```bash
-uv add --group dev qgis-plugin-manager @ git+https://github.com/geociencio/qgis-plugin-manager.git
+uv add --group dev qgis-plugin-manager
 ```
 
-## 🛠️ Usage
+---
 
-From your plugin project root:
+## 🛠️ Command Reference
 
+### 1. Project Initialization
+Scaffold a professional plugin project.
 ```bash
-# Initialize a new plugin project scaffolding
-qgis-manage init "My Plugin" --author "Juan" --email "juan@example.com" --template processing
+# Create a processing plugin
+qgis-manage init "My Plugin" --author "Tester" --email "test@test.com" --template processing
+```
 
-# Install external dependencies to local libs/ folder
-qgis-manage install-deps
-
-# Deploy to QGIS profile (with automatic backup and compilation)
+### 2. Development & Deployment
+Speed up your local iteration.
+```bash
+# Smart deploy to default QGIS profile
 qgis-manage deploy
 
-# Deploy to a specific profile
-qgis-manage deploy --profile production
+# Deploy to a specific profile with backup rotation
+qgis-manage deploy --profile production --max-backups 5
 
-# Deploy with interactive step-by-step confirmation
-qgis-manage deploy --interactive
+# Purge old backups to save space
+qgis-manage deploy --purge-backups
+```
 
-# Create distributable ZIP package (automatically installs dependencies)
+### 3. Advanced Hooks (`hooks`)
+Manage and test your native Python hooks.
+```bash
+# List all hooks from pyproject.toml and plugin_hooks.py
+qgis-manage hooks list
+
+# Initialize a standard plugin_hooks.py template
+qgis-manage hooks init
+
+# Test a hook in isolation without deploying
+qgis-manage hooks test pre_deploy
+```
+
+### 4. Automated Versioning (`bump`)
+Keep your versions in sync across all project files.
+```bash
+# Increment version (Patch, Minor, Major)
+qgis-manage bump patch   # 0.1.0 -> 0.1.1
+qgis-manage bump minor   # 0.1.1 -> 0.2.0
+
+# Sync metadata.txt from pyproject.toml source of truth
+qgis-manage bump sync
+```
+
+### 5. Packaging & Compliance
+Prepare for the Official QGIS Plugin Repository.
+```bash
+# Create a "Repo-Ready" ZIP package
 qgis-manage package
 
-# Create package without dev files
-qgis-manage package --output ./releases
+# Package with strict compliance check (fails if binaries or errors found)
+qgis-manage package --repo-check --sync-version
+```
+
+### 6. Maintenance & Quality
+```bash
+# Run deep structural validation
+qgis-manage validate --strict --repo
 
 # Run QGIS Plugin Analyzer on the project
 qgis-manage analyze
 
-# Validate metadata.txt compliance
-qgis-manage validate --strict
-
-# Compile all resources, translations, and documentation
-qgis-manage compile
-
-# Compile only documentation
-qgis-manage compile --type docs
-
-# Clean Python artifacts and build files
+# Clean Python artifacts (__pycache__) and build files
 qgis-manage clean
 ```
 
-## ⚙️ Configuration
+---
 
-### Robust Exclusions (`.qgisignore`)
-You can control which files are excluded from deployment and packaging by creating a `.qgisignore` file in your project root. It supports gitignore-style patterns:
+## ⚙️ Configuration (`pyproject.toml`)
 
-```text
-# Exclude CSV data files
-data/*.csv
-
-# Exclude specific folders
-temp/
-tests/data/
-
-# Recursive match (anywhere in the project)
-debug.log
-```
-
-### Dependency Management
-Define your plugin's external Python dependencies in `pyproject.toml`:
+Leverage YOUR existing configuration. No new files needed.
 
 ```toml
 [tool.qgis-manager]
-dependencies = [
-    "requests",
-    "six",
-    "pandas"
+max_backups = 5  # Control backup rotation
+
+[tool.qgis-manager.ignore]
+ignore = [
+    "data/*.csv",
+    "tests/temp/*"
 ]
+
+[tool.qgis-manager.hooks]
+post_deploy = "python scripts/notify.py"
 ```
-Running `qgis-manage install-deps` will install these into a local `libs/` folder. Remember to add this folder to `sys.path` in your plugin's `__init__.py`.
 
-## 📖 Documentation
+## 🌍 Internationalization (i18n)
 
-- [CHANGELOG.md](CHANGELOG.md): History of changes and releases.
-- [RULES.md](RULES.md): Coding standards and project rules.
+Automated compilation and management of `.ts` and `.qm` files is handled by `qgis-manage compile`.
 
 ## 📄 License
-
 GPL-2.0-or-later
