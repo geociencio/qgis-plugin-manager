@@ -78,6 +78,17 @@ def get_plugin_metadata(project_root: Path) -> dict:
     return metadata
 
 
+def save_plugin_metadata(project_root: Path, metadata: dict) -> None:
+    """Save metadata dictionary back to metadata.txt."""
+    config = configparser.ConfigParser()
+    # Ensure we only save relevant fields to [general]
+    general_data = {k: v for k, v in metadata.items() if k != "slug"}
+    config["general"] = general_data
+
+    with open(project_root / "metadata.txt", "w", encoding="utf-8") as f:
+        config.write(f, space_around_delimiters=False)
+
+
 def get_source_files(project_root: Path, include_dev: bool = False):
     """Dynamically discover source files and directories to copy."""
     spec = load_ignore_patterns(project_root, include_dev=include_dev)

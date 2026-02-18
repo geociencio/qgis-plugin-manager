@@ -19,9 +19,11 @@ class CLIApp:
     def _discover_commands(self) -> dict[str, BaseCommand]:
         """Auto-discover and instantiate all command classes."""
         from .commands.analyze import AnalyzeCommand
+        from .commands.bump import BumpCommand
         from .commands.clean import CleanCommand
         from .commands.compile import CompileCommand
         from .commands.deploy import DeployCommand
+        from .commands.hooks import HooksCommand
         from .commands.init import InitCommand
         from .commands.install_deps import InstallDepsCommand
         from .commands.package import PackageCommand
@@ -36,6 +38,8 @@ class CLIApp:
             AnalyzeCommand,
             ValidateCommand,
             InstallDepsCommand,
+            HooksCommand,
+            BumpCommand,
         ]
         return {cmd().name: cmd() for cmd in command_classes}
 
