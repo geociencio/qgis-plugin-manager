@@ -1,11 +1,12 @@
 # QGIS Plugin Manager
 
-[![CI](https://github.com/geociencio/qgis-plugin-manager/actions/workflows/main.yml/badge.svg)](https://github.com/geociencio/qgis-plugin-manager/actions/workflows/main.yml)
+[![PyPI version](https://img.shields.io/pypi/v/qgis-manage.svg)](https://pypi.org/project/qgis-manage/)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/qgis-manage.svg)](https://pypi.org/project/qgis-manage/)
+[![Python versions](https://img.shields.io/pypi/pyversions/qgis-manage.svg)](https://pypi.org/project/qgis-manage/)
 [![License: GPL v2+](https://img.shields.io/badge/License-GPL%20v2%2B-blue.svg)](LICENSE)
 [![Code Quality](https://img.shields.io/badge/Code%20Quality-79.4%2F100-brightgreen)](analysis_results/PROJECT_SUMMARY.md)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
-**QGIS Plugin Manager** is a professional, high-performance CLI tool designed to manage the full lifecycle of QGIS plugins. From local development and smart synchronization to official repository compliance and automated versioning.
+**QGIS Plugin Manager** is a professional, high-performance CLI tool designed to manage the full lifecycle of QGIS plugins. From local development and smart synchronization to official repository compliance and automated versioning. Now available on **PyPI** for easy integration.
 
 ---
 
@@ -25,12 +26,17 @@ Unlike traditional tools like `pb_tool` or legacy Makefiles, `qgis-plugin-manage
 
 Install system-wide using `uv` (recommended):
 ```bash
-uv tool install git+https://github.com/geociencio/qgis-plugin-manager.git
+uv tool install qgis-manage
 ```
 
 Or add as a dev-dependency:
 ```bash
-uv add --group dev qgis-plugin-manager
+uv add --group dev qgis-manage
+```
+
+Or using `pip`:
+```bash
+pip install qgis-manage
 ```
 
 ---
