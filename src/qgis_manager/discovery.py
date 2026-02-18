@@ -95,7 +95,7 @@ def get_plugin_metadata(project_root: Path) -> dict[str, Any]:
         }
 
     config = configparser.ConfigParser(interpolation=None)
-    config.optionxform = str  # Preserve case
+    config.optionxform = str  # type: ignore[method-assign, assignment] # Preserve case
     try:
         config.read(metadata_path, encoding="utf-8")
     except UnicodeDecodeError:
@@ -133,7 +133,7 @@ def save_plugin_metadata(project_root: Path, metadata: dict[str, Any]) -> None:
         Exception: If saving the file fails.
     """
     config = configparser.ConfigParser(interpolation=None)
-    config.optionxform = str  # Preserve case
+    config.optionxform = str  # type: ignore[method-assign, assignment] # Preserve case
     # Ensure we only save relevant fields to [general]
     general_data = {k: v for k, v in metadata.items() if k != "slug"}
     config["general"] = general_data

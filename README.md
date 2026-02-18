@@ -8,7 +8,7 @@
 [![Checked with mypy](https://img.shields.io/badge/mypy-checked-blue)](http://mypy-lang.org/)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/geociencio/qgis-plugin-manager/graphs/commit-activity)
 [![License: GPL v2+](https://img.shields.io/badge/License-GPL%20v2%2B-blue.svg)](LICENSE)
-[![Code Quality](https://img.shields.io/badge/Code%20Quality-79.4%2F100-brightgreen)](analysis_results/PROJECT_SUMMARY.md)
+[![Code Quality](https://img.shields.io/badge/Code%20Quality-77.3%2F100-yellow)](analysis_results/PROJECT_SUMMARY.md)
 [![GitHub stars](https://img.shields.io/github/stars/geociencio/qgis-plugin-manager.svg?style=social&label=Star)](https://github.com/geociencio/qgis-plugin-manager/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/geociencio/qgis-plugin-manager.svg?style=social&label=Issue)](https://github.com/geociencio/qgis-plugin-manager/issues)
 

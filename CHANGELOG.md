@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.6.1] - 2026-02-18
+## [0.6.2] - 2026-02-18
 
 ### Added
 - **Advanced Hooks System**: New `hooks` command to manage native Python hooks. Features `hooks list`, `hooks init` (template generation), and `hooks test` (isolated execution with mock context).
@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Structural Validation Deepening**: Enhanced the `validate` command with strict official repository compliance checks.
 
 ### Fixed
+- **Resilient Metadata Parsing**: Fixed `ConfigParser` issue that lowercased CamelCase keys and crashed on `%` symbol in `metadata.txt`.
+- **Robust Persistence**: Improved `bump` synchronization and `save_plugin_metadata` resilience.
 - **Type Safety**: Resolved 10+ Mypy type safety errors across the core codebase.
 - **Import Resolution**: Fixed relative import issues and cleaned up redundant imports.
 - **Ignore Logic**: Fixed recursive exclusion bugs in complex directory structures.
