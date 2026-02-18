@@ -1,111 +1,93 @@
 ---
-description: Proceso unificado de liberación (QGIS Release Flow) basado en la guía de IA
+description: Proceso unificado de liberación para herramientas CLI (PyPI Release Flow)
 agent: QA Engineer
-skills: [release-management, qa-docker, commit-standards]
+skills: [release-management, commit-standards, coding-standards]
 validation: |
-  - Verificar que 361 tests pasan en Docker
-  - Confirmar que qgis-analyzer score > 25/100
-  - Validar que versiones están sincronizadas en 3 archivos
-  - Verificar que ZIP se generó correctamente
+  - Verificar que todos los tests pasan localmente (uv run pytest)
+  - Confirmar que ruff y mypy no reportan errores
+  - Validar que las versiones están sincronizadas vía `qgis-manage bump sync`
+  - Verificar que el build de PyPI (Wheel/Sdist) es correcto
 ---
 
-Sigue este flujo de 5 fases para realizar una liberación oficial del plugin SecInterp.
+Sigue este flujo de 5 fases para realizar una liberación oficial de la herramienta `qgis-manage`.
 
 ### Fase 1: Calidad y Preparación
 
-🤖 **Agent Action**: Usar skill **release-management** para validar checklist completo de pre-release.
+🤖 **Agent Action**: Validar checklist completo de pre-release.
 
 1. **Analizar Calidad**:
    // turbo
    ```bash
-   uv run qgis-analyzer . -o analysis_results
+   uv run ruff check . && uv run mypy src/
    ```
 
-   🤖 **Agent Action**: Verificar que:
-   - Overall Plugin Score > 25/100
-   - No hay métodos con CC > 20
-   - No hay violaciones críticas de QGIS compliance
+   🤖 **Agent Action**: Verificar que no hay errores de linting ni de tipado estático (Type Hints).
 
-2. **Actualizar Badges**: Actualizar `Code Quality` y `QGIS Compliance` en `README.md` según los resultados.
+2. **Actualizar Badges**: Asegurar que los badges de `Code Quality` y `PyPI` en `README.md` reflejen el estado actual.
 
 ### Fase 2: Versionamiento y Documentación
 
-🤖 **Agent Action**: Usar skill **release-management** para sincronizar versiones automáticamente.
+🤖 **Agent Action**: Usar `qgis-manage bump` para un versionado semántico impecable.
 
 1. **Sincronizar Versión**:
-   - Actualizar `version` y `changelog` en `metadata.txt`.
-   - Actualizar `version` en `pyproject.toml`.
-   - Actualizar el badge de versión en `README.md`.
-
-   🤖 **Agent Action**: Validar que las 3 versiones coinciden exactamente.
-
-2. **Changelog Técnico**: Mover `[Unreleased]` a la nueva versión en `docs/CHANGELOG.md`.
-
-3. **Notas de Lanzamiento**:
    // turbo
    ```bash
-   sed -e "s/{version}/X.Y.Z/g" -e "s/{date}/$(date +%F)/g" .github/release_template.md > /tmp/release_notes.md
+   # Incrementar versión (elegir: patch, minor o major)
+   uv run qgis-manage bump patch
+   # Sincronizar metadata.txt (si se mantiene por compatibilidad)
+   uv run qgis-manage bump sync
    ```
 
-   🤖 **Agent Action**: Generar release notes estructuradas siguiendo template de skill **release-management**.
+   🤖 **Agent Action**: Validar que `pyproject.toml` y `metadata.txt` tienen la misma versión.
 
-### Fase 3: Verificación
+2. **Changelog**: Actualizar `docs/releases/RELEASE_NOTES_vX.Y.Z.md` y el `CHANGELOG.md` principal.
 
-🤖 **Agent Action**: Usar skill **qa-docker** para validar tests y skill **commit-standards** para linting.
+### Fase 3: Verificación Técnica
 
-1. **Linting & Formatting**:
+1. **Linting Final**:
    // turbo
    ```bash
-   uv run ruff check --fix . && uv run ruff format . && uv run black .
+   uv run ruff check --fix . && uv run black .
    ```
 2. **Tests**:
    // turbo
    ```bash
-   make docker-test
+   uv run pytest
    ```
-   (361+ tests deben pasar).
 
-   🤖 **Agent Action**: Alertar si algún test falla o si hay regresión en cobertura.
+   🤖 **Agent Action**: Alertar si algún test falla o si hay regresión en la funcionalidad core.
 
 ### Fase 4: Git y Tagging
 
-🤖 **Agent Action**: Usar skill **commit-standards** para mensaje de commit.
-
 1. **Commit de Preparación**:
    ```bash
-   git add metadata.txt pyproject.toml docs/CHANGELOG.md README.md docs/releases/RELEASE_NOTES_vX.Y.Z.md
+   git add pyproject.toml README.md docs/
    git commit -m "chore(release): prepare vX.Y.Z"
    ```
 
 2. **Tag**: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`
 3. **Push**: `git push origin main && git push origin vX.Y.Z`
 
-### Fase 5: Empaquetado y Distribución
+### Fase 5: Compilación y Distribución (PyPI)
 
-🤖 **Agent Action**: Usar skill **release-management** para validar artifacts y proceso de publicación.
-
-1. **Build ZIP**:
+1. **Build**:
    // turbo
    ```bash
-   make package VERSION=main
+   uv build
    ```
-   (Verificar en `dist/`).
+   (Verificar archivos `.whl` y `.tar.gz` en `dist/`).
 
-   🤖 **Agent Action**: Validar contenido del ZIP (metadata, sin basura técnica).
-
-2. **GitHub Release**:
+2. **Publicación**:
    ```bash
-   gh release create vX.Y.Z --title "vX.Y.Z" --notes-file docs/releases/RELEASE_NOTES_vX.Y.Z.md dist/*.zip dist/*.sha256 --draft
+   uv publish
    ```
 
-3. **Portal QGIS**: Subir el ZIP a [plugins.qgis.org](https://plugins.qgis.org/).
-
-   🤖 **Agent Action**: Recordar validar post-publicación:
-   - Plugin aparece en QGIS Plugin Manager
-   - Versión es correcta
-   - Changelog es visible
+3. **GitHub Release**:
+   ```bash
+   gh release create vX.Y.Z --title "vX.Y.Z" --notes-file docs/releases/RELEASE_NOTES_vX.Y.Z.md dist/* --draft
+   ```
 
 ## Resultado Esperado
-- Versión oficial publicada en el repositorio de QGIS y GitHub.
-- Documentación y tags de Git sincronizados.
-- Plugin validado técnicamente con métricas visibles.
+- Versión oficial disponible en PyPI (`pip install qgis-manage`).
+- Tag de Git y Release de GitHub creados.
+- Documentación técnica sincronizada con la nueva versión.
