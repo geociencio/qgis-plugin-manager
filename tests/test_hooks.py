@@ -13,7 +13,7 @@ class TestHooks(unittest.TestCase):
             hook_name = "test-hook"
             # Use a Python one-liner to avoid shell-specific quoting issues.
             command = (
-                "python -c \"from pathlib import Path; "
+                'python -c "from pathlib import Path; '
                 "Path('output.txt').write_text('hello')\""
             )
 

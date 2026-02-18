@@ -1,0 +1,11 @@
+{
+    "total_sessions": 0,
+    "tasks_completed": 0,
+    "agent_retries": {
+        "syntax_errors": 0,
+        "logic_errors": 0,
+        "lint_fixes": 0
+    },
+    "effectiveness_score": 0.0,
+    "history": []
+}

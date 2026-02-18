@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "qgis-plugin-manager"
+name = "qgis-manage"
 version = "0.6.0"
 description = "A modern CLI for managing QGIS plugin development, deployment, and packaging."
 readme = "README.md"
@@ -12,9 +12,35 @@ license = { text = "GPL-2.0-or-later" }
 authors = [
     { name = "Juan M Bernales", email = "juanbernales@gmail.com" }
 ]
+keywords = ["qgis", "plugin", "manager", "cli", "development"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: GIS",
+    "Topic :: Software Development :: Build Tools",
+]
 dependencies = [
     "click>=8.0",
-    "pathlib",
+]
+
+[project.urls]
+Homepage = "https://github.com/geociencio/qgis-plugin-manager"
+Repository = "https://github.com/geociencio/qgis-plugin-manager"
+Issues = "https://github.com/geociencio/qgis-plugin-manager/issues"
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.19.1",
+    "pre-commit>=4.5.1",
+    "ruff>=0.14.10",
+    "types-setuptools>=80.9.0.20251223",
+    "ai-context-core>=3.2.1",
+    "qgis-plugin-analyzer>=1.10.0",
 ]
 
 [project.scripts]
@@ -26,18 +52,6 @@ packages = ["src/qgis_manager"]
 [tool.uv]
 managed = true
 package = true
-
-[tool.uv.sources]
-qgis-plugin-analyzer = { git = "https://github.com/geociencio/qgis-plugin-analyzer.git" }
-
-[dependency-groups]
-dev = [
-    "mypy>=1.19.1",
-    "pre-commit>=4.5.1",
-    "qgis-plugin-analyzer",
-    "ruff>=0.14.10",
-    "types-setuptools>=80.9.0.20251223",
-]
 
 [tool.ruff]
 line-length = 88

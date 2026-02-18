@@ -25,6 +25,18 @@ This package provides command-line utilities to deploy, compile, and manage
 QGIS plugins across different platforms and profiles.
 """
 
+try:
+    from importlib.metadata import PackageNotFoundError, version
+except ImportError:
+    # Fallback for Python < 3.8 (though we require 3.10)
+    from importlib_metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("qgis-manage")
+except PackageNotFoundError:
+    # If package is not installed (e.g. during dev)
+    __version__ = "0.0.0-unknown"
+
 from .cli import main
 
 if __name__ == "__main__":

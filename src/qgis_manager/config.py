@@ -14,6 +14,7 @@ class Settings:
 
     profile: str = "default"
     backup: bool = True
+    max_backups: int = 3
     auto_compile: bool = True
     hooks: dict[str, str] = field(default_factory=dict)
 
@@ -31,6 +32,7 @@ def load_config() -> Settings:
                 defaults = data.get("defaults", {})
                 settings.profile = defaults.get("profile", settings.profile)
                 settings.backup = defaults.get("backup", settings.backup)
+                settings.max_backups = defaults.get("max_backups", settings.max_backups)
                 settings.auto_compile = defaults.get(
                     "auto_compile", settings.auto_compile
                 )
@@ -58,10 +60,14 @@ def load_project_config(project_root: Path, base_settings: Settings) -> Settings
                     "profile", base_settings.profile
                 )
                 base_settings.backup = tool_config.get("backup", base_settings.backup)
+                base_settings.max_backups = tool_config.get(
+                    "max_backups", base_settings.max_backups
+                )
                 base_settings.auto_compile = tool_config.get(
                     "auto_compile", base_settings.auto_compile
                 )
                 base_settings.hooks = tool_config.get("hooks", base_settings.hooks)
+
         except Exception:
             pass
     return base_settings

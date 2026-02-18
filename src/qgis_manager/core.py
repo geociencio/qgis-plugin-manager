@@ -45,7 +45,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from .discovery import IgnoreMatcher, get_plugin_metadata, get_source_files
+from .discovery import get_plugin_metadata, get_source_files
+from .ignore import PathFilter, load_ignore_patterns
 
 logger = logging.getLogger(__name__)
 
@@ -72,12 +73,77 @@ def get_qgis_plugin_dir(profile: str = "default") -> Path:
         raise OSError(f"Unsupported platform: {sys.platform}")
 
 
+def rotate_backups(parent_dir: Path, slug: str, limit: int):
+    """Keep only the N most recent backups for a plugin."""
+    if limit <= 0:
+        return
+
+    # Find all backup directories for this slug
+    backups = []
+    for item in parent_dir.iterdir():
+        if item.is_dir() and item.name.startswith(f"{slug}.bak."):
+            backups.append(item)
+
+    # Sort by name (which contains timestamp) descending
+    backups.sort(key=lambda x: x.name, reverse=True)
+
+    # Remove those exceeding the limit
+    if len(backups) > limit:
+        cols = backups[limit:]
+        for old_bak in cols:
+            logger.debug(f"🧹 Removing old backup: {old_bak.name}")
+            shutil.rmtree(old_bak)
+
+
+def sync_directory(src: Path, dst: Path, matcher: PathFilter):
+    """Sync source to destination only copying changed files (rsync-like)."""
+    if not dst.exists():
+        dst.mkdir(parents=True)
+
+    # 1. Copy/Update files from source
+    for item in src.iterdir():
+        if matcher.should_exclude(item):
+            continue
+
+        dest_item = dst / item.name
+        if item.is_dir():
+            sync_directory(item, dest_item, matcher)
+        else:
+            # Check if we need to copy
+            if dest_item.exists():
+                src_stat = item.stat()
+                dst_stat = dest_item.stat()
+                # Skip if size and mtime match
+                if (
+                    src_stat.st_size == dst_stat.st_size
+                    and src_stat.st_mtime == dst_stat.st_mtime
+                ):
+                    continue
+
+            shutil.copy2(item, dest_item)
+            logger.debug(f"  ✅ {item.name} (updated)")
+
+    # 2. Cleanup files in destination that no longer exist in source
+    # Important: only cleanup items NOT ignored (otherwise we'd delete things like .git)
+    for item in dst.iterdir():
+        source_item = src / item.name
+        # If it doesn't exist in source AND is not ignored/dev file
+        # (Though matcher is based on project_root, so relative paths matter)
+        if not source_item.exists() and not matcher.should_exclude(source_item):
+            if item.is_dir():
+                shutil.rmtree(item)
+            else:
+                item.unlink()
+            logger.debug(f"  🗑️ {item.name} (removed from target)")
+
+
 def deploy_plugin(
     project_root: Path,
     dest_dir: Path | None = None,
     no_backup: bool = False,
     profile: str = "default",
     callback: Callable[[int], Any] | None = None,
+    max_backups: int = 3,
 ):
     """Deploy the plugin to the QGIS directory."""
     metadata = get_plugin_metadata(project_root)
@@ -88,44 +154,29 @@ def deploy_plugin(
 
     target_path = dest_dir / slug
 
-
-    # Backup
+    # Pre-deployment backup
     if target_path.exists() and not no_backup:
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         backup_path = target_path.parent / f"{slug}.bak.{timestamp}"
-        backup_path = target_path.parent / f"{slug}.bak.{timestamp}"
-        logger.info(f"📦 Creating backup at: {backup_path}")
+        logger.info(f"📦 Creating backup at: {backup_path.name}")
         shutil.copytree(target_path, backup_path)
 
-    # Clean target
-    if target_path.exists():
-        shutil.rmtree(target_path)
+        # Rotate backups
+        rotate_backups(target_path.parent, slug, max_backups)
+
+    # Deployment using smart sync
     target_path.mkdir(parents=True, exist_ok=True)
 
-    # Exclusions
-    # Always exclude dev files on deploy
-    matcher = IgnoreMatcher(project_root, include_dev=False)
+    spec = load_ignore_patterns(project_root, include_dev=False)
+    matcher = PathFilter(project_root, spec)
 
-    # Copy files
-    source_files = list(get_source_files(project_root))
+    # Use a set for callback progress if we use iterative sync
+    # For now, we'll keep it simple and sync everything.
+    logger.info(f"🚀 Syncing files to {target_path}")
+    sync_directory(project_root, target_path, matcher)
+
     if callback:
-        callback(len(source_files))
-
-    for item in source_files:
-        dest_item = target_path / item.name
-        if item.is_dir():
-            shutil.copytree(
-                item,
-                dest_item,
-                ignore=matcher.get_ignore_func(),
-                dirs_exist_ok=True,
-            )
-        else:
-            shutil.copy2(item, dest_item)
-
-        if callback:
-            callback(1)
-        logger.debug(f"  ✅ {item.name}")
+        callback(100)  # Simple completion signal
 
     logger.info("✨ Deployment complete.")
 
@@ -187,6 +238,49 @@ def compile_docs(project_root: Path, callback: Callable[[str], Any] | None = Non
         logger.error(f"  ❌ Error al compilar documentación: {e}")
 
 
+def get_rcc_tool() -> str | None:
+    """Find the best available RCC tool."""
+    tools = ["pyside6-rcc", "pyside2-rcc", "pyrcc5"]
+    for tool in tools:
+        try:
+            subprocess.run([tool, "--version"], capture_output=True, check=False)
+            return tool
+        except FileNotFoundError:
+            continue
+    return None
+
+
+def patch_resource_file(py_file: Path) -> bool:
+    """Patch the generated .py resource file to use relative imports.
+
+    RCC sometimes generates 'import resources_rc' which fails in a plugin package.
+    """
+    if not py_file.exists():
+        return False
+
+    try:
+        content = py_file.read_text(encoding="utf-8")
+        # Pattern often found: 'import resources_rc' or similar
+        # We look for imports of other resource files that might have been compiled
+        # In a typical QGIS plugin, we might have multiple .qrc files.
+        import re
+
+        # Fix 'import <name>_rc' to 'from . import <name>_rc'
+        # This is a common issue when multiple resource files are used.
+        patched_content = re.sub(
+            r"^import (\w+_rc)", r"from . import \1", content, flags=re.MULTILINE
+        )
+
+        if patched_content != content:
+            py_file.write_text(patched_content, encoding="utf-8")
+            logger.debug(f"  ✅ Patched imports in {py_file.name}")
+            return True
+    except Exception as e:
+        logger.warning(f"  ⚠️  Failed to patch {py_file.name}: {e}")
+
+    return False
+
+
 def compile_qt_resources(
     project_root: Path,
     res_type: str = "all",
@@ -196,27 +290,39 @@ def compile_qt_resources(
     if res_type in ["resources", "all"]:
         # Look for .qrc files
         qrc_files = list(project_root.rglob("*.qrc"))
-        for qrc in qrc_files:
-            py_file = qrc.with_suffix(".py")
-            rel_qrc = qrc.relative_to(project_root)
-            if callback:
-                callback(f"START:Recurso {rel_qrc.name}")
-            logger.debug(f"🔨 Compiling resource: {rel_qrc} -> {py_file.name}")
-
-            try:
-                subprocess.run(
-                    ["pyrcc5", "-o", str(py_file), str(qrc)],
-                    check=True,
-                    capture_output=True,
-                    text=True,
+        if qrc_files:
+            rcc_tool = get_rcc_tool()
+            if not rcc_tool:
+                logger.error(
+                    "  ❌ No RCC tool found (pyside6-rcc, pyside2-rcc, pyrcc5)."
                 )
+                return
+
+            for qrc in qrc_files:
+                py_file = qrc.with_suffix(".py")
+                rel_qrc = qrc.relative_to(project_root)
                 if callback:
-                    callback(f"DONE:Recurso {rel_qrc.name}")
-                logger.debug("  ✅ Done.")
-            except subprocess.CalledProcessError as e:
-                logger.error(f"  ❌ Error compiling {qrc.name}: {e.stderr}")
-            except FileNotFoundError:
-                logger.error("  ❌ pyrcc5 not found. Is it installed?")
+                    callback(f"START:Recurso {rel_qrc.name}")
+                logger.debug(
+                    f"🔨 Compiling resource: {rel_qrc} -> {py_file.name} "
+                    f"using {rcc_tool}"
+                )
+
+                try:
+                    subprocess.run(
+                        [rcc_tool, "-o", str(py_file), str(qrc)],
+                        check=True,
+                        capture_output=True,
+                        text=True,
+                    )
+                    # Apply patching
+                    patch_resource_file(py_file)
+
+                    if callback:
+                        callback(f"DONE:Recurso {rel_qrc.name}")
+                    logger.debug("  ✅ Done.")
+                except subprocess.CalledProcessError as e:
+                    logger.error(f"  ❌ Error compiling {qrc.name}: {e.stderr}")
 
     if res_type in ["translations", "all"]:
         # Look for .ts files
@@ -290,8 +396,8 @@ def create_plugin_package(
 
     logger.info(f"📦 Creating package: {zip_filename}")
 
-    matcher = IgnoreMatcher(project_root, include_dev=include_dev)
-
+    spec = load_ignore_patterns(project_root, include_dev=include_dev)
+    matcher = PathFilter(project_root, spec)
 
     # Collect items for ZIP
     items_to_zip = []
@@ -375,7 +481,7 @@ def init_plugin_project(
         "email": email,
         "description": description,
         "slug": slug,
-        "class_name": class_name
+        "class_name": class_name,
     }
 
     template_base = Path(__file__).parent / "templates" / template

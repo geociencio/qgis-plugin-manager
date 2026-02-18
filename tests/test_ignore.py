@@ -63,5 +63,6 @@ class TestIgnoreMatcher(unittest.TestCase):
             pycache = tmp_path / "__pycache__"
             self.assertTrue(matcher.should_exclude(pycache))
 
+
 if __name__ == "__main__":
     unittest.main()

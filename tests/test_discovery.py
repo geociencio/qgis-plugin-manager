@@ -49,6 +49,7 @@ class TestDiscovery(unittest.TestCase):
 
     def test_get_source_files(self):
         from qgis_manager.discovery import get_source_files
+
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
             # Setup structure

@@ -1,4 +1,3 @@
-
 """
 Constants and default values for QGIS Plugin Manager.
 """
@@ -15,12 +14,10 @@ DEFAULT_EXCLUDE_PATTERNS = {
     ".venv",
     "venv",
     "env",
-
     # Version Control
     ".git",
     ".gitignore",
     ".gitattributes",
-
     # IDEs / Editors
     ".vscode",
     ".idea",
@@ -31,29 +28,25 @@ DEFAULT_EXCLUDE_PATTERNS = {
     "*.sublime-project",
     "*.sublime-workspace",
     ".DS_Store",
-
     # Tools / Linters
     ".mypy_cache",
     ".pytest_cache",
     ".ruff_cache",
     ".pre-commit-config.yaml",
-
     # Package Managers
     "poetry.lock",
     "uv.lock",
     "Pipfile",
     "Pipfile.lock",
-
     # Build Artifacts
     "build",
     "dist",
     "*.bak*",
     "*.log",
-
     # QGIS Manager internals
     ".agent",
     ".ai-context",
-    "debug_package_list.py", # Exclude debug scripts if present
+    "debug_package_list.py",  # Exclude debug scripts if present
     "analysis_results",
     "generator_export",
 }

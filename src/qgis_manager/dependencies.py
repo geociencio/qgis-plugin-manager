@@ -10,6 +10,7 @@ else:
 
 logger = logging.getLogger(__name__)
 
+
 def get_dependencies(project_root: Path) -> list[str]:
     """Read dependencies from pyproject.toml."""
     pyproject_path = project_root / "pyproject.toml"
@@ -24,6 +25,7 @@ def get_dependencies(project_root: Path) -> list[str]:
     except Exception as e:
         logger.error(f"Error reading dependencies from pyproject.toml: {e}")
         return []
+
 
 def install_external_libs(project_root: Path, target_dir: str = "libs") -> bool:
     """Install external libraries to a target directory using pip/uv."""
@@ -47,12 +49,7 @@ def install_external_libs(project_root: Path, target_dir: str = "libs") -> bool:
     cmd = cmd_base + ["--target", str(dest_path)] + dependencies
 
     try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            check=False
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
         if result.returncode != 0:
             logger.error(f"❌ Failed to install dependencies:\n{result.stderr}")
             return False

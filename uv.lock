@@ -3,6 +3,19 @@ revision = 3
 requires-python = ">=3.10"
 
 [[package]]
+name = "ai-context-core"
+version = "3.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+    { name = "rich" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b6/56/500535b7c63ec49d55a33716a0fa7eaac17b0be26e4f9dc0693ca9465277/ai_context_core-3.2.1.tar.gz", hash = "sha256:9e40c8fd1da3bb1564cfd2f4a0ebb220a204f1ef3469957ac1c5f173dbcca1dd", size = 163899, upload-time = "2026-02-08T04:52:37.127Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/62/d9/39ba816c6b31d88d046fd4d13b5e7f96b25f3bd19bbc848f01a9472cfaa4/ai_context_core-3.2.1-py3-none-any.whl", hash = "sha256:527c09bc55695d1229c5df00b73f56d89f0c997700213f3b90b9380f4f5311d4", size = 184608, upload-time = "2026-02-08T04:52:35.377Z" },
+]
+
+[[package]]
 name = "cfgv"
 version = "3.5.0"
 source = { registry = "https://pypi.org/simple" }
@@ -133,6 +146,27 @@ wheels = [
 ]
 
 [[package]]
+name = "markdown-it-py"
+version = "4.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "mdurl" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5b/f5/4ec618ed16cc4f8fb3b701563655a69816155e79e24a17b651541804721d/markdown_it_py-4.0.0.tar.gz", hash = "sha256:cb0a2b4aa34f932c007117b194e945bd74e0ec24133ceb5bac59009cda1cb9f3", size = 73070, upload-time = "2025-08-11T12:57:52.854Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/94/54/e7d793b573f298e1c9013b8c4dade17d481164aa517d1d7148619c2cedbf/markdown_it_py-4.0.0-py3-none-any.whl", hash = "sha256:87327c59b172c5011896038353a81343b6754500a08cd7a4973bb48c6d578147", size = 87321, upload-time = "2025-08-11T12:57:51.923Z" },
+]
+
+[[package]]
+name = "mdurl"
+version = "0.1.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec958cb99bd3efefba235e65cdeb9c84d24a8293ba1d90/mdurl-0.1.2.tar.gz", hash = "sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba", size = 8729, upload-time = "2022-08-14T12:40:10.846Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b3/38/89ba8ad64ae25be8de66a6d463314cf1eb366222074cfda9ee839c56a4b4/mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8", size = 9979, upload-time = "2022-08-14T12:40:09.779Z" },
+]
+
+[[package]]
 name = "mypy"
 version = "1.19.1"
 source = { registry = "https://pypi.org/simple" }
@@ -197,15 +231,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pathlib"
-version = "1.0.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ac/aa/9b065a76b9af472437a0059f77e8f962fe350438b927cb80184c32f075eb/pathlib-1.0.1.tar.gz", hash = "sha256:6940718dfc3eff4258203ad5021090933e5c04707d5ca8cc9e73c94a7894ea9f", size = 49298, upload-time = "2014-09-03T15:41:57.18Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/78/f9/690a8600b93c332de3ab4a344a4ac34f00c8f104917061f779db6a918ed6/pathlib-1.0.1-py3-none-any.whl", hash = "sha256:f35f95ab8b0f59e6d354090350b44a80a80635d22efdedfa84c7ad1cf0a74147", size = 14363, upload-time = "2022-05-04T13:37:20.585Z" },
-]
-
-[[package]]
 name = "pathspec"
 version = "0.12.1"
 source = { registry = "https://pypi.org/simple" }
@@ -237,6 +262,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/40/f1/6d86a29246dfd2e9b6237f0b5823717f60cad94d47ddc26afa916d21f525/pre_commit-4.5.1.tar.gz", hash = "sha256:eb545fcff725875197837263e977ea257a402056661f09dae08e4b149b030a61", size = 198232, upload-time = "2025-12-16T21:14:33.552Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/5d/19/fd3ef348460c80af7bb4669ea7926651d1f95c23ff2df18b9d24bab4f3fa/pre_commit-4.5.1-py2.py3-none-any.whl", hash = "sha256:3b3afd891e97337708c1674210f8eba659b52a38ea5f822ff142d10786221f77", size = 226437, upload-time = "2025-12-16T21:14:32.409Z" },
+]
+
+[[package]]
+name = "pygments"
+version = "2.19.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b0/77/a5b8c569bf593b0140bde72ea885a803b82086995367bf2037de0159d924/pygments-2.19.2.tar.gz", hash = "sha256:636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887", size = 4968631, upload-time = "2025-06-21T13:39:12.283Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl", hash = "sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b", size = 1225217, upload-time = "2025-06-21T13:39:07.939Z" },
 ]
 
 [[package]]
@@ -304,21 +338,16 @@ wheels = [
 ]
 
 [[package]]
-name = "qgis-plugin-analyzer"
-version = "0.1.0"
-source = { git = "https://github.com/geociencio/qgis-plugin-analyzer.git#276688e58dcc66b92623aede43a102d10010a16a" }
-
-[[package]]
-name = "qgis-plugin-manager"
-version = "0.5.0"
+name = "qgis-manage"
+version = "0.6.0"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
-    { name = "pathlib" },
 ]
 
-[package.dev-dependencies]
+[package.optional-dependencies]
 dev = [
+    { name = "ai-context-core" },
     { name = "mypy" },
     { name = "pre-commit" },
     { name = "qgis-plugin-analyzer" },
@@ -328,17 +357,36 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "ai-context-core", marker = "extra == 'dev'", specifier = ">=3.2.1" },
     { name = "click", specifier = ">=8.0" },
-    { name = "pathlib" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.19.1" },
+    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.5.1" },
+    { name = "qgis-plugin-analyzer", marker = "extra == 'dev'", specifier = ">=1.10.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.14.10" },
+    { name = "types-setuptools", marker = "extra == 'dev'", specifier = ">=80.9.0.20251223" },
+]
+provides-extras = ["dev"]
+
+[[package]]
+name = "qgis-plugin-analyzer"
+version = "1.10.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/2f/55/2b8b5127c961efc660ca5cbec0846cc7cee78c50f983e654c2661ec3ef0c/qgis_plugin_analyzer-1.10.0.tar.gz", hash = "sha256:f0b4b3c483ef687b3673b6c560e9049139dd858149b6bee6346cb8dda318abc9", size = 98338, upload-time = "2026-02-18T04:54:03.195Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5d/73/47e9fffc884aee8728d3bfbe6ff5a6a670e5b0cf33c8cf9f6a9b0ca5efbf/qgis_plugin_analyzer-1.10.0-py3-none-any.whl", hash = "sha256:1be57eb2feeee60d528afdc843a668c507e491685e62626c627ec975d9b23add", size = 102711, upload-time = "2026-02-18T04:54:01.636Z" },
 ]
 
-[package.metadata.requires-dev]
-dev = [
-    { name = "mypy", specifier = ">=1.19.1" },
-    { name = "pre-commit", specifier = ">=4.5.1" },
-    { name = "qgis-plugin-analyzer", git = "https://github.com/geociencio/qgis-plugin-analyzer.git" },
-    { name = "ruff", specifier = ">=0.14.10" },
-    { name = "types-setuptools", specifier = ">=80.9.0.20251223" },
+[[package]]
+name = "rich"
+version = "14.3.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "markdown-it-py" },
+    { name = "pygments" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/74/99/a4cab2acbb884f80e558b0771e97e21e939c5dfb460f488d19df485e8298/rich-14.3.2.tar.gz", hash = "sha256:e712f11c1a562a11843306f5ed999475f09ac31ffb64281f73ab29ffdda8b3b8", size = 230143, upload-time = "2026-02-01T16:20:47.908Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ef/45/615f5babd880b4bd7d405cc0dc348234c5ffb6ed1ea33e152ede08b2072d/rich-14.3.2-py3-none-any.whl", hash = "sha256:08e67c3e90884651da3239ea668222d19bea7b589149d8014a21c633420dbb69", size = 309963, upload-time = "2026-02-01T16:20:46.078Z" },
 ]
 
 [[package]]

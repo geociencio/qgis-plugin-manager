@@ -190,6 +190,7 @@ class TestCore(unittest.TestCase):
             dest_dir.mkdir()
 
             callback_calls = []
+
             def callback(n):
                 callback_calls.append(n)
 
@@ -218,14 +219,14 @@ class TestCore(unittest.TestCase):
 
             # Verify
             mock_popen.assert_called_once()
-            args = mock_popen.call_args[1].get('args') or mock_popen.call_args[0][0]
+            args = mock_popen.call_args[1].get("args") or mock_popen.call_args[0][0]
             self.assertIn("sphinx-build", args)
 
             # Test with uv run
             (tmp_path / "pyproject.toml").touch()
             compile_docs(tmp_path)
             self.assertEqual(mock_popen.call_count, 2)
-            args = mock_popen.call_args[1].get('args') or mock_popen.call_args[0][0]
+            args = mock_popen.call_args[1].get("args") or mock_popen.call_args[0][0]
             self.assertEqual(args[0], "uv")
             self.assertEqual(args[1], "run")
             self.assertEqual(args[2], "sphinx-build")
@@ -245,6 +246,7 @@ class TestCore(unittest.TestCase):
             mock_popen.return_value = mock_process
 
             callback_lines = []
+
             def callback(line):
                 callback_lines.append(line)
 
