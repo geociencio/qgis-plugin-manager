@@ -25,3 +25,4 @@ Remove `pathspec` from the `dependencies` list in `pyproject.toml`.
 
 ### Manual Verification
 - Verify that `uv sync` no longer installs `pathspec`.
+
