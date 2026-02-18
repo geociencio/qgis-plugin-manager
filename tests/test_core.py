@@ -157,9 +157,7 @@ class TestCore(unittest.TestCase):
 
     @patch("qgis_manager.core.get_plugin_metadata")
     @patch("qgis_manager.core.sync_directory")
-    def test_deploy_plugin_with_callback(
-        self, mock_sync, mock_get_meta
-    ):
+    def test_deploy_plugin_with_callback(self, mock_sync, mock_get_meta):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
             # Mocks

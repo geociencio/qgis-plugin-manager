@@ -36,14 +36,16 @@ class TestCLI(unittest.TestCase):
         with patch("qgis_manager.cli.commands.init.init_plugin_project") as mock_init:
             with patch("pathlib.Path.exists") as mock_exists:
                 mock_exists.return_value = True
-                exit_code, output, _ = self._invoke([
-                    "init",
-                    "Test Plugin",
-                    "--author",
-                    "Author",
-                    "--email",
-                    "email@example.com",
-                ])
+                exit_code, output, _ = self._invoke(
+                    [
+                        "init",
+                        "Test Plugin",
+                        "--author",
+                        "Author",
+                        "--email",
+                        "email@example.com",
+                    ]
+                )
                 self.assertEqual(exit_code, 0)
                 self.assertIn("Plugin 'Test Plugin' initialized successfully", output)
                 mock_init.assert_called_once()

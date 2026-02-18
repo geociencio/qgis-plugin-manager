@@ -1,9 +1,12 @@
 """CLI Application orchestrator."""
 
 import argparse
+import logging
 import sys
 
 from .base import BaseCommand
+
+logger = logging.getLogger(__name__)
 
 
 class CLIApp:
@@ -12,12 +15,16 @@ class CLIApp:
     Manages command registration, argument parsing, and execution.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the CLI application with available commands."""
         self.commands: dict[str, BaseCommand] = self._discover_commands()
 
     def _discover_commands(self) -> dict[str, BaseCommand]:
-        """Auto-discover and instantiate all command classes."""
+        """Auto-discover and instantiate all command classes.
+
+        Returns:
+            Dictionary mapping command names to command instances.
+        """
         from .commands.analyze import AnalyzeCommand
         from .commands.bump import BumpCommand
         from .commands.clean import CleanCommand
@@ -44,7 +51,11 @@ class CLIApp:
         return {cmd().name: cmd() for cmd in command_classes}
 
     def _build_parser(self) -> argparse.ArgumentParser:
-        """Build the argument parser with all commands."""
+        """Build the argument parser with all commands.
+
+        Returns:
+            Configured ArgumentParser instance.
+        """
         from .. import __version__
 
         parser = argparse.ArgumentParser(
@@ -75,7 +86,11 @@ class CLIApp:
         return parser
 
     def _setup_logging(self, args: argparse.Namespace) -> None:
-        """Setup logging based on command arguments."""
+        """Setup logging based on command arguments.
+
+        Args:
+            args: Parsed command-line arguments.
+        """
         import logging
 
         level = logging.INFO
@@ -95,7 +110,14 @@ class CLIApp:
         logging.basicConfig(level=level, format=log_format, handlers=handlers)
 
     def run(self, argv: list[str] | None = None) -> int:
-        """Run the CLI application."""
+        """Run the CLI application.
+
+        Args:
+            argv: Optional list of command-line arguments.
+
+        Returns:
+            Exit code (0 for success, 1 for failure).
+        """
         parser = self._build_parser()
 
         if argv is None:
@@ -113,8 +135,12 @@ class CLIApp:
             return command.execute(args)
 
         except KeyboardInterrupt:
-            print("\n⏹️ Interrupted.")
+            logger.info("Interrupted by user.")
+            sys.stdout.write("\n⏹️ Interrupted.\n")
             return 1
         except Exception as e:
-            print(f"❌ Error: {e}")
+            logger.error(f"Top-level CLI error: {e}")
+            import click
+
+            click.echo(click.style(f"❌ Error: {e}", fg="red", bold=True), err=True)
             return 1

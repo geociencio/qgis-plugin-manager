@@ -23,13 +23,6 @@ Metadata validation for QGIS plugins.
 
 This module provides functions to validate metadata.txt files against
 QGIS plugin repository requirements and best practices.
-
-Functions:
-    validate_metadata: Validate plugin metadata dictionary
-    validate_version: Check version format (X.Y.Z)
-    validate_email: Check email format
-    validate_url: Check URL format
-    get_required_fields: Get list of required metadata fields
 """
 
 import re
@@ -40,7 +33,13 @@ from typing import Any
 
 @dataclass
 class ValidationResult:
-    """Result of metadata validation."""
+    """Result of metadata validation.
+
+    Attributes:
+        is_valid: Boolean indicating if the validation passed.
+        errors: List of error messages (blocking).
+        warnings: List of warning messages (non-blocking).
+    """
 
     is_valid: bool
     errors: list[str]
@@ -48,7 +47,11 @@ class ValidationResult:
 
 
 def get_required_fields() -> list[str]:
-    """Get list of required metadata fields for QGIS plugins."""
+    """Get list of required metadata fields for QGIS plugins.
+
+    Returns:
+        List of field names that must be present in metadata.txt.
+    """
     return [
         "name",
         "description",
@@ -60,7 +63,11 @@ def get_required_fields() -> list[str]:
 
 
 def get_optional_fields() -> list[str]:
-    """Get list of optional but recommended metadata fields."""
+    """Get list of optional but recommended metadata fields.
+
+    Returns:
+        List of field names that are optional but recommended.
+    """
     return [
         "homepage",
         "tracker",
@@ -76,57 +83,53 @@ def get_optional_fields() -> list[str]:
     ]
 
 
-def validate_version(version: str) -> bool:
-    """
-    Validate version format.
+def validate_version(version_str: str) -> bool:
+    """Validate version format using semantic versioning (X.Y.Z).
 
     Args:
-        version: Version string to validate
+        version_str: Version string to validate.
 
     Returns:
-        True if version matches X.Y.Z format
+        True if version matches X.Y or X.Y.Z format.
     """
     pattern = r"^\d+\.\d+(\.\d+)?$"
-    return bool(re.match(pattern, version))
+    return bool(re.match(pattern, version_str))
 
 
 def validate_email(email: str) -> bool:
-    """
-    Validate email format.
+    """Validate email format using a standard regex.
 
     Args:
-        email: Email address to validate
+        email: Email address to validate.
 
     Returns:
-        True if email format is valid
+        True if email format is valid.
     """
     pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
     return bool(re.match(pattern, email))
 
 
 def validate_url(url: str) -> bool:
-    """
-    Validate URL format.
+    """Validate URL format (must start with http or https).
 
     Args:
-        url: URL to validate
+        url: URL to validate.
 
     Returns:
-        True if URL format is valid (http/https)
+        True if URL format is valid.
     """
     pattern = r"^https?://[^\s]+$"
     return bool(re.match(pattern, url))
 
 
 def validate_official_compliance(project_root: Path) -> ValidationResult:
-    """
-    Check if the project complies with official QGIS repository rules.
+    """Check if the project complies with official QGIS repository rules.
 
     Args:
-        project_root: Root directory of the project
+        project_root: Root directory of the project.
 
     Returns:
-        ValidationResult with compliance status
+        ValidationResult containing errors and warnings.
     """
     errors: list[str] = []
     warnings: list[str] = []
@@ -165,15 +168,14 @@ def validate_official_compliance(project_root: Path) -> ValidationResult:
 def validate_project_structure(
     project_root: Path, metadata: dict[str, Any]
 ) -> ValidationResult:
-    """
-    Validate the physical structure of the plugin project.
+    """Validate the physical structure of the plugin project.
 
     Args:
-        project_root: Root directory of the project
-        metadata: Plugin metadata dictionary
+        project_root: Root directory of the project.
+        metadata: Plugin metadata dictionary.
 
     Returns:
-        ValidationResult with validation status and messages
+        ValidationResult with validation status and messages.
     """
     errors: list[str] = []
     warnings: list[str] = []
@@ -206,14 +208,13 @@ def validate_project_structure(
 
 
 def validate_metadata(metadata: dict[str, Any]) -> ValidationResult:
-    """
-    Validate plugin metadata against QGIS requirements.
+    """Validate plugin metadata against QGIS requirements.
 
     Args:
-        metadata: Dictionary containing plugin metadata
+        metadata: Dictionary containing plugin metadata.
 
     Returns:
-        ValidationResult with validation status and messages
+        ValidationResult with validation status and messages.
     """
     errors: list[str] = []
     warnings: list[str] = []

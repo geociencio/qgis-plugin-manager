@@ -1,6 +1,7 @@
 """Bump command implementation."""
 
 import argparse
+import logging
 import re
 from pathlib import Path
 
@@ -9,19 +10,32 @@ import click
 from ...discovery import find_project_root, get_plugin_metadata, save_plugin_metadata
 from ..base import BaseCommand
 
+logger = logging.getLogger(__name__)
+
 
 class BumpCommand(BaseCommand):
-    """Command to automate project versioning."""
+    """Command to automate project versioning.
+
+    Handles major, minor, and patch bumps, as well as syncing version
+    from pyproject.toml to metadata.txt.
+    """
 
     @property
     def name(self) -> str:
+        """Command name as it appears in the CLI."""
         return "bump"
 
     @property
     def help(self) -> str:
+        """Help text for the command."""
         return "Automate project versioning"
 
     def configure_parser(self, parser: argparse.ArgumentParser) -> None:
+        """Configure subcommand and arguments.
+
+        Args:
+            parser: Argument parser to configure.
+        """
         self.add_common_args(parser, include_profile=False)
         subparsers = parser.add_subparsers(dest="subcommand", help="Bump subcommand")
 
@@ -33,6 +47,14 @@ class BumpCommand(BaseCommand):
         )
 
     def execute(self, args: argparse.Namespace) -> int:
+        """Execute the bump command.
+
+        Args:
+            args: Parsed command-line arguments.
+
+        Returns:
+            Exit code (0 for success, 1 for failure).
+        """
         try:
             root = find_project_root(Path(args.path))
 
@@ -48,13 +70,23 @@ class BumpCommand(BaseCommand):
                 )
                 return 1
         except Exception as e:
+            logger.error(f"Execution error in bump: {e}")
             click.echo(click.style(f"❌ Error: {e}", fg="red"), err=True)
             return 1
 
     def _bump_version(self, root: Path, part: str) -> int:
-        """Bump a part of the semantic version."""
+        """Bump a part of the semantic version.
+
+        Args:
+            root: Project root directory.
+            part: Part of the version to bump (major, minor, or patch).
+
+        Returns:
+            Exit code.
+        """
         current = self._get_version(root)
         if not current:
+            logger.error(f"Could not determine current version in {root}")
             click.echo(click.style("❌ Could not determine current version.", fg="red"))
             return 1
 
@@ -63,7 +95,12 @@ class BumpCommand(BaseCommand):
             # Pad with zeros if needed
             parts = (parts + ["0", "0", "0"])[:3]
 
-        major, minor, patch = map(int, parts)
+        try:
+            major, minor, patch = map(int, parts)
+        except ValueError as e:
+            logger.error(f"Invalid version format '{current}': {e}")
+            click.echo(click.style(f"❌ Invalid version format: {current}", fg="red"))
+            return 1
 
         if part == "major":
             major += 1
@@ -84,11 +121,19 @@ class BumpCommand(BaseCommand):
             click.echo(click.style(f"✅ Version bumped to {new_version}", fg="green"))
             return 0
         else:
+            logger.error(f"Failed to update version entries to {new_version}")
             click.echo(click.style("❌ Failed to update version in files.", fg="red"))
             return 1
 
     def _sync_versions(self, root: Path) -> int:
-        """Sync version from pyproject.toml to metadata.txt."""
+        """Sync version from pyproject.toml to metadata.txt.
+
+        Args:
+            root: Project root directory.
+
+        Returns:
+            Exit code.
+        """
         version = self._get_pyproject_version(root)
         if not version:
             click.echo(click.style("❌ No version found in pyproject.toml", fg="red"))
@@ -106,7 +151,14 @@ class BumpCommand(BaseCommand):
         return 0
 
     def _get_version(self, root: Path) -> str | None:
-        """Get version from pyproject.toml or metadata.txt."""
+        """Get version from pyproject.toml or metadata.txt.
+
+        Args:
+            root: Project root directory.
+
+        Returns:
+            Version string or None if not found.
+        """
         v = self._get_pyproject_version(root)
         if v:
             return v
@@ -114,7 +166,14 @@ class BumpCommand(BaseCommand):
         return metadata.get("version")
 
     def _get_pyproject_version(self, root: Path) -> str | None:
-        """Read version from pyproject.toml."""
+        """Read version from pyproject.toml.
+
+        Args:
+            root: Project root directory.
+
+        Returns:
+            Version string or None.
+        """
         pyproj = root / "pyproject.toml"
         if not pyproj.exists():
             return None
@@ -125,11 +184,20 @@ class BumpCommand(BaseCommand):
                 data = tomllib.load(f)
                 version = data.get("project", {}).get("version")
                 return str(version) if version else None
-        except Exception:
+        except Exception as e:
+            logger.debug(f"Failed to read pyproject.toml version: {e}")
             return None
 
     def _update_version_in_files(self, root: Path, version: str) -> bool:
-        """Update version in all tracked files."""
+        """Update version in all tracked files.
+
+        Args:
+            root: Project root directory.
+            version: New version string to set.
+
+        Returns:
+            True if all updates succeeded.
+        """
         success = True
 
         # 1. Update pyproject.toml
@@ -137,7 +205,6 @@ class BumpCommand(BaseCommand):
         if pyproj.exists():
             content = pyproj.read_text(encoding="utf-8")
             # Try to find version in [project] section safely
-            # We look for [project] then skip to version
             match = re.search(
                 r"(\[project\].*?version\s*=\s*\")[^\"]+(\")", content, re.DOTALL
             )
@@ -152,7 +219,7 @@ class BumpCommand(BaseCommand):
                 pyproj.write_text(new_content, encoding="utf-8")
                 click.echo("  📝 Updated pyproject.toml")
             else:
-                # Fallback to simple replacement if [project] doesn't match perfectly
+                # Fallback to simple replacement
                 new_content = re.sub(
                     r"(version\s*=\s*\")[^\"]+(\")", rf"\1{version}\2", content, count=1
                 )
@@ -160,6 +227,7 @@ class BumpCommand(BaseCommand):
                     pyproj.write_text(new_content, encoding="utf-8")
                     click.echo("  📝 Updated pyproject.toml (simple match)")
                 else:
+                    logger.warning("Could not find version entry in pyproject.toml")
                     success = False
 
         # 2. Update metadata.txt
@@ -168,7 +236,9 @@ class BumpCommand(BaseCommand):
             metadata["version"] = version
             save_plugin_metadata(root, metadata)
             click.echo("  📝 Updated metadata.txt")
-        except Exception:
+        except Exception as e:
+            logger.error(f"Error updating metadata.txt: {e}")
+            click.echo(click.style(f"  ❌ Error updating metadata.txt: {e}", fg="red"))
             success = False
 
         return success
