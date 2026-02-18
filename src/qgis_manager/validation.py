@@ -118,6 +118,50 @@ def validate_url(url: str) -> bool:
     return bool(re.match(pattern, url))
 
 
+def validate_official_compliance(project_root: Path) -> ValidationResult:
+    """
+    Check if the project complies with official QGIS repository rules.
+
+    Args:
+        project_root: Root directory of the project
+
+    Returns:
+        ValidationResult with compliance status
+    """
+    errors = []
+    warnings = []
+
+    # 1. Prohibited binary extensions
+    prohibited = [".so", ".dll", ".exe", ".dylib", ".pyd", ".pyc", ".pyo"]
+    found_binaries = []
+    for ext in prohibited:
+        for p in project_root.rglob(f"*{ext}"):
+            found_binaries.append(str(p.relative_to(project_root)))
+
+    if found_binaries:
+        errors.append(
+            "Official repository prohibits binaries. "
+            f"Found: {', '.join(found_binaries)}"
+        )
+
+    # 2. License file check (Must be named LICENSE)
+    license_file = project_root / "LICENSE"
+    if not license_file.exists():
+        # Check for common variants to give better advice
+        variants = ["LICENSE.txt", "COPYING", "LICENSE.md"]
+        found_variant = next((v for v in variants if (project_root / v).exists()), None)
+        if found_variant:
+            errors.append(
+                f"License file must be named exactly 'LICENSE' "
+                f"(no extension). Found '{found_variant}'."
+            )
+        else:
+            errors.append("Critical file missing for official repository: 'LICENSE'")
+
+    is_valid = len(errors) == 0
+    return ValidationResult(is_valid=is_valid, errors=errors, warnings=warnings)
+
+
 def validate_project_structure(
     project_root: Path, metadata: dict[str, Any]
 ) -> ValidationResult:

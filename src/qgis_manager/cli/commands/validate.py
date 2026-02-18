@@ -24,6 +24,11 @@ class ValidateCommand(BaseCommand):
     def configure_parser(self, parser: argparse.ArgumentParser) -> None:
         self.add_common_args(parser, include_profile=False)
         parser.add_argument("--strict", action="store_true", help="Fail on warnings")
+        parser.add_argument(
+            "--repo",
+            action="store_true",
+            help="Check compliance with official QGIS repository",
+        )
 
     def execute(self, args: argparse.Namespace) -> int:
         try:
@@ -36,10 +41,24 @@ class ValidateCommand(BaseCommand):
             # 2. Structural validation
             struct_result = validate_project_structure(root, metadata)
 
+            # 3. Official repo compliance (Optional)
+            repo_errors = []
+            repo_warnings = []
+            if getattr(args, "repo", False):
+                from ...validation import validate_official_compliance
+
+                repo_res = validate_official_compliance(root)
+                repo_errors = repo_res.errors
+                repo_warnings = repo_res.warnings
+
             # Combine output
-            errors = meta_result.errors + struct_result.errors
-            warnings = meta_result.warnings + struct_result.warnings
-            is_valid = meta_result.is_valid and struct_result.is_valid
+            errors = meta_result.errors + struct_result.errors + repo_errors
+            warnings = meta_result.warnings + struct_result.warnings + repo_warnings
+            is_valid = (
+                meta_result.is_valid
+                and struct_result.is_valid
+                and (not getattr(args, "repo", False) or not repo_errors)
+            )
 
             if errors:
                 msg = click.style(
