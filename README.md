@@ -18,13 +18,25 @@
 
 ## 🥇 The "Manager" Difference
 
-Unlike traditional tools like `pb_tool` or legacy Makefiles, `qgis-plugin-manager` is built for modern engineering workflows.
+`qgis-plugin-manager` is the modern successor to traditional QGIS development workflows.
 
-### Why choose us?
-- **Smart Sync (rsync-like)**: No more "delete and copy". We only update modified files, drastically reducing deployment time and disk wear.
-- **Native Python Hooks**: Write your automation in pure Python. Hooks receive a rich context (metadata, paths, profiles) for advanced workflows.
-- **official Repository Compliance**: Built-in checks for prohibited binaries, mandatory files, and single-root folder structure.
-- **TOML-Native**: Pure PEP 621 compliance via `pyproject.toml`. No more legacy `.cfg` files.
+### 📊 Ecosystem Comparison
+
+| Feature | pb_tool | qgis-plugin-ci | qgis-plugin-manager |
+| :--- | :--- | :--- | :--- |
+| **Configuration** | Legacy `.cfg` | Hybrid `.yml` | **Pure PEP 621 (TOML)** |
+| **Deployment** | Delete & Copy | N/A | **Smart Sync (rsync-like)** |
+| **Backups** | None | None | **Rotation & Multi-profile** |
+| **Hooks** | Shell only | Shell only | **Native Python + Shell** |
+| **Validation** | Basic | Schema only | **Deep Structure & Compliance** |
+| **Modern RCC** | Fixed tools | Limited | **Dynamic Tooling & Patching** |
+
+### 🚀 Key Differentiators (USPs)
+
+- **Smart Synchronization (Sync v2.0)**: We use idempotent sync logic. Instead of slow "delete and copy", we only update modified files.
+- **Native Python Hooks Architecture**: Write your automation in pure Python via `plugin_hooks.py`. Hooks receive full project context (metadata, paths, profiles).
+- **Official Repository "First-Time-Right"**: Built-in `--repo-check` and structural validation catch errors *before* you upload to QGIS.
+- **AI-Agent Friendly**: Specifically designed to be easily automated by AI agents, featuring clear metadata and a modular command system.
 
 ---
 
