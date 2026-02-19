@@ -122,6 +122,47 @@ def validate_url(url: str) -> bool:
     return bool(re.match(pattern, url))
 
 
+def validate_category(category: str) -> bool:
+    """Validate plugin category against official allowed values.
+
+    Args:
+        category: Category string.
+
+    Returns:
+        True if category is valid.
+    """
+    allowed = ["Vector", "Raster", "Database", "Web", "Processing", "Plugins"]
+    return category in allowed
+
+
+def validate_boolean_field(value: str) -> bool:
+    """Validate strict boolean fields (True/False).
+
+    Args:
+        value: Field value.
+
+    Returns:
+        True if value is exactly "True" or "False".
+    """
+    return value in ["True", "False"]
+
+
+def validate_tags(tags: str) -> bool:
+    """Validate comma-separated tags format.
+
+    Args:
+        tags: Tags string.
+
+    Returns:
+        True if tags are comma-separated and not empty.
+    """
+    if not tags.strip():
+        return False  # Empty tags are technically allowed but we want at least one
+    # Check if it looks like a list
+    parts = [t.strip() for t in tags.split(",")]
+    return len(parts) > 0 and all(parts)
+
+
 def validate_official_compliance(project_root: Path) -> ValidationResult:
     """Check if the project complies with official QGIS repository rules.
 
@@ -184,6 +225,16 @@ def validate_project_structure(
     init_py = project_root / "__init__.py"
     if not init_py.exists():
         errors.append("Critical file missing: '__init__.py'")
+    else:
+        # Check for classFactory
+        try:
+            content = init_py.read_text(encoding="utf-8")
+            if "def classFactory" not in content:
+                errors.append(
+                    "Critical function missing in '__init__.py': 'def classFactory'"
+                )
+        except Exception:
+            errors.append("Could not read '__init__.py'")
 
     # 2. Icon validation
     icon_name = metadata.get("icon", "icon.png")
@@ -270,6 +321,25 @@ def validate_metadata(metadata: dict[str, Any]) -> ValidationResult:
 
     if "tags" not in metadata or not metadata["tags"]:
         warnings.append("Recommended field 'tags' is missing")
+    elif not validate_tags(metadata["tags"]):
+        warnings.append("Tags should be comma-separated list of keywords")
+
+    # Validate category
+    if "category" in metadata:
+        if not validate_category(metadata["category"]):
+            warnings.append(
+                f"Unknown category: '{metadata['category']}'. "
+                "Allowed: Vector, Raster, Database, Web, Processing, Plugins"
+            )
+
+    # Validate boolean fields
+    bool_fields = ["experimental", "deprecated", "hasProcessingProvider"]
+    for field in bool_fields:
+        if field in metadata and metadata[field]:
+            warnings.append(
+                f"Field '{field}' should be 'True' or 'False'. "
+                f"Found: '{metadata[field]}'"
+            )
 
     is_valid = len(errors) == 0
 

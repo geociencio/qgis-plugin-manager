@@ -1,16 +1,16 @@
 # PROJECT SUMMARY - qgis-plugin-manager
-Analysis Date: 2026-02-18 15:24:22
+Analysis Date: 2026-02-18 18:08:33
 Analyzer Version: 3.1.1 (Ai-Context-Core)
 
 ## 📊 KEY METRICS
-- **Quality Score**: 79.4/100
-- **Source Lines (SLOC)**: 3,050
-- **Total Physical Lines**: 4,581
-- **Maintainability**: 44.6
-- **Test Coverage**: 13 test files
+- **Quality Score**: 77.3/100
+- **Source Lines (SLOC)**: 3,495
+- **Total Physical Lines**: 5,280
+- **Maintainability**: 43.2
+- **Test Coverage**: 14 test files
 
 ## 📁 STRUCTURE
-**Total Modules**: 48
+**Total Modules**: 51
 
 ```tree
 ./
@@ -21,7 +21,7 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
     AI_CONTEXT.md
     CHANGELOG.md
     LICENSE
-    ... (+10 more)
+    ... (+11 more)
     src/
         qgis_manager/
             __init__.py
@@ -47,12 +47,12 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
                 commands/
                     __init__.py
                     analyze.py
+                    bump.py
                     clean.py
                     compile.py
                     deploy.py
-                    init.py
-                    install_deps.py
-                    ... (+1 more)
+                    hooks.py
+                    ... (+3 more)
     tests/
         test_cli.py
         test_config.py
@@ -61,20 +61,51 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
         test_discovery.py
         test_fix_exclusions.py
         test_hooks.py
-        ... (+5 more)
+        ... (+6 more)
     analysis_results/
         PROJECT_SUMMARY.md
         analyzer.log
         project_context.json
     docs/
-        COMMIT_GUIDELINES.md
-        CONTRIBUTING.md
-        GITHUB_RELEASE_v0.3.1.md
-        GITHUB_RELEASE_v0.3.2.md
-        GITHUB_RELEASE_v0.3.3.md
-        GITHUB_RELEASE_v0.4.0.md
-        GITHUB_RELEASE_v0.4.1.md
-        ... (+14 more)
+        DEVELOPMENT_LOG.md
+        research/
+            CLI_EXPANSION_PROPOSAL.md
+            COMPETITIVE_ANALYSIS.md
+            RECOMMENDATIONS.md
+            distribution_research.md
+            qgis_manager_dev_roadmap.md
+        plans/
+            badges_expansion_plan.md
+            bump_implementation_plan.md
+            cli_refactor_plan.md
+            deployment_optimization_plan.md
+            distribution_plan.md
+            documentation_reorg_plan.md
+            hooks_expansion_plan.md
+            ... (+4 more)
+        walkthroughs/
+            walkthrough.md
+        releases/
+            GITHUB_RELEASE_v0.3.1.md
+            GITHUB_RELEASE_v0.3.2.md
+            GITHUB_RELEASE_v0.3.3.md
+            GITHUB_RELEASE_v0.4.0.md
+            GITHUB_RELEASE_v0.4.1.md
+            GITHUB_RELEASE_v0.5.0.md
+            GITHUB_RELEASE_v0.6.0.md
+            ... (+9 more)
+        guides/
+            TUTORIAL.md
+            uv_modernization_guide.md
+        standards/
+            COMMIT_GUIDELINES.md
+            CONTRIBUTING.md
+        maintenance/
+            SESSION_LOG_modernization.md
+            sesion_2026-02-18_v0.6.1_release.md
+            sesion_2026-02-18_v0.6.1_release_task.md
+            v0.6.1_bug_patch_report.md
+        examples/
     generator_export/
         GENERATOR_MANUAL.md
         generator.py
@@ -90,8 +121,8 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
                 plugin.py.tmpl
     dist/
         .gitignore
-        qgis_manage-0.6.0-py3-none-any.whl
-        qgis_manage-0.6.0.tar.gz
+        qgis_manage-0.6.1-py3-none-any.whl
+        qgis_manage-0.6.1.tar.gz
     antigravity-framerepo/
         BOOTSTRAP.md
         LICENSE
@@ -156,12 +187,11 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
 - **antigravity-framerepo/scripts/skill_sync.py**: 2 issues (Max: HIGH)
 
 ## 💡 MAIN RECOMMENDATIONS
-### src/qgis_manager/core.py
-- Consider breaking down large logic
-- Large module (600 lines)
 ### src/qgis_manager/ignore.py
 - Consider breaking down large logic
 ### src/qgis_manager/validation.py
+- Consider breaking down large logic
+### src/qgis_manager/cli/commands/bump.py
 - Consider breaking down large logic
 
 ## 🏗️ DESIGN PATTERNS
@@ -169,14 +199,19 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
 - **get_ignore_func** in `src/qgis_manager/ignore.py` (50%)
 
 ## 🔄 GIT ANALYSIS
+### Code Churn (last 30 days)
+- **Files Changed**: 176
+- **Additions**: +17756
+- **Deletions**: -1218
+- **Total Churn**: 18974
 
 ### 🔥 Hotspots
-- `src/qgis_manager/core.py`: 16 commits
-- `src/qgis_manager/cli.py`: 13 commits
-- `tests/test_core.py`: 9 commits
-- `src/qgis_manager/discovery.py`: 6 commits
-- `tests/test_discovery.py`: 6 commits
+- `src/qgis_manager/core.py`: 18 commits
+- `src/qgis_manager/cli.py`: 14 commits
+- `tests/test_core.py`: 12 commits
+- `src/qgis_manager/discovery.py`: 10 commits
+- `tests/test_discovery.py`: 7 commits
 
 ## 📈 COMPLEXITY DISTRIBUTION
-- **Average Complexity**: 8.06
+- **Average Complexity**: 8.96
 - **Max Complexity**: 74

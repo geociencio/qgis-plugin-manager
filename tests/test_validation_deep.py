@@ -38,7 +38,9 @@ class TestStructuralValidation(unittest.TestCase):
         self.assertIn("Critical file missing: '__init__.py'", result.errors)
 
     def test_missing_icon(self):
-        (self.test_dir / "__init__.py").touch()
+        (self.test_dir / "__init__.py").write_text(
+            "def classFactory(iface): pass", encoding="utf-8"
+        )
         # icon.png is missing
         result = validate_project_structure(self.test_dir, self.metadata)
         self.assertTrue(result.is_valid)
@@ -48,7 +50,9 @@ class TestStructuralValidation(unittest.TestCase):
         )
 
     def test_missing_custom_icon(self):
-        (self.test_dir / "__init__.py").touch()
+        (self.test_dir / "__init__.py").write_text(
+            "def classFactory(iface): pass", encoding="utf-8"
+        )
         self.metadata["icon"] = "custom_icon.png"
         # custom_icon.png is missing
         result = validate_project_structure(self.test_dir, self.metadata)
@@ -65,7 +69,9 @@ class TestStructuralValidation(unittest.TestCase):
         self.assertTrue(any("illegal characters" in e for e in result.errors))
 
     def test_valid_project(self):
-        (self.test_dir / "__init__.py").touch()
+        (self.test_dir / "__init__.py").write_text(
+            "def classFactory(iface): pass", encoding="utf-8"
+        )
         (self.test_dir / "icon.png").touch()
         (self.test_dir / "plugin.py").touch()
         result = validate_project_structure(self.test_dir, self.metadata)

@@ -266,6 +266,24 @@ def get_rcc_tool() -> str | None:
             continue
     return None
 
+    return False
+
+
+def verify_resource_patch(py_file: Path) -> bool:
+    """Verify that a resource file contains correct imports."""
+    try:
+        content = py_file.read_text(encoding="utf-8")
+        if (
+            "import resources_rc" in content
+            and "from . import resources_rc" not in content
+        ):
+            return False
+        if "from PyQt5" in content:
+            return False
+        return True
+    except Exception:
+        return False
+
 
 def patch_resource_file(py_file: Path) -> bool:
     """Patch the generated .py resource file to use relative imports.
@@ -277,17 +295,31 @@ def patch_resource_file(py_file: Path) -> bool:
 
     try:
         content = py_file.read_text(encoding="utf-8")
+        original_content = content
         import re
 
         # Fix 'import <name>_rc' to 'from . import <name>_rc'
-        patched_content = re.sub(
-            r"^import (\w+_rc)", r"from . import \1", content, flags=re.MULTILINE
-        )
+        # Only if not already relative
+        if re.search(r"^import \w+_rc", content, flags=re.MULTILINE):
+            content = re.sub(
+                r"^import (\w+_rc)", r"from . import \1", content, flags=re.MULTILINE
+            )
 
-        if patched_content != content:
-            py_file.write_text(patched_content, encoding="utf-8")
+        # Fix 'from PyQt5' to 'from qgis.PyQt' for QGIS compatibility
+        content = content.replace("from PyQt5", "from qgis.PyQt")
+
+        if content != original_content:
+            py_file.write_text(content, encoding="utf-8")
             logger.debug(f"  ✅ Patched imports in {py_file.name}")
+
+            # Verification step
+            if not verify_resource_patch(py_file):
+                logger.warning(
+                    f"  ⚠️  Patch verification failed for {py_file.name}. "
+                    "It may still contain invalid imports."
+                )
             return True
+
     except Exception as e:
         logger.warning(f"  ⚠️  Failed to patch {py_file.name}: {e}")
 
