@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.3] - 2026-02-18
+
+### Fixed
+- **Structural Validation Tests**: Fixed `test_validation_deep.py` tests that failed because `__init__.py` was created empty (without `classFactory`), not satisfying the stricter validation rules introduced in v0.6.2.
+- **Linting Errors**: Resolved `E501` line-too-long errors in `core.py` (`verify_resource_patch`) and `validation.py` (boolean field warning message).
+- **Blank-Line Whitespace**: Removed trailing whitespace from blank lines inside `patch_resource_file` in `core.py`.
+
+### Added
+- **CI Verification Step**: Added `uv run qgis-manage --version` step to GitHub Actions workflow to verify CLI installation on every CI run.
+- **Release Notes**: Added `docs/releases/v0.6.3.md` with detailed release notes.
+- **Maintenance Report**: Added `docs/maintenance/infrastructure_upgrade_20260218.md` documenting the validation hardening work.
+
 ## [0.6.2] - 2026-02-18
 
 ### Added
