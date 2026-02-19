@@ -55,6 +55,30 @@ qgis-manage = "qgis_manager.cli:main"
 [tool.hatch.build.targets.wheel]
 packages = ["src/qgis_manager"]
 
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/.agent",
+    "/.github",
+    "/.vscode",
+    "/.pre-commit-config.yaml",
+    "/.gitattributes",
+    "/.ai_context_cache.json",
+    "/AI_CONTEXT.md",
+    "/PROJECT_SUMMARY.md",
+    "/RULES.md",
+    "/agentic_framework_guide.md",
+    "/agentic_framework_skeleton.zip",
+    "/antigravity-framerepo",
+    "/bootstrap.py",
+    "/metadata.txt",
+    "/project_context.json",
+    "/uv.lock",
+    "/Makefile",
+    "/tests",
+    "/docs",
+    "/scaffold",
+]
+
 [tool.uv]
 managed = true
 package = true
