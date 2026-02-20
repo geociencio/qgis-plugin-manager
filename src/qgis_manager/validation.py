@@ -84,15 +84,20 @@ def get_optional_fields() -> list[str]:
 
 
 def validate_version(version_str: str) -> bool:
-    """Validate version format using semantic versioning (X.Y.Z).
+    """Validate version format using semantic versioning.
 
     Args:
         version_str: Version string to validate.
 
     Returns:
-        True if version matches X.Y or X.Y.Z format.
+        True if version matches SemVer format (including pre-releases).
     """
-    pattern = r"^\d+\.\d+(\.\d+)?$"
+    pattern = r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-zA-Z0-9-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][a-zA-Z0-9-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$"  # noqa: E501
+
+    # QGIS mínimo a menudo solo tiene X.Y (ej "3.0"). Fallback simple si falla.  # noqa: E501
+    if re.match(r"^\d+\.\d+$", version_str):
+        return True
+
     return bool(re.match(pattern, version_str))
 
 

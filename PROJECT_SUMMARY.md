@@ -1,12 +1,12 @@
 # PROJECT SUMMARY - qgis-plugin-manager
-Analysis Date: 2026-02-18 18:08:33
+Analysis Date: 2026-02-18 21:56:21
 Analyzer Version: 3.1.1 (Ai-Context-Core)
 
 ## 📊 KEY METRICS
-- **Quality Score**: 77.3/100
-- **Source Lines (SLOC)**: 3,495
-- **Total Physical Lines**: 5,280
-- **Maintainability**: 43.2
+- **Quality Score**: 77.1/100
+- **Source Lines (SLOC)**: 3,557
+- **Total Physical Lines**: 5,388
+- **Maintainability**: 43.1
 - **Test Coverage**: 14 test files
 
 ## 📁 STRUCTURE
@@ -93,7 +93,7 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
             GITHUB_RELEASE_v0.4.1.md
             GITHUB_RELEASE_v0.5.0.md
             GITHUB_RELEASE_v0.6.0.md
-            ... (+9 more)
+            ... (+11 more)
         guides/
             TUTORIAL.md
             uv_modernization_guide.md
@@ -102,6 +102,7 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
             CONTRIBUTING.md
         maintenance/
             SESSION_LOG_modernization.md
+            infrastructure_upgrade_20260218.md
             sesion_2026-02-18_v0.6.1_release.md
             sesion_2026-02-18_v0.6.1_release_task.md
             v0.6.1_bug_patch_report.md
@@ -121,8 +122,8 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
                 plugin.py.tmpl
     dist/
         .gitignore
-        qgis_manage-0.6.1-py3-none-any.whl
-        qgis_manage-0.6.1.tar.gz
+        qgis_manage-0.6.3-py3-none-any.whl
+        qgis_manage-0.6.3.tar.gz
     antigravity-framerepo/
         BOOTSTRAP.md
         LICENSE
@@ -187,11 +188,11 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
 - **antigravity-framerepo/scripts/skill_sync.py**: 2 issues (Max: HIGH)
 
 ## 💡 MAIN RECOMMENDATIONS
-### src/qgis_manager/ignore.py
-- Consider breaking down large logic
-### src/qgis_manager/validation.py
-- Consider breaking down large logic
 ### src/qgis_manager/cli/commands/bump.py
+- Consider breaking down large logic
+### src/qgis_manager/cli/commands/hooks.py
+- Consider breaking down large logic
+### src/qgis_manager/ignore.py
 - Consider breaking down large logic
 
 ## 🏗️ DESIGN PATTERNS
@@ -200,18 +201,18 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
 
 ## 🔄 GIT ANALYSIS
 ### Code Churn (last 30 days)
-- **Files Changed**: 176
-- **Additions**: +17756
-- **Deletions**: -1218
-- **Total Churn**: 18974
+- **Files Changed**: 198
+- **Additions**: +21555
+- **Deletions**: -3818
+- **Total Churn**: 25373
 
 ### 🔥 Hotspots
-- `src/qgis_manager/core.py`: 18 commits
+- `src/qgis_manager/core.py`: 19 commits
 - `src/qgis_manager/cli.py`: 14 commits
 - `tests/test_core.py`: 12 commits
-- `src/qgis_manager/discovery.py`: 10 commits
-- `tests/test_discovery.py`: 7 commits
+- `src/qgis_manager/discovery.py`: 11 commits
+- `src/qgis_manager/validation.py`: 7 commits
 
 ## 📈 COMPLEXITY DISTRIBUTION
-- **Average Complexity**: 8.96
-- **Max Complexity**: 74
+- **Average Complexity**: 9.29
+- **Max Complexity**: 80

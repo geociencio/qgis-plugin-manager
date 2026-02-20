@@ -1,19 +1,19 @@
 {
   "project_name": "qgis-plugin-manager",
   "metrics": {
-    "quality_score": 77.31441176470588,
-    "total_lines_code": 3495,
-    "total_physical_lines": 5280,
-    "avg_complexity": 8.96,
-    "max_complexity": 74,
-    "avg_maintainability": 43.21,
+    "quality_score": 77.09617647058823,
+    "total_lines_code": 3557,
+    "total_physical_lines": 5388,
+    "avg_complexity": 9.29,
+    "max_complexity": 80,
+    "avg_maintainability": 43.06,
     "test_files_count": 14,
     "entry_points_count": 27
   },
   "complexity": {
     "total_modules": 51,
-    "total_lines": 3495,
-    "total_physical_lines": 5280,
+    "total_lines": 3557,
+    "total_physical_lines": 5388,
     "total_functions": 0,
     "total_classes": 0,
     "average_complexity": 0,
@@ -21,11 +21,11 @@
     "most_complex_modules": [
       [
         "src/qgis_manager/core.py",
-        74
+        80
       ],
       [
         "src/qgis_manager/validation.py",
-        32
+        43
       ],
       [
         "src/qgis_manager/ignore.py",
@@ -1577,6 +1577,68 @@
       "patterns": {}
     },
     {
+      "path": "src/qgis_manager/__init__.py",
+      "lines": 43,
+      "sloc": 11,
+      "loc": 11,
+      "file_size_kb": 1.81640625,
+      "complexity": 4,
+      "imports": [
+        "importlib.metadata.PackageNotFoundError",
+        "importlib.metadata.version",
+        "importlib_metadata.PackageNotFoundError",
+        "importlib_metadata.version",
+        "cli.main"
+      ],
+      "classes": [],
+      "functions": [],
+      "docstrings": {
+        "module": true,
+        "classes": {},
+        "functions": {}
+      },
+      "entry_point_info": {
+        "is_entry_point": true,
+        "type": "main_guard"
+      },
+      "has_main": true,
+      "type_hints": {
+        "total_functions": 0,
+        "typed_functions": 0,
+        "coverage": 100.0
+      },
+      "halstead": {
+        "vocabulary": 13,
+        "length": 15,
+        "volume": 45,
+        "difficulty": 1.65,
+        "effort": 74.25
+      },
+      "maintenance_index": 65.17,
+      "syntax_error": false,
+      "unused_imports": [],
+      "qgis_compliance": {
+        "processing_framework": false,
+        "i18n_usage": {
+          "tr": 0,
+          "translate": 0,
+          "total_strings": 1
+        },
+        "gdal_import_style": "Modern",
+        "qt_transition": {
+          "pyqt5_imports": [],
+          "pyqt6_imports": []
+        },
+        "signals_slots": {
+          "legacy": 0,
+          "modern": 0
+        }
+      },
+      "antipatterns": [],
+      "ast_security": [],
+      "patterns": {}
+    },
+    {
       "path": "src/qgis_manager/cli/__init__.py",
       "lines": 14,
       "sloc": 6,
@@ -1637,6 +1699,111 @@
       },
       "antipatterns": [],
       "ast_security": [],
+      "patterns": {}
+    },
+    {
+      "path": "src/qgis_manager/cli/app.py",
+      "lines": 146,
+      "sloc": 91,
+      "loc": 91,
+      "file_size_kb": 4.326171875,
+      "complexity": 11,
+      "imports": [
+        "argparse",
+        "logging",
+        "sys",
+        "base.BaseCommand",
+        "commands.analyze.AnalyzeCommand",
+        "commands.bump.BumpCommand",
+        "commands.clean.CleanCommand",
+        "commands.compile.CompileCommand",
+        "commands.deploy.DeployCommand",
+        "commands.hooks.HooksCommand",
+        "commands.init.InitCommand",
+        "commands.install_deps.InstallDepsCommand",
+        "commands.package.PackageCommand",
+        "commands.validate.ValidateCommand",
+        "__version__",
+        "logging",
+        "click"
+      ],
+      "classes": [
+        "CLIApp"
+      ],
+      "functions": [
+        "__init__(1 args)",
+        "_discover_commands(1 args)",
+        "_build_parser(1 args)",
+        "_setup_logging(2 args)",
+        "run(2 args)"
+      ],
+      "docstrings": {
+        "module": true,
+        "classes": {
+          "CLIApp": true
+        },
+        "functions": {
+          "__init__": true,
+          "_discover_commands": true,
+          "_build_parser": true,
+          "_setup_logging": true,
+          "run": true
+        }
+      },
+      "entry_point_info": {
+        "is_entry_point": false,
+        "type": null
+      },
+      "has_main": false,
+      "type_hints": {
+        "total_functions": 5,
+        "typed_functions": 5,
+        "coverage": 100.0
+      },
+      "halstead": {
+        "vocabulary": 79,
+        "length": 162,
+        "volume": 972,
+        "difficulty": 10.29,
+        "effort": 10001.74
+      },
+      "maintenance_index": 34.87,
+      "syntax_error": false,
+      "unused_imports": [],
+      "qgis_compliance": {
+        "processing_framework": false,
+        "i18n_usage": {
+          "tr": 0,
+          "translate": 0,
+          "total_strings": 16
+        },
+        "gdal_import_style": "Modern",
+        "qt_transition": {
+          "pyqt5_imports": [],
+          "pyqt6_imports": []
+        },
+        "signals_slots": {
+          "legacy": 0,
+          "modern": 0
+        }
+      },
+      "antipatterns": [
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 2",
+          "line": 99,
+          "value": 2
+        }
+      ],
+      "ast_security": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 141,
+          "description": "Too broad exception handler"
+        }
+      ],
       "patterns": {}
     },
     {
@@ -1794,6 +1961,138 @@
           "pattern": "except Exception:",
           "severity": "low",
           "line": 49,
+          "description": "Too broad exception handler"
+        }
+      ],
+      "patterns": {}
+    },
+    {
+      "path": "src/qgis_manager/cli/commands/bump.py",
+      "lines": 244,
+      "sloc": 147,
+      "loc": 147,
+      "file_size_kb": 7.9501953125,
+      "complexity": 20,
+      "imports": [
+        "argparse",
+        "logging",
+        "re",
+        "pathlib.Path",
+        "click",
+        "discovery.find_project_root",
+        "discovery.get_plugin_metadata",
+        "discovery.save_plugin_metadata",
+        "base.BaseCommand",
+        "tomllib"
+      ],
+      "classes": [
+        "BumpCommand(BaseCommand)"
+      ],
+      "functions": [
+        "name(1 args)",
+        "help(1 args)",
+        "configure_parser(2 args)",
+        "execute(2 args)",
+        "_bump_version(3 args)",
+        "_sync_versions(2 args)",
+        "_get_version(2 args)",
+        "_get_pyproject_version(2 args)",
+        "_update_version_in_files(3 args)"
+      ],
+      "docstrings": {
+        "module": true,
+        "classes": {
+          "BumpCommand": true
+        },
+        "functions": {
+          "name": true,
+          "help": true,
+          "configure_parser": true,
+          "execute": true,
+          "_bump_version": true,
+          "_sync_versions": true,
+          "_get_version": true,
+          "_get_pyproject_version": true,
+          "_update_version_in_files": true
+        }
+      },
+      "entry_point_info": {
+        "is_entry_point": false,
+        "type": null
+      },
+      "has_main": false,
+      "type_hints": {
+        "total_functions": 9,
+        "typed_functions": 9,
+        "coverage": 100.0
+      },
+      "halstead": {
+        "vocabulary": 122,
+        "length": 375,
+        "volume": 2250,
+        "difficulty": 19.2,
+        "effort": 43204.13
+      },
+      "maintenance_index": 26.56,
+      "syntax_error": false,
+      "unused_imports": [],
+      "qgis_compliance": {
+        "processing_framework": false,
+        "i18n_usage": {
+          "tr": 0,
+          "translate": 0,
+          "total_strings": 54
+        },
+        "gdal_import_style": "Modern",
+        "qt_transition": {
+          "pyqt5_imports": [],
+          "pyqt6_imports": []
+        },
+        "signals_slots": {
+          "legacy": 0,
+          "modern": 0
+        }
+      },
+      "antipatterns": [
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 3",
+          "line": 94,
+          "value": 3
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 3",
+          "line": 96,
+          "value": 3
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 2",
+          "line": 216,
+          "value": 2
+        }
+      ],
+      "ast_security": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 72,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 187,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 239,
           "description": "Too broad exception handler"
         }
       ],
@@ -2116,6 +2415,99 @@
       "patterns": {}
     },
     {
+      "path": "src/qgis_manager/cli/commands/hooks.py",
+      "lines": 184,
+      "sloc": 142,
+      "loc": 142,
+      "file_size_kb": 5.6845703125,
+      "complexity": 19,
+      "imports": [
+        "argparse",
+        "pathlib.Path",
+        "click",
+        "discovery.find_project_root",
+        "hooks.execute_python_hook",
+        "base.BaseCommand",
+        "importlib.util",
+        "config.Settings",
+        "config.load_project_config"
+      ],
+      "classes": [
+        "HooksCommand(BaseCommand)"
+      ],
+      "functions": [
+        "name(1 args)",
+        "help(1 args)",
+        "configure_parser(2 args)",
+        "execute(2 args)",
+        "_hooks_list(2 args)",
+        "_hooks_init(2 args)",
+        "_hooks_test(3 args)"
+      ],
+      "docstrings": {
+        "module": true,
+        "classes": {
+          "HooksCommand": true
+        },
+        "functions": {
+          "name": false,
+          "help": false,
+          "configure_parser": false,
+          "execute": false,
+          "_hooks_list": true,
+          "_hooks_init": true,
+          "_hooks_test": true
+        }
+      },
+      "entry_point_info": {
+        "is_entry_point": false,
+        "type": null
+      },
+      "has_main": false,
+      "type_hints": {
+        "total_functions": 7,
+        "typed_functions": 7,
+        "coverage": 100.0
+      },
+      "halstead": {
+        "vocabulary": 101,
+        "length": 236,
+        "volume": 1416,
+        "difficulty": 9.88,
+        "effort": 13990.7
+      },
+      "maintenance_index": 28.43,
+      "syntax_error": false,
+      "unused_imports": [],
+      "qgis_compliance": {
+        "processing_framework": false,
+        "i18n_usage": {
+          "tr": 0,
+          "translate": 0,
+          "total_strings": 41
+        },
+        "gdal_import_style": "Modern",
+        "qt_transition": {
+          "pyqt5_imports": [],
+          "pyqt6_imports": []
+        },
+        "signals_slots": {
+          "legacy": 0,
+          "modern": 0
+        }
+      },
+      "antipatterns": [],
+      "ast_security": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 61,
+          "description": "Too broad exception handler"
+        }
+      ],
+      "patterns": {}
+    },
+    {
       "path": "src/qgis_manager/cli/commands/init.py",
       "lines": 69,
       "sloc": 55,
@@ -2277,6 +2669,202 @@
           "pattern": "except Exception:",
           "severity": "low",
           "line": 38,
+          "description": "Too broad exception handler"
+        }
+      ],
+      "patterns": {}
+    },
+    {
+      "path": "src/qgis_manager/cli/commands/package.py",
+      "lines": 118,
+      "sloc": 92,
+      "loc": 92,
+      "file_size_kb": 4.267578125,
+      "complexity": 11,
+      "imports": [
+        "argparse",
+        "pathlib.Path",
+        "click",
+        "core.create_plugin_package",
+        "dependencies.install_external_libs",
+        "discovery.find_project_root",
+        "base.BaseCommand",
+        "tomllib",
+        "discovery.get_plugin_metadata",
+        "discovery.save_plugin_metadata",
+        "discovery.get_plugin_metadata",
+        "validation.validate_metadata",
+        "validation.validate_official_compliance"
+      ],
+      "classes": [
+        "PackageCommand(BaseCommand)"
+      ],
+      "functions": [
+        "name(1 args)",
+        "help(1 args)",
+        "configure_parser(2 args)",
+        "execute(2 args)",
+        "update_bar(1 args)"
+      ],
+      "docstrings": {
+        "module": true,
+        "classes": {
+          "PackageCommand": true
+        },
+        "functions": {
+          "name": false,
+          "help": false,
+          "configure_parser": false,
+          "execute": false,
+          "update_bar": false
+        }
+      },
+      "entry_point_info": {
+        "is_entry_point": false,
+        "type": null
+      },
+      "has_main": false,
+      "type_hints": {
+        "total_functions": 5,
+        "typed_functions": 4,
+        "coverage": 80.0
+      },
+      "halstead": {
+        "vocabulary": 87,
+        "length": 169,
+        "volume": 1014,
+        "difficulty": 11.6,
+        "effort": 11762.4
+      },
+      "maintenance_index": 34.63,
+      "syntax_error": false,
+      "unused_imports": [],
+      "qgis_compliance": {
+        "processing_framework": false,
+        "i18n_usage": {
+          "tr": 0,
+          "translate": 0,
+          "total_strings": 26
+        },
+        "gdal_import_style": "Modern",
+        "qt_transition": {
+          "pyqt5_imports": [],
+          "pyqt6_imports": []
+        },
+        "signals_slots": {
+          "legacy": 0,
+          "modern": 0
+        }
+      },
+      "antipatterns": [
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 100",
+          "line": 93,
+          "value": 100
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 100",
+          "line": 101,
+          "value": 100
+        }
+      ],
+      "ast_security": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 116,
+          "description": "Too broad exception handler"
+        }
+      ],
+      "patterns": {}
+    },
+    {
+      "path": "src/qgis_manager/cli/commands/validate.py",
+      "lines": 125,
+      "sloc": 78,
+      "loc": 78,
+      "file_size_kb": 4.2724609375,
+      "complexity": 16,
+      "imports": [
+        "argparse",
+        "logging",
+        "pathlib.Path",
+        "click",
+        "discovery.find_project_root",
+        "discovery.get_plugin_metadata",
+        "validation.validate_metadata",
+        "validation.validate_project_structure",
+        "base.BaseCommand",
+        "validation.validate_official_compliance"
+      ],
+      "classes": [
+        "ValidateCommand(BaseCommand)"
+      ],
+      "functions": [
+        "name(1 args)",
+        "help(1 args)",
+        "configure_parser(2 args)",
+        "execute(2 args)"
+      ],
+      "docstrings": {
+        "module": true,
+        "classes": {
+          "ValidateCommand": true
+        },
+        "functions": {
+          "name": true,
+          "help": true,
+          "configure_parser": true,
+          "execute": true
+        }
+      },
+      "entry_point_info": {
+        "is_entry_point": false,
+        "type": null
+      },
+      "has_main": false,
+      "type_hints": {
+        "total_functions": 4,
+        "typed_functions": 4,
+        "coverage": 100.0
+      },
+      "halstead": {
+        "vocabulary": 78,
+        "length": 191,
+        "volume": 1146,
+        "difficulty": 10.7,
+        "effort": 12257.22
+      },
+      "maintenance_index": 35.15,
+      "syntax_error": false,
+      "unused_imports": [],
+      "qgis_compliance": {
+        "processing_framework": false,
+        "i18n_usage": {
+          "tr": 0,
+          "translate": 0,
+          "total_strings": 26
+        },
+        "gdal_import_style": "Modern",
+        "qt_transition": {
+          "pyqt5_imports": [],
+          "pyqt6_imports": []
+        },
+        "signals_slots": {
+          "legacy": 0,
+          "modern": 0
+        }
+      },
+      "antipatterns": [],
+      "ast_security": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 122,
           "description": "Too broad exception handler"
         }
       ],
@@ -2505,6 +3093,510 @@
       "patterns": {}
     },
     {
+      "path": "src/qgis_manager/dependencies.py",
+      "lines": 66,
+      "sloc": 46,
+      "loc": 46,
+      "file_size_kb": 2.3115234375,
+      "complexity": 9,
+      "imports": [
+        "logging",
+        "subprocess",
+        "sys",
+        "pathlib.Path",
+        "tomllib",
+        "tomli"
+      ],
+      "classes": [],
+      "functions": [
+        "get_dependencies(1 args)",
+        "install_external_libs(2 args)"
+      ],
+      "docstrings": {
+        "module": false,
+        "classes": {},
+        "functions": {
+          "get_dependencies": true,
+          "install_external_libs": true
+        }
+      },
+      "entry_point_info": {
+        "is_entry_point": false,
+        "type": null
+      },
+      "has_main": false,
+      "type_hints": {
+        "total_functions": 2,
+        "typed_functions": 2,
+        "coverage": 100.0
+      },
+      "halstead": {
+        "vocabulary": 66,
+        "length": 126,
+        "volume": 756,
+        "difficulty": 8.53,
+        "effort": 6445.89
+      },
+      "maintenance_index": 42.36,
+      "syntax_error": false,
+      "unused_imports": [],
+      "qgis_compliance": {
+        "processing_framework": false,
+        "i18n_usage": {
+          "tr": 0,
+          "translate": 0,
+          "total_strings": 9
+        },
+        "gdal_import_style": "Modern",
+        "qt_transition": {
+          "pyqt5_imports": [],
+          "pyqt6_imports": []
+        },
+        "signals_slots": {
+          "legacy": 0,
+          "modern": 0
+        }
+      },
+      "antipatterns": [
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 3",
+          "line": 6,
+          "value": 3
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 11",
+          "line": 6,
+          "value": 11
+        }
+      ],
+      "ast_security": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 27,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 64,
+          "description": "Too broad exception handler"
+        }
+      ],
+      "patterns": {}
+    },
+    {
+      "path": "src/qgis_manager/discovery.py",
+      "lines": 167,
+      "sloc": 70,
+      "loc": 70,
+      "file_size_kb": 5.935546875,
+      "complexity": 14,
+      "imports": [
+        "configparser",
+        "logging",
+        "re",
+        "collections.abc.Iterator",
+        "pathlib.Path",
+        "typing.Any",
+        "ignore.IgnoreMatcher",
+        "ignore.load_ignore_patterns"
+      ],
+      "classes": [],
+      "functions": [
+        "slugify(1 args)",
+        "find_project_root(1 args)",
+        "get_plugin_metadata(1 args)",
+        "save_plugin_metadata(2 args)",
+        "get_source_files(2 args)"
+      ],
+      "docstrings": {
+        "module": true,
+        "classes": {},
+        "functions": {
+          "slugify": true,
+          "find_project_root": true,
+          "get_plugin_metadata": true,
+          "save_plugin_metadata": true,
+          "get_source_files": true
+        }
+      },
+      "entry_point_info": {
+        "is_entry_point": false,
+        "type": null
+      },
+      "has_main": false,
+      "type_hints": {
+        "total_functions": 5,
+        "typed_functions": 5,
+        "coverage": 100.0
+      },
+      "halstead": {
+        "vocabulary": 72,
+        "length": 186,
+        "volume": 1116,
+        "difficulty": 14.52,
+        "effort": 16200.3
+      },
+      "maintenance_index": 36.53,
+      "syntax_error": false,
+      "unused_imports": [],
+      "qgis_compliance": {
+        "processing_framework": false,
+        "i18n_usage": {
+          "tr": 0,
+          "translate": 0,
+          "total_strings": 12
+        },
+        "gdal_import_style": "Modern",
+        "qt_transition": {
+          "pyqt5_imports": [],
+          "pyqt6_imports": []
+        },
+        "signals_slots": {
+          "legacy": 0,
+          "modern": 0
+        }
+      },
+      "antipatterns": [],
+      "ast_security": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 107,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 114,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 144,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 104,
+          "description": "Too broad exception handler"
+        }
+      ],
+      "patterns": {}
+    },
+    {
+      "path": "src/qgis_manager/hooks.py",
+      "lines": 122,
+      "sloc": 80,
+      "loc": 80,
+      "file_size_kb": 3.5673828125,
+      "complexity": 15,
+      "imports": [
+        "importlib.util",
+        "logging",
+        "os",
+        "subprocess",
+        "sys",
+        "pathlib.Path",
+        "typing.Any"
+      ],
+      "classes": [],
+      "functions": [
+        "execute_python_hook(3 args)",
+        "run_hook(4 args)"
+      ],
+      "docstrings": {
+        "module": false,
+        "classes": {},
+        "functions": {
+          "execute_python_hook": true,
+          "run_hook": true
+        }
+      },
+      "entry_point_info": {
+        "is_entry_point": false,
+        "type": null
+      },
+      "has_main": false,
+      "type_hints": {
+        "total_functions": 2,
+        "typed_functions": 2,
+        "coverage": 100.0
+      },
+      "halstead": {
+        "vocabulary": 72,
+        "length": 182,
+        "volume": 1092,
+        "difficulty": 11.07,
+        "effort": 12090.0
+      },
+      "maintenance_index": 35.19,
+      "syntax_error": false,
+      "unused_imports": [],
+      "qgis_compliance": {
+        "processing_framework": false,
+        "i18n_usage": {
+          "tr": 0,
+          "translate": 0,
+          "total_strings": 0
+        },
+        "gdal_import_style": "Modern",
+        "qt_transition": {
+          "pyqt5_imports": [],
+          "pyqt6_imports": []
+        },
+        "signals_slots": {
+          "legacy": 0,
+          "modern": 0
+        }
+      },
+      "antipatterns": [],
+      "ast_security": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 58,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 120,
+          "description": "Too broad exception handler"
+        }
+      ],
+      "patterns": {}
+    },
+    {
+      "path": "src/qgis_manager/ignore.py",
+      "lines": 171,
+      "sloc": 99,
+      "loc": 99,
+      "file_size_kb": 6.0947265625,
+      "complexity": 28,
+      "imports": [
+        "fnmatch",
+        "sys",
+        "pathlib.Path",
+        "tomllib",
+        "re",
+        "constants.DEFAULT_EXCLUDE_PATTERNS",
+        "constants.DEV_DIRECTORIES"
+      ],
+      "classes": [
+        "TomlLoaderShim",
+        "IgnoreMatcher"
+      ],
+      "functions": [
+        "load(1 args)",
+        "load_ignore_patterns(2 args)",
+        "__init__(3 args)",
+        "should_exclude(2 args)",
+        "get_ignore_func(1 args)",
+        "ignore_func(2 args)"
+      ],
+      "docstrings": {
+        "module": true,
+        "classes": {
+          "TomlLoaderShim": false,
+          "IgnoreMatcher": true
+        },
+        "functions": {
+          "load": false,
+          "load_ignore_patterns": true,
+          "__init__": false,
+          "should_exclude": true,
+          "get_ignore_func": true,
+          "ignore_func": false
+        }
+      },
+      "entry_point_info": {
+        "is_entry_point": false,
+        "type": null
+      },
+      "has_main": false,
+      "type_hints": {
+        "total_functions": 6,
+        "typed_functions": 2,
+        "coverage": 33.33333333333333
+      },
+      "halstead": {
+        "vocabulary": 88,
+        "length": 237,
+        "volume": 1422,
+        "difficulty": 15.24,
+        "effort": 21666.79
+      },
+      "maintenance_index": 30.62,
+      "syntax_error": false,
+      "unused_imports": [],
+      "qgis_compliance": {
+        "processing_framework": false,
+        "i18n_usage": {
+          "tr": 0,
+          "translate": 0,
+          "total_strings": 5
+        },
+        "gdal_import_style": "Modern",
+        "qt_transition": {
+          "pyqt5_imports": [],
+          "pyqt6_imports": []
+        },
+        "signals_slots": {
+          "legacy": 0,
+          "modern": 0
+        }
+      },
+      "antipatterns": [
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 3",
+          "line": 32,
+          "value": 3
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 11",
+          "line": 32,
+          "value": 11
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 3",
+          "line": 109,
+          "value": 3
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 11",
+          "line": 109,
+          "value": 11
+        }
+      ],
+      "ast_security": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 118,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 101,
+          "description": "Too broad exception handler"
+        }
+      ],
+      "patterns": {
+        "Decorator": [
+          {
+            "class": "get_ignore_func",
+            "type": "function",
+            "confidence": 50,
+            "evidence": [
+              "Function contains and returns inner 'ignore_func'"
+            ],
+            "module": "src/qgis_manager/ignore.py"
+          }
+        ]
+      }
+    },
+    {
+      "path": "tests/test_cli.py",
+      "lines": 81,
+      "sloc": 69,
+      "loc": 69,
+      "file_size_kb": 3.015625,
+      "complexity": 3,
+      "imports": [
+        "io",
+        "unittest",
+        "contextlib.redirect_stderr",
+        "contextlib.redirect_stdout",
+        "pathlib.Path",
+        "unittest.mock.patch",
+        "qgis_manager.cli.app.CLIApp"
+      ],
+      "classes": [
+        "TestCLI(unittest)"
+      ],
+      "functions": [
+        "setUp(1 args)",
+        "_invoke(2 args)",
+        "test_cli_help(1 args)",
+        "test_cli_init_success(1 args)",
+        "test_cli_package_no_project(1 args)",
+        "test_cli_validate_no_project(1 args)",
+        "test_cli_compile_docs(3 args)"
+      ],
+      "docstrings": {
+        "module": false,
+        "classes": {
+          "TestCLI": false
+        },
+        "functions": {
+          "setUp": false,
+          "_invoke": false,
+          "test_cli_help": false,
+          "test_cli_init_success": false,
+          "test_cli_package_no_project": false,
+          "test_cli_validate_no_project": false,
+          "test_cli_compile_docs": false
+        }
+      },
+      "entry_point_info": {
+        "is_entry_point": true,
+        "type": "main_guard"
+      },
+      "has_main": true,
+      "type_hints": {
+        "total_functions": 7,
+        "typed_functions": 0,
+        "coverage": 0.0
+      },
+      "halstead": {
+        "vocabulary": 61,
+        "length": 154,
+        "volume": 770,
+        "difficulty": 8.81,
+        "effort": 6787.41
+      },
+      "maintenance_index": 39.27,
+      "syntax_error": false,
+      "unused_imports": [],
+      "qgis_compliance": {
+        "processing_framework": false,
+        "i18n_usage": {
+          "tr": 0,
+          "translate": 0,
+          "total_strings": 21
+        },
+        "gdal_import_style": "Modern",
+        "qt_transition": {
+          "pyqt5_imports": [],
+          "pyqt6_imports": []
+        },
+        "signals_slots": {
+          "legacy": 0,
+          "modern": 0
+        }
+      },
+      "antipatterns": [],
+      "ast_security": [],
+      "patterns": {}
+    },
+    {
       "path": "tests/test_config.py",
       "lines": 49,
       "sloc": 40,
@@ -2577,6 +3669,252 @@
         }
       },
       "antipatterns": [],
+      "ast_security": [],
+      "patterns": {}
+    },
+    {
+      "path": "tests/test_core.py",
+      "lines": 242,
+      "sloc": 170,
+      "loc": 170,
+      "file_size_kb": 8.4052734375,
+      "complexity": 4,
+      "imports": [
+        "tempfile",
+        "unittest",
+        "pathlib.Path",
+        "unittest.mock.MagicMock",
+        "unittest.mock.patch",
+        "qgis_manager.core.clean_artifacts",
+        "qgis_manager.core.compile_docs",
+        "qgis_manager.core.compile_qt_resources",
+        "qgis_manager.core.deploy_plugin",
+        "qgis_manager.core.get_qgis_plugin_dir",
+        "qgis_manager.core.init_plugin_project"
+      ],
+      "classes": [
+        "TestCore(unittest)"
+      ],
+      "functions": [
+        "test_get_qgis_plugin_dir_linux(1 args)",
+        "test_get_qgis_plugin_dir_linux_custom_profile(1 args)",
+        "test_get_qgis_plugin_dir_darwin(1 args)",
+        "test_get_qgis_plugin_dir_win32(1 args)",
+        "test_get_qgis_plugin_dir_win32_custom(1 args)",
+        "test_get_qgis_plugin_dir_unsupported(1 args)",
+        "test_deploy_plugin(3 args)",
+        "test_deploy_plugin_with_backup(5 args)",
+        "test_compile_qt_resources(2 args)",
+        "test_clean_artifacts(1 args)",
+        "test_init_plugin_project(1 args)",
+        "test_deploy_plugin_with_callback(3 args)",
+        "callback(1 args)",
+        "test_compile_docs(2 args)",
+        "test_compile_docs_with_callback(2 args)",
+        "callback(1 args)"
+      ],
+      "docstrings": {
+        "module": false,
+        "classes": {
+          "TestCore": false
+        },
+        "functions": {
+          "test_get_qgis_plugin_dir_linux": false,
+          "test_get_qgis_plugin_dir_linux_custom_profile": false,
+          "test_get_qgis_plugin_dir_darwin": false,
+          "test_get_qgis_plugin_dir_win32": false,
+          "test_get_qgis_plugin_dir_win32_custom": false,
+          "test_get_qgis_plugin_dir_unsupported": false,
+          "test_deploy_plugin": false,
+          "test_deploy_plugin_with_backup": false,
+          "test_compile_qt_resources": false,
+          "test_clean_artifacts": false,
+          "test_init_plugin_project": false,
+          "test_deploy_plugin_with_callback": false,
+          "callback": false,
+          "test_compile_docs": false,
+          "test_compile_docs_with_callback": false
+        }
+      },
+      "entry_point_info": {
+        "is_entry_point": true,
+        "type": "main_guard"
+      },
+      "has_main": true,
+      "type_hints": {
+        "total_functions": 16,
+        "typed_functions": 0,
+        "coverage": 0.0
+      },
+      "halstead": {
+        "vocabulary": 117,
+        "length": 411,
+        "volume": 2466,
+        "difficulty": 13.14,
+        "effort": 32397.36
+      },
+      "maintenance_index": 27.06,
+      "syntax_error": false,
+      "unused_imports": [],
+      "qgis_compliance": {
+        "processing_framework": false,
+        "i18n_usage": {
+          "tr": 0,
+          "translate": 0,
+          "total_strings": 38
+        },
+        "gdal_import_style": "Modern",
+        "qt_transition": {
+          "pyqt5_imports": [],
+          "pyqt6_imports": []
+        },
+        "signals_slots": {
+          "legacy": 0,
+          "modern": 0
+        }
+      },
+      "antipatterns": [
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 2",
+          "line": 111,
+          "value": 2
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 2",
+          "line": 206,
+          "value": 2
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 100",
+          "line": 179,
+          "value": 100
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 2",
+          "line": 210,
+          "value": 2
+        }
+      ],
+      "ast_security": [],
+      "patterns": {}
+    },
+    {
+      "path": "tests/test_deployment_optimization.py",
+      "lines": 94,
+      "sloc": 61,
+      "loc": 61,
+      "file_size_kb": 3.123046875,
+      "complexity": 4,
+      "imports": [
+        "shutil",
+        "tempfile",
+        "time",
+        "unittest",
+        "pathlib.Path",
+        "src.qgis_manager.core.rotate_backups",
+        "src.qgis_manager.core.sync_directory",
+        "src.qgis_manager.ignore.IgnoreMatcher"
+      ],
+      "classes": [
+        "TestDeploymentOptimization(unittest)"
+      ],
+      "functions": [
+        "setUp(1 args)",
+        "tearDown(1 args)",
+        "test_rotate_backups(1 args)",
+        "test_sync_directory_initial(1 args)",
+        "test_sync_directory_update(1 args)",
+        "test_sync_directory_cleanup(1 args)"
+      ],
+      "docstrings": {
+        "module": false,
+        "classes": {
+          "TestDeploymentOptimization": false
+        },
+        "functions": {
+          "setUp": false,
+          "tearDown": false,
+          "test_rotate_backups": false,
+          "test_sync_directory_initial": false,
+          "test_sync_directory_update": false,
+          "test_sync_directory_cleanup": false
+        }
+      },
+      "entry_point_info": {
+        "is_entry_point": true,
+        "type": "main_guard"
+      },
+      "has_main": true,
+      "type_hints": {
+        "total_functions": 6,
+        "typed_functions": 0,
+        "coverage": 0.0
+      },
+      "halstead": {
+        "vocabulary": 49,
+        "length": 176,
+        "volume": 880,
+        "difficulty": 10.26,
+        "effort": 9025.12
+      },
+      "maintenance_index": 39.9,
+      "syntax_error": false,
+      "unused_imports": [],
+      "qgis_compliance": {
+        "processing_framework": false,
+        "i18n_usage": {
+          "tr": 0,
+          "translate": 0,
+          "total_strings": 14
+        },
+        "gdal_import_style": "Modern",
+        "qt_transition": {
+          "pyqt5_imports": [],
+          "pyqt6_imports": []
+        },
+        "signals_slots": {
+          "legacy": 0,
+          "modern": 0
+        }
+      },
+      "antipatterns": [
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 6",
+          "line": 28,
+          "value": 6
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 3",
+          "line": 36,
+          "value": 3
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 0.1",
+          "line": 65,
+          "value": 0.1
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 3",
+          "line": 33,
+          "value": 3
+        }
+      ],
       "ast_security": [],
       "patterns": {}
     },
@@ -2891,901 +4229,6 @@
       "patterns": {}
     },
     {
-      "path": "tests/test_rcc_modernization.py",
-      "lines": 51,
-      "sloc": 38,
-      "loc": 38,
-      "file_size_kb": 1.373046875,
-      "complexity": 2,
-      "imports": [
-        "shutil",
-        "tempfile",
-        "unittest",
-        "pathlib.Path",
-        "src.qgis_manager.core.get_rcc_tool",
-        "src.qgis_manager.core.patch_resource_file"
-      ],
-      "classes": [
-        "TestRCCModernization(unittest)"
-      ],
-      "functions": [
-        "setUp(1 args)",
-        "tearDown(1 args)",
-        "test_get_rcc_tool(1 args)",
-        "test_patch_resource_file(1 args)",
-        "test_patch_resource_file_no_change(1 args)"
-      ],
-      "docstrings": {
-        "module": false,
-        "classes": {
-          "TestRCCModernization": false
-        },
-        "functions": {
-          "setUp": false,
-          "tearDown": false,
-          "test_get_rcc_tool": false,
-          "test_patch_resource_file": false,
-          "test_patch_resource_file_no_change": false
-        }
-      },
-      "entry_point_info": {
-        "is_entry_point": true,
-        "type": "main_guard"
-      },
-      "has_main": true,
-      "type_hints": {
-        "total_functions": 5,
-        "typed_functions": 0,
-        "coverage": 0.0
-      },
-      "halstead": {
-        "vocabulary": 29,
-        "length": 64,
-        "volume": 256,
-        "difficulty": 5.62,
-        "effort": 1440.0
-      },
-      "maintenance_index": 48.41,
-      "syntax_error": false,
-      "unused_imports": [],
-      "qgis_compliance": {
-        "processing_framework": false,
-        "i18n_usage": {
-          "tr": 0,
-          "translate": 0,
-          "total_strings": 8
-        },
-        "gdal_import_style": "Modern",
-        "qt_transition": {
-          "pyqt5_imports": [],
-          "pyqt6_imports": []
-        },
-        "signals_slots": {
-          "legacy": 0,
-          "modern": 0
-        }
-      },
-      "antipatterns": [],
-      "ast_security": [],
-      "patterns": {}
-    },
-    {
-      "path": "tests/test_validation.py",
-      "lines": 134,
-      "sloc": 115,
-      "loc": 115,
-      "file_size_kb": 4.7783203125,
-      "complexity": 7,
-      "imports": [
-        "unittest",
-        "qgis_manager.validation.get_optional_fields",
-        "qgis_manager.validation.get_required_fields",
-        "qgis_manager.validation.validate_email",
-        "qgis_manager.validation.validate_metadata",
-        "qgis_manager.validation.validate_url",
-        "qgis_manager.validation.validate_version"
-      ],
-      "classes": [
-        "TestValidation(unittest)"
-      ],
-      "functions": [
-        "test_get_required_fields(1 args)",
-        "test_get_optional_fields(1 args)",
-        "test_validate_version_valid(1 args)",
-        "test_validate_version_invalid(1 args)",
-        "test_validate_email_valid(1 args)",
-        "test_validate_email_invalid(1 args)",
-        "test_validate_url_valid(1 args)",
-        "test_validate_url_invalid(1 args)",
-        "test_validate_metadata_complete(1 args)",
-        "test_validate_metadata_missing_required(1 args)",
-        "test_validate_metadata_invalid_version(1 args)",
-        "test_validate_metadata_invalid_email(1 args)",
-        "test_validate_metadata_warnings(1 args)"
-      ],
-      "docstrings": {
-        "module": false,
-        "classes": {
-          "TestValidation": false
-        },
-        "functions": {
-          "test_get_required_fields": false,
-          "test_get_optional_fields": false,
-          "test_validate_version_valid": false,
-          "test_validate_version_invalid": false,
-          "test_validate_email_valid": false,
-          "test_validate_email_invalid": false,
-          "test_validate_url_valid": false,
-          "test_validate_url_invalid": false,
-          "test_validate_metadata_complete": false,
-          "test_validate_metadata_missing_required": false,
-          "test_validate_metadata_invalid_version": false,
-          "test_validate_metadata_invalid_email": false,
-          "test_validate_metadata_warnings": false
-        }
-      },
-      "entry_point_info": {
-        "is_entry_point": true,
-        "type": "main_guard"
-      },
-      "has_main": true,
-      "type_hints": {
-        "total_functions": 13,
-        "typed_functions": 0,
-        "coverage": 0.0
-      },
-      "halstead": {
-        "vocabulary": 61,
-        "length": 244,
-        "volume": 1220,
-        "difficulty": 10.0,
-        "effort": 12200.0
-      },
-      "maintenance_index": 32.5,
-      "syntax_error": false,
-      "unused_imports": [],
-      "qgis_compliance": {
-        "processing_framework": false,
-        "i18n_usage": {
-          "tr": 0,
-          "translate": 0,
-          "total_strings": 33
-        },
-        "gdal_import_style": "Modern",
-        "qt_transition": {
-          "pyqt5_imports": [],
-          "pyqt6_imports": []
-        },
-        "signals_slots": {
-          "legacy": 0,
-          "modern": 0
-        }
-      },
-      "antipatterns": [],
-      "ast_security": [],
-      "patterns": {}
-    },
-    {
-      "path": "tests/test_validation_deep.py",
-      "lines": 77,
-      "sloc": 62,
-      "loc": 62,
-      "file_size_kb": 2.59765625,
-      "complexity": 3,
-      "imports": [
-        "configparser",
-        "shutil",
-        "tempfile",
-        "unittest",
-        "pathlib.Path",
-        "src.qgis_manager.validation.validate_metadata",
-        "src.qgis_manager.validation.validate_project_structure"
-      ],
-      "classes": [
-        "TestStructuralValidation(unittest)"
-      ],
-      "functions": [
-        "setUp(1 args)",
-        "tearDown(1 args)",
-        "write_metadata(1 args)",
-        "test_missing_init_py(1 args)",
-        "test_missing_icon(1 args)",
-        "test_missing_custom_icon(1 args)",
-        "test_illegal_name(1 args)",
-        "test_valid_project(1 args)"
-      ],
-      "docstrings": {
-        "module": false,
-        "classes": {
-          "TestStructuralValidation": false
-        },
-        "functions": {
-          "setUp": false,
-          "tearDown": false,
-          "write_metadata": false,
-          "test_missing_init_py": false,
-          "test_missing_icon": false,
-          "test_missing_custom_icon": false,
-          "test_illegal_name": false,
-          "test_valid_project": false
-        }
-      },
-      "entry_point_info": {
-        "is_entry_point": true,
-        "type": "main_guard"
-      },
-      "has_main": true,
-      "type_hints": {
-        "total_functions": 8,
-        "typed_functions": 0,
-        "coverage": 0.0
-      },
-      "halstead": {
-        "vocabulary": 51,
-        "length": 123,
-        "volume": 615,
-        "difficulty": 8.27,
-        "effort": 5087.73
-      },
-      "maintenance_index": 40.97,
-      "syntax_error": false,
-      "unused_imports": [],
-      "qgis_compliance": {
-        "processing_framework": false,
-        "i18n_usage": {
-          "tr": 0,
-          "translate": 0,
-          "total_strings": 10
-        },
-        "gdal_import_style": "Modern",
-        "qt_transition": {
-          "pyqt5_imports": [],
-          "pyqt6_imports": []
-        },
-        "signals_slots": {
-          "legacy": 0,
-          "modern": 0
-        }
-      },
-      "antipatterns": [],
-      "ast_security": [],
-      "patterns": {}
-    },
-    {
-      "path": "src/qgis_manager/hooks.py",
-      "lines": 122,
-      "sloc": 80,
-      "loc": 80,
-      "file_size_kb": 3.5673828125,
-      "complexity": 15,
-      "imports": [
-        "importlib.util",
-        "logging",
-        "os",
-        "subprocess",
-        "sys",
-        "pathlib.Path",
-        "typing.Any"
-      ],
-      "classes": [],
-      "functions": [
-        "execute_python_hook(3 args)",
-        "run_hook(4 args)"
-      ],
-      "docstrings": {
-        "module": false,
-        "classes": {},
-        "functions": {
-          "execute_python_hook": true,
-          "run_hook": true
-        }
-      },
-      "entry_point_info": {
-        "is_entry_point": false,
-        "type": null
-      },
-      "has_main": false,
-      "type_hints": {
-        "total_functions": 2,
-        "typed_functions": 2,
-        "coverage": 100.0
-      },
-      "halstead": {
-        "vocabulary": 72,
-        "length": 182,
-        "volume": 1092,
-        "difficulty": 11.07,
-        "effort": 12090.0
-      },
-      "maintenance_index": 35.19,
-      "syntax_error": false,
-      "unused_imports": [],
-      "qgis_compliance": {
-        "processing_framework": false,
-        "i18n_usage": {
-          "tr": 0,
-          "translate": 0,
-          "total_strings": 0
-        },
-        "gdal_import_style": "Modern",
-        "qt_transition": {
-          "pyqt5_imports": [],
-          "pyqt6_imports": []
-        },
-        "signals_slots": {
-          "legacy": 0,
-          "modern": 0
-        }
-      },
-      "antipatterns": [],
-      "ast_security": [
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 58,
-          "description": "Too broad exception handler"
-        },
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 120,
-          "description": "Too broad exception handler"
-        }
-      ],
-      "patterns": {}
-    },
-    {
-      "path": "src/qgis_manager/ignore.py",
-      "lines": 171,
-      "sloc": 99,
-      "loc": 99,
-      "file_size_kb": 6.0947265625,
-      "complexity": 28,
-      "imports": [
-        "fnmatch",
-        "sys",
-        "pathlib.Path",
-        "tomllib",
-        "re",
-        "constants.DEFAULT_EXCLUDE_PATTERNS",
-        "constants.DEV_DIRECTORIES"
-      ],
-      "classes": [
-        "TomlLoaderShim",
-        "IgnoreMatcher"
-      ],
-      "functions": [
-        "load(1 args)",
-        "load_ignore_patterns(2 args)",
-        "__init__(3 args)",
-        "should_exclude(2 args)",
-        "get_ignore_func(1 args)",
-        "ignore_func(2 args)"
-      ],
-      "docstrings": {
-        "module": true,
-        "classes": {
-          "TomlLoaderShim": false,
-          "IgnoreMatcher": true
-        },
-        "functions": {
-          "load": false,
-          "load_ignore_patterns": true,
-          "__init__": false,
-          "should_exclude": true,
-          "get_ignore_func": true,
-          "ignore_func": false
-        }
-      },
-      "entry_point_info": {
-        "is_entry_point": false,
-        "type": null
-      },
-      "has_main": false,
-      "type_hints": {
-        "total_functions": 6,
-        "typed_functions": 2,
-        "coverage": 33.33333333333333
-      },
-      "halstead": {
-        "vocabulary": 88,
-        "length": 237,
-        "volume": 1422,
-        "difficulty": 15.24,
-        "effort": 21666.79
-      },
-      "maintenance_index": 30.62,
-      "syntax_error": false,
-      "unused_imports": [],
-      "qgis_compliance": {
-        "processing_framework": false,
-        "i18n_usage": {
-          "tr": 0,
-          "translate": 0,
-          "total_strings": 5
-        },
-        "gdal_import_style": "Modern",
-        "qt_transition": {
-          "pyqt5_imports": [],
-          "pyqt6_imports": []
-        },
-        "signals_slots": {
-          "legacy": 0,
-          "modern": 0
-        }
-      },
-      "antipatterns": [
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 3",
-          "line": 32,
-          "value": 3
-        },
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 11",
-          "line": 32,
-          "value": 11
-        },
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 3",
-          "line": 109,
-          "value": 3
-        },
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 11",
-          "line": 109,
-          "value": 11
-        }
-      ],
-      "ast_security": [
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 118,
-          "description": "Too broad exception handler"
-        },
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 101,
-          "description": "Too broad exception handler"
-        }
-      ],
-      "patterns": {
-        "Decorator": [
-          {
-            "class": "get_ignore_func",
-            "type": "function",
-            "confidence": 50,
-            "evidence": [
-              "Function contains and returns inner 'ignore_func'"
-            ],
-            "module": "src/qgis_manager/ignore.py"
-          }
-        ]
-      }
-    },
-    {
-      "path": "src/qgis_manager/validation.py",
-      "lines": 276,
-      "sloc": 130,
-      "loc": 130,
-      "file_size_kb": 8.744140625,
-      "complexity": 32,
-      "imports": [
-        "re",
-        "dataclasses.dataclass",
-        "pathlib.Path",
-        "typing.Any"
-      ],
-      "classes": [
-        "ValidationResult"
-      ],
-      "functions": [
-        "get_required_fields",
-        "get_optional_fields",
-        "validate_version(1 args)",
-        "validate_email(1 args)",
-        "validate_url(1 args)",
-        "validate_official_compliance(1 args)",
-        "validate_project_structure(2 args)",
-        "validate_metadata(1 args)"
-      ],
-      "docstrings": {
-        "module": true,
-        "classes": {
-          "ValidationResult": true
-        },
-        "functions": {
-          "get_required_fields": true,
-          "get_optional_fields": true,
-          "validate_version": true,
-          "validate_email": true,
-          "validate_url": true,
-          "validate_official_compliance": true,
-          "validate_project_structure": true,
-          "validate_metadata": true
-        }
-      },
-      "entry_point_info": {
-        "is_entry_point": false,
-        "type": null
-      },
-      "has_main": false,
-      "type_hints": {
-        "total_functions": 8,
-        "typed_functions": 8,
-        "coverage": 100.0
-      },
-      "halstead": {
-        "vocabulary": 121,
-        "length": 355,
-        "volume": 2130,
-        "difficulty": 15.8,
-        "effort": 33650.09
-      },
-      "maintenance_index": 26.28,
-      "syntax_error": false,
-      "unused_imports": [],
-      "qgis_compliance": {
-        "processing_framework": false,
-        "i18n_usage": {
-          "tr": 0,
-          "translate": 0,
-          "total_strings": 51
-        },
-        "gdal_import_style": "Modern",
-        "qt_transition": {
-          "pyqt5_imports": [],
-          "pyqt6_imports": []
-        },
-        "signals_slots": {
-          "legacy": 0,
-          "modern": 0
-        }
-      },
-      "antipatterns": [],
-      "ast_security": [],
-      "patterns": {}
-    },
-    {
-      "path": "tests/test_cli.py",
-      "lines": 81,
-      "sloc": 69,
-      "loc": 69,
-      "file_size_kb": 3.015625,
-      "complexity": 3,
-      "imports": [
-        "io",
-        "unittest",
-        "contextlib.redirect_stderr",
-        "contextlib.redirect_stdout",
-        "pathlib.Path",
-        "unittest.mock.patch",
-        "qgis_manager.cli.app.CLIApp"
-      ],
-      "classes": [
-        "TestCLI(unittest)"
-      ],
-      "functions": [
-        "setUp(1 args)",
-        "_invoke(2 args)",
-        "test_cli_help(1 args)",
-        "test_cli_init_success(1 args)",
-        "test_cli_package_no_project(1 args)",
-        "test_cli_validate_no_project(1 args)",
-        "test_cli_compile_docs(3 args)"
-      ],
-      "docstrings": {
-        "module": false,
-        "classes": {
-          "TestCLI": false
-        },
-        "functions": {
-          "setUp": false,
-          "_invoke": false,
-          "test_cli_help": false,
-          "test_cli_init_success": false,
-          "test_cli_package_no_project": false,
-          "test_cli_validate_no_project": false,
-          "test_cli_compile_docs": false
-        }
-      },
-      "entry_point_info": {
-        "is_entry_point": true,
-        "type": "main_guard"
-      },
-      "has_main": true,
-      "type_hints": {
-        "total_functions": 7,
-        "typed_functions": 0,
-        "coverage": 0.0
-      },
-      "halstead": {
-        "vocabulary": 61,
-        "length": 154,
-        "volume": 770,
-        "difficulty": 8.81,
-        "effort": 6787.41
-      },
-      "maintenance_index": 39.27,
-      "syntax_error": false,
-      "unused_imports": [],
-      "qgis_compliance": {
-        "processing_framework": false,
-        "i18n_usage": {
-          "tr": 0,
-          "translate": 0,
-          "total_strings": 21
-        },
-        "gdal_import_style": "Modern",
-        "qt_transition": {
-          "pyqt5_imports": [],
-          "pyqt6_imports": []
-        },
-        "signals_slots": {
-          "legacy": 0,
-          "modern": 0
-        }
-      },
-      "antipatterns": [],
-      "ast_security": [],
-      "patterns": {}
-    },
-    {
-      "path": "tests/test_core.py",
-      "lines": 242,
-      "sloc": 170,
-      "loc": 170,
-      "file_size_kb": 8.4052734375,
-      "complexity": 4,
-      "imports": [
-        "tempfile",
-        "unittest",
-        "pathlib.Path",
-        "unittest.mock.MagicMock",
-        "unittest.mock.patch",
-        "qgis_manager.core.clean_artifacts",
-        "qgis_manager.core.compile_docs",
-        "qgis_manager.core.compile_qt_resources",
-        "qgis_manager.core.deploy_plugin",
-        "qgis_manager.core.get_qgis_plugin_dir",
-        "qgis_manager.core.init_plugin_project"
-      ],
-      "classes": [
-        "TestCore(unittest)"
-      ],
-      "functions": [
-        "test_get_qgis_plugin_dir_linux(1 args)",
-        "test_get_qgis_plugin_dir_linux_custom_profile(1 args)",
-        "test_get_qgis_plugin_dir_darwin(1 args)",
-        "test_get_qgis_plugin_dir_win32(1 args)",
-        "test_get_qgis_plugin_dir_win32_custom(1 args)",
-        "test_get_qgis_plugin_dir_unsupported(1 args)",
-        "test_deploy_plugin(3 args)",
-        "test_deploy_plugin_with_backup(5 args)",
-        "test_compile_qt_resources(2 args)",
-        "test_clean_artifacts(1 args)",
-        "test_init_plugin_project(1 args)",
-        "test_deploy_plugin_with_callback(3 args)",
-        "callback(1 args)",
-        "test_compile_docs(2 args)",
-        "test_compile_docs_with_callback(2 args)",
-        "callback(1 args)"
-      ],
-      "docstrings": {
-        "module": false,
-        "classes": {
-          "TestCore": false
-        },
-        "functions": {
-          "test_get_qgis_plugin_dir_linux": false,
-          "test_get_qgis_plugin_dir_linux_custom_profile": false,
-          "test_get_qgis_plugin_dir_darwin": false,
-          "test_get_qgis_plugin_dir_win32": false,
-          "test_get_qgis_plugin_dir_win32_custom": false,
-          "test_get_qgis_plugin_dir_unsupported": false,
-          "test_deploy_plugin": false,
-          "test_deploy_plugin_with_backup": false,
-          "test_compile_qt_resources": false,
-          "test_clean_artifacts": false,
-          "test_init_plugin_project": false,
-          "test_deploy_plugin_with_callback": false,
-          "callback": false,
-          "test_compile_docs": false,
-          "test_compile_docs_with_callback": false
-        }
-      },
-      "entry_point_info": {
-        "is_entry_point": true,
-        "type": "main_guard"
-      },
-      "has_main": true,
-      "type_hints": {
-        "total_functions": 16,
-        "typed_functions": 0,
-        "coverage": 0.0
-      },
-      "halstead": {
-        "vocabulary": 117,
-        "length": 411,
-        "volume": 2466,
-        "difficulty": 13.14,
-        "effort": 32397.36
-      },
-      "maintenance_index": 27.06,
-      "syntax_error": false,
-      "unused_imports": [],
-      "qgis_compliance": {
-        "processing_framework": false,
-        "i18n_usage": {
-          "tr": 0,
-          "translate": 0,
-          "total_strings": 38
-        },
-        "gdal_import_style": "Modern",
-        "qt_transition": {
-          "pyqt5_imports": [],
-          "pyqt6_imports": []
-        },
-        "signals_slots": {
-          "legacy": 0,
-          "modern": 0
-        }
-      },
-      "antipatterns": [
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 2",
-          "line": 111,
-          "value": 2
-        },
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 2",
-          "line": 206,
-          "value": 2
-        },
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 100",
-          "line": 179,
-          "value": 100
-        },
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 2",
-          "line": 210,
-          "value": 2
-        }
-      ],
-      "ast_security": [],
-      "patterns": {}
-    },
-    {
-      "path": "tests/test_deployment_optimization.py",
-      "lines": 94,
-      "sloc": 61,
-      "loc": 61,
-      "file_size_kb": 3.123046875,
-      "complexity": 4,
-      "imports": [
-        "shutil",
-        "tempfile",
-        "time",
-        "unittest",
-        "pathlib.Path",
-        "src.qgis_manager.core.rotate_backups",
-        "src.qgis_manager.core.sync_directory",
-        "src.qgis_manager.ignore.IgnoreMatcher"
-      ],
-      "classes": [
-        "TestDeploymentOptimization(unittest)"
-      ],
-      "functions": [
-        "setUp(1 args)",
-        "tearDown(1 args)",
-        "test_rotate_backups(1 args)",
-        "test_sync_directory_initial(1 args)",
-        "test_sync_directory_update(1 args)",
-        "test_sync_directory_cleanup(1 args)"
-      ],
-      "docstrings": {
-        "module": false,
-        "classes": {
-          "TestDeploymentOptimization": false
-        },
-        "functions": {
-          "setUp": false,
-          "tearDown": false,
-          "test_rotate_backups": false,
-          "test_sync_directory_initial": false,
-          "test_sync_directory_update": false,
-          "test_sync_directory_cleanup": false
-        }
-      },
-      "entry_point_info": {
-        "is_entry_point": true,
-        "type": "main_guard"
-      },
-      "has_main": true,
-      "type_hints": {
-        "total_functions": 6,
-        "typed_functions": 0,
-        "coverage": 0.0
-      },
-      "halstead": {
-        "vocabulary": 49,
-        "length": 176,
-        "volume": 880,
-        "difficulty": 10.26,
-        "effort": 9025.12
-      },
-      "maintenance_index": 39.9,
-      "syntax_error": false,
-      "unused_imports": [],
-      "qgis_compliance": {
-        "processing_framework": false,
-        "i18n_usage": {
-          "tr": 0,
-          "translate": 0,
-          "total_strings": 14
-        },
-        "gdal_import_style": "Modern",
-        "qt_transition": {
-          "pyqt5_imports": [],
-          "pyqt6_imports": []
-        },
-        "signals_slots": {
-          "legacy": 0,
-          "modern": 0
-        }
-      },
-      "antipatterns": [
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 6",
-          "line": 28,
-          "value": 6
-        },
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 3",
-          "line": 36,
-          "value": 3
-        },
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 0.1",
-          "line": 65,
-          "value": 0.1
-        },
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 3",
-          "line": 33,
-          "value": 3
-        }
-      ],
-      "ast_security": [],
-      "patterns": {}
-    },
-    {
       "path": "tests/test_ignore.py",
       "lines": 68,
       "sloc": 41,
@@ -3935,6 +4378,85 @@
       "patterns": {}
     },
     {
+      "path": "tests/test_rcc_modernization.py",
+      "lines": 51,
+      "sloc": 38,
+      "loc": 38,
+      "file_size_kb": 1.373046875,
+      "complexity": 2,
+      "imports": [
+        "shutil",
+        "tempfile",
+        "unittest",
+        "pathlib.Path",
+        "src.qgis_manager.core.get_rcc_tool",
+        "src.qgis_manager.core.patch_resource_file"
+      ],
+      "classes": [
+        "TestRCCModernization(unittest)"
+      ],
+      "functions": [
+        "setUp(1 args)",
+        "tearDown(1 args)",
+        "test_get_rcc_tool(1 args)",
+        "test_patch_resource_file(1 args)",
+        "test_patch_resource_file_no_change(1 args)"
+      ],
+      "docstrings": {
+        "module": false,
+        "classes": {
+          "TestRCCModernization": false
+        },
+        "functions": {
+          "setUp": false,
+          "tearDown": false,
+          "test_get_rcc_tool": false,
+          "test_patch_resource_file": false,
+          "test_patch_resource_file_no_change": false
+        }
+      },
+      "entry_point_info": {
+        "is_entry_point": true,
+        "type": "main_guard"
+      },
+      "has_main": true,
+      "type_hints": {
+        "total_functions": 5,
+        "typed_functions": 0,
+        "coverage": 0.0
+      },
+      "halstead": {
+        "vocabulary": 29,
+        "length": 64,
+        "volume": 256,
+        "difficulty": 5.62,
+        "effort": 1440.0
+      },
+      "maintenance_index": 48.41,
+      "syntax_error": false,
+      "unused_imports": [],
+      "qgis_compliance": {
+        "processing_framework": false,
+        "i18n_usage": {
+          "tr": 0,
+          "translate": 0,
+          "total_strings": 8
+        },
+        "gdal_import_style": "Modern",
+        "qt_transition": {
+          "pyqt5_imports": [],
+          "pyqt6_imports": []
+        },
+        "signals_slots": {
+          "legacy": 0,
+          "modern": 0
+        }
+      },
+      "antipatterns": [],
+      "ast_security": [],
+      "patterns": {}
+    },
+    {
       "path": "tests/test_v061_patch.py",
       "lines": 82,
       "sloc": 57,
@@ -4013,25 +4535,59 @@
       "patterns": {}
     },
     {
-      "path": "src/qgis_manager/__init__.py",
-      "lines": 43,
-      "sloc": 11,
-      "loc": 11,
-      "file_size_kb": 1.81640625,
-      "complexity": 4,
+      "path": "tests/test_validation.py",
+      "lines": 134,
+      "sloc": 115,
+      "loc": 115,
+      "file_size_kb": 4.7783203125,
+      "complexity": 7,
       "imports": [
-        "importlib.metadata.PackageNotFoundError",
-        "importlib.metadata.version",
-        "importlib_metadata.PackageNotFoundError",
-        "importlib_metadata.version",
-        "cli.main"
+        "unittest",
+        "qgis_manager.validation.get_optional_fields",
+        "qgis_manager.validation.get_required_fields",
+        "qgis_manager.validation.validate_email",
+        "qgis_manager.validation.validate_metadata",
+        "qgis_manager.validation.validate_url",
+        "qgis_manager.validation.validate_version"
       ],
-      "classes": [],
-      "functions": [],
+      "classes": [
+        "TestValidation(unittest)"
+      ],
+      "functions": [
+        "test_get_required_fields(1 args)",
+        "test_get_optional_fields(1 args)",
+        "test_validate_version_valid(1 args)",
+        "test_validate_version_invalid(1 args)",
+        "test_validate_email_valid(1 args)",
+        "test_validate_email_invalid(1 args)",
+        "test_validate_url_valid(1 args)",
+        "test_validate_url_invalid(1 args)",
+        "test_validate_metadata_complete(1 args)",
+        "test_validate_metadata_missing_required(1 args)",
+        "test_validate_metadata_invalid_version(1 args)",
+        "test_validate_metadata_invalid_email(1 args)",
+        "test_validate_metadata_warnings(1 args)"
+      ],
       "docstrings": {
-        "module": true,
-        "classes": {},
-        "functions": {}
+        "module": false,
+        "classes": {
+          "TestValidation": false
+        },
+        "functions": {
+          "test_get_required_fields": false,
+          "test_get_optional_fields": false,
+          "test_validate_version_valid": false,
+          "test_validate_version_invalid": false,
+          "test_validate_email_valid": false,
+          "test_validate_email_invalid": false,
+          "test_validate_url_valid": false,
+          "test_validate_url_invalid": false,
+          "test_validate_metadata_complete": false,
+          "test_validate_metadata_missing_required": false,
+          "test_validate_metadata_invalid_version": false,
+          "test_validate_metadata_invalid_email": false,
+          "test_validate_metadata_warnings": false
+        }
       },
       "entry_point_info": {
         "is_entry_point": true,
@@ -4039,18 +4595,18 @@
       },
       "has_main": true,
       "type_hints": {
-        "total_functions": 0,
+        "total_functions": 13,
         "typed_functions": 0,
-        "coverage": 100.0
+        "coverage": 0.0
       },
       "halstead": {
-        "vocabulary": 13,
-        "length": 15,
-        "volume": 45,
-        "difficulty": 1.65,
-        "effort": 74.25
+        "vocabulary": 61,
+        "length": 244,
+        "volume": 1220,
+        "difficulty": 10.0,
+        "effort": 12200.0
       },
-      "maintenance_index": 65.17,
+      "maintenance_index": 32.5,
       "syntax_error": false,
       "unused_imports": [],
       "qgis_compliance": {
@@ -4058,7 +4614,7 @@
         "i18n_usage": {
           "tr": 0,
           "translate": 0,
-          "total_strings": 1
+          "total_strings": 33
         },
         "gdal_import_style": "Modern",
         "qt_transition": {
@@ -4075,538 +4631,12 @@
       "patterns": {}
     },
     {
-      "path": "src/qgis_manager/cli/app.py",
-      "lines": 146,
-      "sloc": 91,
-      "loc": 91,
-      "file_size_kb": 4.326171875,
-      "complexity": 11,
-      "imports": [
-        "argparse",
-        "logging",
-        "sys",
-        "base.BaseCommand",
-        "commands.analyze.AnalyzeCommand",
-        "commands.bump.BumpCommand",
-        "commands.clean.CleanCommand",
-        "commands.compile.CompileCommand",
-        "commands.deploy.DeployCommand",
-        "commands.hooks.HooksCommand",
-        "commands.init.InitCommand",
-        "commands.install_deps.InstallDepsCommand",
-        "commands.package.PackageCommand",
-        "commands.validate.ValidateCommand",
-        "__version__",
-        "logging",
-        "click"
-      ],
-      "classes": [
-        "CLIApp"
-      ],
-      "functions": [
-        "__init__(1 args)",
-        "_discover_commands(1 args)",
-        "_build_parser(1 args)",
-        "_setup_logging(2 args)",
-        "run(2 args)"
-      ],
-      "docstrings": {
-        "module": true,
-        "classes": {
-          "CLIApp": true
-        },
-        "functions": {
-          "__init__": true,
-          "_discover_commands": true,
-          "_build_parser": true,
-          "_setup_logging": true,
-          "run": true
-        }
-      },
-      "entry_point_info": {
-        "is_entry_point": false,
-        "type": null
-      },
-      "has_main": false,
-      "type_hints": {
-        "total_functions": 5,
-        "typed_functions": 5,
-        "coverage": 100.0
-      },
-      "halstead": {
-        "vocabulary": 79,
-        "length": 162,
-        "volume": 972,
-        "difficulty": 10.29,
-        "effort": 10001.74
-      },
-      "maintenance_index": 34.87,
-      "syntax_error": false,
-      "unused_imports": [],
-      "qgis_compliance": {
-        "processing_framework": false,
-        "i18n_usage": {
-          "tr": 0,
-          "translate": 0,
-          "total_strings": 16
-        },
-        "gdal_import_style": "Modern",
-        "qt_transition": {
-          "pyqt5_imports": [],
-          "pyqt6_imports": []
-        },
-        "signals_slots": {
-          "legacy": 0,
-          "modern": 0
-        }
-      },
-      "antipatterns": [
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 2",
-          "line": 99,
-          "value": 2
-        }
-      ],
-      "ast_security": [
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 141,
-          "description": "Too broad exception handler"
-        }
-      ],
-      "patterns": {}
-    },
-    {
-      "path": "src/qgis_manager/cli/commands/bump.py",
-      "lines": 244,
-      "sloc": 147,
-      "loc": 147,
-      "file_size_kb": 7.9501953125,
-      "complexity": 20,
-      "imports": [
-        "argparse",
-        "logging",
-        "re",
-        "pathlib.Path",
-        "click",
-        "discovery.find_project_root",
-        "discovery.get_plugin_metadata",
-        "discovery.save_plugin_metadata",
-        "base.BaseCommand",
-        "tomllib"
-      ],
-      "classes": [
-        "BumpCommand(BaseCommand)"
-      ],
-      "functions": [
-        "name(1 args)",
-        "help(1 args)",
-        "configure_parser(2 args)",
-        "execute(2 args)",
-        "_bump_version(3 args)",
-        "_sync_versions(2 args)",
-        "_get_version(2 args)",
-        "_get_pyproject_version(2 args)",
-        "_update_version_in_files(3 args)"
-      ],
-      "docstrings": {
-        "module": true,
-        "classes": {
-          "BumpCommand": true
-        },
-        "functions": {
-          "name": true,
-          "help": true,
-          "configure_parser": true,
-          "execute": true,
-          "_bump_version": true,
-          "_sync_versions": true,
-          "_get_version": true,
-          "_get_pyproject_version": true,
-          "_update_version_in_files": true
-        }
-      },
-      "entry_point_info": {
-        "is_entry_point": false,
-        "type": null
-      },
-      "has_main": false,
-      "type_hints": {
-        "total_functions": 9,
-        "typed_functions": 9,
-        "coverage": 100.0
-      },
-      "halstead": {
-        "vocabulary": 122,
-        "length": 375,
-        "volume": 2250,
-        "difficulty": 19.2,
-        "effort": 43204.13
-      },
-      "maintenance_index": 26.56,
-      "syntax_error": false,
-      "unused_imports": [],
-      "qgis_compliance": {
-        "processing_framework": false,
-        "i18n_usage": {
-          "tr": 0,
-          "translate": 0,
-          "total_strings": 54
-        },
-        "gdal_import_style": "Modern",
-        "qt_transition": {
-          "pyqt5_imports": [],
-          "pyqt6_imports": []
-        },
-        "signals_slots": {
-          "legacy": 0,
-          "modern": 0
-        }
-      },
-      "antipatterns": [
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 3",
-          "line": 94,
-          "value": 3
-        },
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 3",
-          "line": 96,
-          "value": 3
-        },
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 2",
-          "line": 216,
-          "value": 2
-        }
-      ],
-      "ast_security": [
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 72,
-          "description": "Too broad exception handler"
-        },
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 187,
-          "description": "Too broad exception handler"
-        },
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 239,
-          "description": "Too broad exception handler"
-        }
-      ],
-      "patterns": {}
-    },
-    {
-      "path": "src/qgis_manager/cli/commands/hooks.py",
-      "lines": 184,
-      "sloc": 142,
-      "loc": 142,
-      "file_size_kb": 5.6845703125,
-      "complexity": 19,
-      "imports": [
-        "argparse",
-        "pathlib.Path",
-        "click",
-        "discovery.find_project_root",
-        "hooks.execute_python_hook",
-        "base.BaseCommand",
-        "importlib.util",
-        "config.Settings",
-        "config.load_project_config"
-      ],
-      "classes": [
-        "HooksCommand(BaseCommand)"
-      ],
-      "functions": [
-        "name(1 args)",
-        "help(1 args)",
-        "configure_parser(2 args)",
-        "execute(2 args)",
-        "_hooks_list(2 args)",
-        "_hooks_init(2 args)",
-        "_hooks_test(3 args)"
-      ],
-      "docstrings": {
-        "module": true,
-        "classes": {
-          "HooksCommand": true
-        },
-        "functions": {
-          "name": false,
-          "help": false,
-          "configure_parser": false,
-          "execute": false,
-          "_hooks_list": true,
-          "_hooks_init": true,
-          "_hooks_test": true
-        }
-      },
-      "entry_point_info": {
-        "is_entry_point": false,
-        "type": null
-      },
-      "has_main": false,
-      "type_hints": {
-        "total_functions": 7,
-        "typed_functions": 7,
-        "coverage": 100.0
-      },
-      "halstead": {
-        "vocabulary": 101,
-        "length": 236,
-        "volume": 1416,
-        "difficulty": 9.88,
-        "effort": 13990.7
-      },
-      "maintenance_index": 28.43,
-      "syntax_error": false,
-      "unused_imports": [],
-      "qgis_compliance": {
-        "processing_framework": false,
-        "i18n_usage": {
-          "tr": 0,
-          "translate": 0,
-          "total_strings": 41
-        },
-        "gdal_import_style": "Modern",
-        "qt_transition": {
-          "pyqt5_imports": [],
-          "pyqt6_imports": []
-        },
-        "signals_slots": {
-          "legacy": 0,
-          "modern": 0
-        }
-      },
-      "antipatterns": [],
-      "ast_security": [
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 61,
-          "description": "Too broad exception handler"
-        }
-      ],
-      "patterns": {}
-    },
-    {
-      "path": "src/qgis_manager/cli/commands/package.py",
-      "lines": 118,
-      "sloc": 92,
-      "loc": 92,
-      "file_size_kb": 4.267578125,
-      "complexity": 11,
-      "imports": [
-        "argparse",
-        "pathlib.Path",
-        "click",
-        "core.create_plugin_package",
-        "dependencies.install_external_libs",
-        "discovery.find_project_root",
-        "base.BaseCommand",
-        "tomllib",
-        "discovery.get_plugin_metadata",
-        "discovery.save_plugin_metadata",
-        "discovery.get_plugin_metadata",
-        "validation.validate_metadata",
-        "validation.validate_official_compliance"
-      ],
-      "classes": [
-        "PackageCommand(BaseCommand)"
-      ],
-      "functions": [
-        "name(1 args)",
-        "help(1 args)",
-        "configure_parser(2 args)",
-        "execute(2 args)",
-        "update_bar(1 args)"
-      ],
-      "docstrings": {
-        "module": true,
-        "classes": {
-          "PackageCommand": true
-        },
-        "functions": {
-          "name": false,
-          "help": false,
-          "configure_parser": false,
-          "execute": false,
-          "update_bar": false
-        }
-      },
-      "entry_point_info": {
-        "is_entry_point": false,
-        "type": null
-      },
-      "has_main": false,
-      "type_hints": {
-        "total_functions": 5,
-        "typed_functions": 4,
-        "coverage": 80.0
-      },
-      "halstead": {
-        "vocabulary": 87,
-        "length": 169,
-        "volume": 1014,
-        "difficulty": 11.6,
-        "effort": 11762.4
-      },
-      "maintenance_index": 34.63,
-      "syntax_error": false,
-      "unused_imports": [],
-      "qgis_compliance": {
-        "processing_framework": false,
-        "i18n_usage": {
-          "tr": 0,
-          "translate": 0,
-          "total_strings": 26
-        },
-        "gdal_import_style": "Modern",
-        "qt_transition": {
-          "pyqt5_imports": [],
-          "pyqt6_imports": []
-        },
-        "signals_slots": {
-          "legacy": 0,
-          "modern": 0
-        }
-      },
-      "antipatterns": [
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 100",
-          "line": 93,
-          "value": 100
-        },
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 100",
-          "line": 101,
-          "value": 100
-        }
-      ],
-      "ast_security": [
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 116,
-          "description": "Too broad exception handler"
-        }
-      ],
-      "patterns": {}
-    },
-    {
-      "path": "src/qgis_manager/cli/commands/validate.py",
-      "lines": 125,
-      "sloc": 78,
-      "loc": 78,
-      "file_size_kb": 4.2724609375,
-      "complexity": 16,
-      "imports": [
-        "argparse",
-        "logging",
-        "pathlib.Path",
-        "click",
-        "discovery.find_project_root",
-        "discovery.get_plugin_metadata",
-        "validation.validate_metadata",
-        "validation.validate_project_structure",
-        "base.BaseCommand",
-        "validation.validate_official_compliance"
-      ],
-      "classes": [
-        "ValidateCommand(BaseCommand)"
-      ],
-      "functions": [
-        "name(1 args)",
-        "help(1 args)",
-        "configure_parser(2 args)",
-        "execute(2 args)"
-      ],
-      "docstrings": {
-        "module": true,
-        "classes": {
-          "ValidateCommand": true
-        },
-        "functions": {
-          "name": true,
-          "help": true,
-          "configure_parser": true,
-          "execute": true
-        }
-      },
-      "entry_point_info": {
-        "is_entry_point": false,
-        "type": null
-      },
-      "has_main": false,
-      "type_hints": {
-        "total_functions": 4,
-        "typed_functions": 4,
-        "coverage": 100.0
-      },
-      "halstead": {
-        "vocabulary": 78,
-        "length": 191,
-        "volume": 1146,
-        "difficulty": 10.7,
-        "effort": 12257.22
-      },
-      "maintenance_index": 35.15,
-      "syntax_error": false,
-      "unused_imports": [],
-      "qgis_compliance": {
-        "processing_framework": false,
-        "i18n_usage": {
-          "tr": 0,
-          "translate": 0,
-          "total_strings": 26
-        },
-        "gdal_import_style": "Modern",
-        "qt_transition": {
-          "pyqt5_imports": [],
-          "pyqt6_imports": []
-        },
-        "signals_slots": {
-          "legacy": 0,
-          "modern": 0
-        }
-      },
-      "antipatterns": [],
-      "ast_security": [
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 122,
-          "description": "Too broad exception handler"
-        }
-      ],
-      "patterns": {}
-    },
-    {
       "path": "src/qgis_manager/core.py",
-      "lines": 549,
-      "sloc": 368,
-      "loc": 368,
-      "file_size_kb": 17.7841796875,
-      "complexity": 74,
+      "lines": 581,
+      "sloc": 390,
+      "loc": 390,
+      "file_size_kb": 18.7880859375,
+      "complexity": 80,
       "imports": [
         "logging",
         "os",
@@ -4633,6 +4663,7 @@
         "deploy_plugin(6 args)",
         "compile_docs(2 args)",
         "get_rcc_tool",
+        "verify_resource_patch(1 args)",
         "patch_resource_file(1 args)",
         "compile_qt_resources(3 args)",
         "clean_artifacts(1 args)",
@@ -4649,6 +4680,7 @@
           "deploy_plugin": true,
           "compile_docs": true,
           "get_rcc_tool": true,
+          "verify_resource_patch": true,
           "patch_resource_file": true,
           "compile_qt_resources": true,
           "clean_artifacts": true,
@@ -4662,18 +4694,18 @@
       },
       "has_main": false,
       "type_hints": {
-        "total_functions": 11,
-        "typed_functions": 5,
-        "coverage": 45.45454545454545
+        "total_functions": 12,
+        "typed_functions": 6,
+        "coverage": 50.0
       },
       "halstead": {
-        "vocabulary": 267,
-        "length": 853,
-        "volume": 6824,
-        "difficulty": 24.04,
-        "effort": 164035.31
+        "vocabulary": 277,
+        "length": 898,
+        "volume": 7184,
+        "difficulty": 25.75,
+        "effort": 184981.07
       },
-      "maintenance_index": 7.23,
+      "maintenance_index": 5.72,
       "syntax_error": false,
       "unused_imports": [],
       "qgis_compliance": {
@@ -4681,7 +4713,7 @@
         "i18n_usage": {
           "tr": 0,
           "translate": 0,
-          "total_strings": 46
+          "total_strings": 52
         },
         "gdal_import_style": "Modern",
         "qt_transition": {
@@ -4712,8 +4744,15 @@
           "type": "magic_number",
           "severity": "low",
           "message": "Magic number detected: 4096",
-          "line": 439,
+          "line": 471,
           "value": 4096
+        },
+        {
+          "type": "dead_code",
+          "severity": "medium",
+          "message": "Unreachable code detected",
+          "line": 269,
+          "value": 1
         }
       ],
       "ast_security": [
@@ -4726,7 +4765,13 @@
         {
           "pattern": "except Exception:",
           "severity": "low",
-          "line": 291,
+          "line": 284,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 323,
           "description": "Too broad exception handler"
         },
         {
@@ -4739,31 +4784,51 @@
       "patterns": {}
     },
     {
-      "path": "src/qgis_manager/dependencies.py",
-      "lines": 66,
-      "sloc": 46,
-      "loc": 46,
-      "file_size_kb": 2.3115234375,
-      "complexity": 9,
+      "path": "src/qgis_manager/validation.py",
+      "lines": 346,
+      "sloc": 164,
+      "loc": 164,
+      "file_size_kb": 10.84765625,
+      "complexity": 43,
       "imports": [
-        "logging",
-        "subprocess",
-        "sys",
+        "re",
+        "dataclasses.dataclass",
         "pathlib.Path",
-        "tomllib",
-        "tomli"
+        "typing.Any"
       ],
-      "classes": [],
+      "classes": [
+        "ValidationResult"
+      ],
       "functions": [
-        "get_dependencies(1 args)",
-        "install_external_libs(2 args)"
+        "get_required_fields",
+        "get_optional_fields",
+        "validate_version(1 args)",
+        "validate_email(1 args)",
+        "validate_url(1 args)",
+        "validate_category(1 args)",
+        "validate_boolean_field(1 args)",
+        "validate_tags(1 args)",
+        "validate_official_compliance(1 args)",
+        "validate_project_structure(2 args)",
+        "validate_metadata(1 args)"
       ],
       "docstrings": {
-        "module": false,
-        "classes": {},
+        "module": true,
+        "classes": {
+          "ValidationResult": true
+        },
         "functions": {
-          "get_dependencies": true,
-          "install_external_libs": true
+          "get_required_fields": true,
+          "get_optional_fields": true,
+          "validate_version": true,
+          "validate_email": true,
+          "validate_url": true,
+          "validate_category": true,
+          "validate_boolean_field": true,
+          "validate_tags": true,
+          "validate_official_compliance": true,
+          "validate_project_structure": true,
+          "validate_metadata": true
         }
       },
       "entry_point_info": {
@@ -4772,18 +4837,18 @@
       },
       "has_main": false,
       "type_hints": {
-        "total_functions": 2,
-        "typed_functions": 2,
+        "total_functions": 11,
+        "typed_functions": 11,
         "coverage": 100.0
       },
       "halstead": {
-        "vocabulary": 66,
-        "length": 126,
-        "volume": 756,
-        "difficulty": 8.53,
-        "effort": 6445.89
+        "vocabulary": 155,
+        "length": 452,
+        "volume": 3164,
+        "difficulty": 17.97,
+        "effort": 56862.24
       },
-      "maintenance_index": 42.36,
+      "maintenance_index": 21.39,
       "syntax_error": false,
       "unused_imports": [],
       "qgis_compliance": {
@@ -4791,7 +4856,7 @@
         "i18n_usage": {
           "tr": 0,
           "translate": 0,
-          "total_strings": 9
+          "total_strings": 66
         },
         "gdal_import_style": "Modern",
         "qt_transition": {
@@ -4805,90 +4870,86 @@
       },
       "antipatterns": [
         {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 3",
-          "line": 6,
-          "value": 3
-        },
-        {
-          "type": "magic_number",
-          "severity": "low",
-          "message": "Magic number detected: 11",
-          "line": 6,
-          "value": 11
+          "type": "spaghetti_code",
+          "severity": "high",
+          "message": "Function 'validate_metadata' is Spaghetti Code (CC: 28)",
+          "line": 261,
+          "value": 28
         }
       ],
       "ast_security": [
         {
           "pattern": "except Exception:",
           "severity": "low",
-          "line": 27,
-          "description": "Too broad exception handler"
-        },
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 64,
+          "line": 236,
           "description": "Too broad exception handler"
         }
       ],
       "patterns": {}
     },
     {
-      "path": "src/qgis_manager/discovery.py",
-      "lines": 167,
-      "sloc": 70,
-      "loc": 70,
-      "file_size_kb": 5.935546875,
-      "complexity": 14,
+      "path": "tests/test_validation_deep.py",
+      "lines": 83,
+      "sloc": 68,
+      "loc": 68,
+      "file_size_kb": 2.8203125,
+      "complexity": 3,
       "imports": [
         "configparser",
-        "logging",
-        "re",
-        "collections.abc.Iterator",
+        "shutil",
+        "tempfile",
+        "unittest",
         "pathlib.Path",
-        "typing.Any",
-        "ignore.IgnoreMatcher",
-        "ignore.load_ignore_patterns"
+        "src.qgis_manager.validation.validate_metadata",
+        "src.qgis_manager.validation.validate_project_structure"
       ],
-      "classes": [],
+      "classes": [
+        "TestStructuralValidation(unittest)"
+      ],
       "functions": [
-        "slugify(1 args)",
-        "find_project_root(1 args)",
-        "get_plugin_metadata(1 args)",
-        "save_plugin_metadata(2 args)",
-        "get_source_files(2 args)"
+        "setUp(1 args)",
+        "tearDown(1 args)",
+        "write_metadata(1 args)",
+        "test_missing_init_py(1 args)",
+        "test_missing_icon(1 args)",
+        "test_missing_custom_icon(1 args)",
+        "test_illegal_name(1 args)",
+        "test_valid_project(1 args)"
       ],
       "docstrings": {
-        "module": true,
-        "classes": {},
+        "module": false,
+        "classes": {
+          "TestStructuralValidation": false
+        },
         "functions": {
-          "slugify": true,
-          "find_project_root": true,
-          "get_plugin_metadata": true,
-          "save_plugin_metadata": true,
-          "get_source_files": true
+          "setUp": false,
+          "tearDown": false,
+          "write_metadata": false,
+          "test_missing_init_py": false,
+          "test_missing_icon": false,
+          "test_missing_custom_icon": false,
+          "test_illegal_name": false,
+          "test_valid_project": false
         }
       },
       "entry_point_info": {
-        "is_entry_point": false,
-        "type": null
+        "is_entry_point": true,
+        "type": "main_guard"
       },
-      "has_main": false,
+      "has_main": true,
       "type_hints": {
-        "total_functions": 5,
-        "typed_functions": 5,
-        "coverage": 100.0
+        "total_functions": 8,
+        "typed_functions": 0,
+        "coverage": 0.0
       },
       "halstead": {
-        "vocabulary": 72,
-        "length": 186,
-        "volume": 1116,
-        "difficulty": 14.52,
-        "effort": 16200.3
+        "vocabulary": 52,
+        "length": 129,
+        "volume": 645,
+        "difficulty": 8.56,
+        "effort": 5518.33
       },
-      "maintenance_index": 36.53,
+      "maintenance_index": 39.95,
       "syntax_error": false,
       "unused_imports": [],
       "qgis_compliance": {
@@ -4896,7 +4957,7 @@
         "i18n_usage": {
           "tr": 0,
           "translate": 0,
-          "total_strings": 12
+          "total_strings": 16
         },
         "gdal_import_style": "Modern",
         "qt_transition": {
@@ -4909,32 +4970,7 @@
         }
       },
       "antipatterns": [],
-      "ast_security": [
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 107,
-          "description": "Too broad exception handler"
-        },
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 114,
-          "description": "Too broad exception handler"
-        },
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 144,
-          "description": "Too broad exception handler"
-        },
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 104,
-          "description": "Too broad exception handler"
-        }
-      ],
+      "ast_security": [],
       "patterns": {}
     }
   ],
@@ -5075,7 +5111,7 @@
       "yaml"
     ],
     "files": {
-      "pyproject.toml": "[build-system]\nrequires = [\"hatchling\"]\nbuild-backend = \"hatchling.build\"\n\n[project]\nname = \"qgis-manage\"\nversion = \"0.6.1\"\ndescription = \"A modern CLI for managing QGIS plugin development, deployment, and packaging.\"\nreadme = \"README.md\"\nrequires-python = \">=3.10\"\nlicense = { text = \"GPL-2.0-or-later\" }\nauthors = [\n    { name = \"Juan M Bernales\", email = \"juanbernales@gmail.com\" }\n]\nkeywords = [\"qgis\", \"plugin\", \"manager\", \"cli\", \"development\"]\nclassifiers = [\n    \"Development Status :: 4 - Beta\",\n    \"Intended Audience :: Developers\",\n    \"Intended Audience :: Science/Research\",\n    \"License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)\",\n    \"Operating System :: OS Independent\",\n    \"Programming Language :: Python :: 3\",\n    \"Programming Language :: Python :: 3.10\",\n    \"Programming Language :: Python :: 3.11\",\n    \"Programming Language :: Python :: 3.12\",\n    \"Topic :: Scientific/Engineering :: GIS\",\n    \"Topic :: Software Development :: Build Tools\",\n    \"Environment :: Console\",\n    \"Natural Language :: Spanish\",\n]\ndependencies = [\n    \"click>=8.0\",\n]\n\n[project.urls]\nHomepage = \"https://github.com/geociencio/qgis-plugin-manager\"\nRepository = \"https://github.com/geociencio/qgis-plugin-manager\"\nIssues = \"https://github.com/geociencio/qgis-plugin-manager/issues\"\nChangelog = \"https://github.com/geociencio/qgis-plugin-manager/blob/main/CHANGELOG.md\"\nDocumentation = \"https://github.com/geociencio/qgis-plugin-manager#readme\"\n\n[project.optional-dependencies]\ndev = [\n    \"mypy>=1.19.1\",\n    \"pre-commit>=4.5.1\",\n    \"ruff>=0.14.10\",\n    \"types-setuptools>=80.9.0.20251223\",\n    \"ai-context-core>=3.2.1\",\n    \"qgis-plugin-analyzer>=1.10.0\",\n]\n\n[project.scripts]\nqgis-manage = \"qgis_manager.cli:main\"\n\n[tool.hatch.build.targets.wheel]\npackages = [\"src/qgis_manager\"]\n\n[tool.uv]\nmanaged = true\npackage = true\n\n[tool.ruff]\nline-length = 88\ntarget-version = \"py310\"\n\n[tool.ruff.lint]\nselect = [\"E\", \"F\", \"B\", \"I\", \"W\", \"UP\", \"N\"]\nignore = []\n\n[tool.ruff.lint.iso"
+      "pyproject.toml": "[build-system]\nrequires = [\"hatchling\"]\nbuild-backend = \"hatchling.build\"\n\n[project]\nname = \"qgis-manage\"\nversion = \"0.6.3\"\ndescription = \"A modern CLI for managing QGIS plugin development, deployment, and packaging.\"\nreadme = \"README.md\"\nrequires-python = \">=3.10\"\nlicense = { text = \"GPL-2.0-or-later\" }\nauthors = [\n    { name = \"Juan M Bernales\", email = \"juanbernales@gmail.com\" }\n]\nkeywords = [\"qgis\", \"plugin\", \"manager\", \"cli\", \"development\"]\nclassifiers = [\n    \"Development Status :: 4 - Beta\",\n    \"Intended Audience :: Developers\",\n    \"Intended Audience :: Science/Research\",\n    \"License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)\",\n    \"Operating System :: OS Independent\",\n    \"Programming Language :: Python :: 3\",\n    \"Programming Language :: Python :: 3.10\",\n    \"Programming Language :: Python :: 3.11\",\n    \"Programming Language :: Python :: 3.12\",\n    \"Topic :: Scientific/Engineering :: GIS\",\n    \"Topic :: Software Development :: Build Tools\",\n    \"Environment :: Console\",\n    \"Natural Language :: Spanish\",\n]\ndependencies = [\n    \"click>=8.0\",\n]\n\n[project.urls]\nHomepage = \"https://github.com/geociencio/qgis-plugin-manager\"\nRepository = \"https://github.com/geociencio/qgis-plugin-manager\"\nIssues = \"https://github.com/geociencio/qgis-plugin-manager/issues\"\nChangelog = \"https://github.com/geociencio/qgis-plugin-manager/blob/main/CHANGELOG.md\"\nDocumentation = \"https://github.com/geociencio/qgis-plugin-manager#readme\"\n\n[project.optional-dependencies]\ndev = [\n    \"mypy>=1.19.1\",\n    \"pre-commit>=4.5.1\",\n    \"ruff>=0.14.10\",\n    \"types-setuptools>=80.9.0.20251223\",\n    \"ai-context-core>=3.2.1\",\n    \"qgis-plugin-analyzer>=1.10.0\",\n]\n\n[project.scripts]\nqgis-manage = \"qgis_manager.cli:main\"\n\n[tool.hatch.build.targets.wheel]\npackages = [\"src/qgis_manager\"]\n\n[tool.hatch.build.targets.sdist]\nexclude = [\n    \"/.agent\",\n    \"/.github\",\n    \"/.vscode\",\n    \"/.pre-commit-config.yaml\",\n    \"/.gitattributes\",\n    \"/.ai_context_cache.json\",\n    \"/AI_CONT"
     },
     "import_graph": {
       "antigravity-framerepo/bootstrap.py": [],
@@ -5092,20 +5128,37 @@
       "scaffold/skills/data-science/scripts/generate_mock_data.py": [],
       "scaffold/skills/data-science/scripts/validate_dataset.py": [],
       "scaffold/ui/dialog_template.py": [],
+      "src/qgis_manager/__init__.py": [],
       "src/qgis_manager/cli/__init__.py": [],
+      "src/qgis_manager/cli/app.py": [],
       "src/qgis_manager/cli/base.py": [],
       "src/qgis_manager/cli/commands/analyze.py": [],
+      "src/qgis_manager/cli/commands/bump.py": [],
       "src/qgis_manager/cli/commands/clean.py": [],
       "src/qgis_manager/cli/commands/compile.py": [],
       "src/qgis_manager/cli/commands/deploy.py": [],
+      "src/qgis_manager/cli/commands/hooks.py": [],
       "src/qgis_manager/cli/commands/init.py": [],
       "src/qgis_manager/cli/commands/install_deps.py": [],
+      "src/qgis_manager/cli/commands/package.py": [],
+      "src/qgis_manager/cli/commands/validate.py": [],
       "src/qgis_manager/cli.py": [],
       "src/qgis_manager/config.py": [],
       "src/qgis_manager/constants.py": [],
+      "src/qgis_manager/dependencies.py": [],
+      "src/qgis_manager/discovery.py": [],
+      "src/qgis_manager/hooks.py": [],
+      "src/qgis_manager/ignore.py": [],
+      "tests/test_cli.py": [
+        "src/qgis_manager/cli/app.py"
+      ],
       "tests/test_config.py": [
         "src/qgis_manager/config.py"
       ],
+      "tests/test_core.py": [
+        "src/qgis_manager/core.py"
+      ],
+      "tests/test_deployment_optimization.py": [],
       "tests/test_discovery.py": [
         "src/qgis_manager/discovery.py"
       ],
@@ -5116,37 +5169,20 @@
         "src/qgis_manager/hooks.py"
       ],
       "tests/test_hooks_native.py": [],
-      "tests/test_rcc_modernization.py": [],
-      "tests/test_validation.py": [
-        "src/qgis_manager/validation.py"
-      ],
-      "tests/test_validation_deep.py": [],
-      "src/qgis_manager/hooks.py": [],
-      "src/qgis_manager/ignore.py": [],
-      "src/qgis_manager/validation.py": [],
-      "tests/test_cli.py": [
-        "src/qgis_manager/cli/app.py"
-      ],
-      "tests/test_core.py": [
-        "src/qgis_manager/core.py"
-      ],
-      "tests/test_deployment_optimization.py": [],
       "tests/test_ignore.py": [
         "src/qgis_manager/ignore.py"
       ],
       "tests/test_ignore_system.py": [],
+      "tests/test_rcc_modernization.py": [],
       "tests/test_v061_patch.py": [
         "src/qgis_manager/discovery.py"
       ],
-      "src/qgis_manager/__init__.py": [],
-      "src/qgis_manager/cli/app.py": [],
-      "src/qgis_manager/cli/commands/bump.py": [],
-      "src/qgis_manager/cli/commands/hooks.py": [],
-      "src/qgis_manager/cli/commands/package.py": [],
-      "src/qgis_manager/cli/commands/validate.py": [],
+      "tests/test_validation.py": [
+        "src/qgis_manager/validation.py"
+      ],
       "src/qgis_manager/core.py": [],
-      "src/qgis_manager/dependencies.py": [],
-      "src/qgis_manager/discovery.py": []
+      "src/qgis_manager/validation.py": [],
+      "tests/test_validation_deep.py": []
     },
     "circular_dependencies": [],
     "graph_metrics": {
@@ -5157,77 +5193,17 @@
       "weakly_connected_components": 42
     },
     "coupling_metrics": {
-      "antigravity-framerepo/scaffold/ui/dialog_template.py": {
+      "scaffold/skills/data-science/examples/eda_template.py": {
         "fan_in": 0,
         "fan_out": 0,
         "cbo": 0
       },
-      "tests/test_validation.py": {
-        "fan_in": 0,
-        "fan_out": 1,
-        "cbo": 1
-      },
-      "antigravity-framerepo/bootstrap.py": {
+      "src/qgis_manager/__init__.py": {
         "fan_in": 0,
         "fan_out": 0,
         "cbo": 0
-      },
-      "src/qgis_manager/cli/commands/analyze.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "tests/test_rcc_modernization.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "antigravity-framerepo/scripts/skill_sync.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "src/qgis_manager/cli/commands/compile.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "tests/test_deployment_optimization.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "tests/test_hooks_native.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "src/qgis_manager/validation.py": {
-        "fan_in": 1,
-        "fan_out": 0,
-        "cbo": 1
-      },
-      "tests/test_core.py": {
-        "fan_in": 0,
-        "fan_out": 1,
-        "cbo": 1
       },
       "src/qgis_manager/constants.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "tests/test_config.py": {
-        "fan_in": 0,
-        "fan_out": 1,
-        "cbo": 1
-      },
-      "src/qgis_manager/cli/commands/validate.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "scaffold/ui/dialog_template.py": {
         "fan_in": 0,
         "fan_out": 0,
         "cbo": 0
@@ -5237,97 +5213,12 @@
         "fan_out": 1,
         "cbo": 1
       },
-      "src/qgis_manager/dependencies.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "antigravity-framerepo/scaffold/skills/data-science/examples/eda_template.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "scaffold/skills/data-science/examples/eda_template.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "src/qgis_manager/cli/app.py": {
-        "fan_in": 1,
-        "fan_out": 0,
-        "cbo": 1
-      },
-      "src/qgis_manager/cli/__init__.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "src/qgis_manager/cli/base.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "tests/test_fix_exclusions.py": {
-        "fan_in": 0,
-        "fan_out": 1,
-        "cbo": 1
-      },
-      "antigravity-framerepo/scaffold/skills/data-science/scripts/validate_dataset.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
       "tests/test_hooks.py": {
         "fan_in": 0,
         "fan_out": 1,
         "cbo": 1
       },
-      "antigravity-framerepo/scaffold/skills/data-science/scripts/generate_mock_data.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "tests/test_validation_deep.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "src/qgis_manager/discovery.py": {
-        "fan_in": 2,
-        "fan_out": 0,
-        "cbo": 2
-      },
-      "tests/test_ignore.py": {
-        "fan_in": 0,
-        "fan_out": 1,
-        "cbo": 1
-      },
-      "src/qgis_manager/cli.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "src/qgis_manager/cli/commands/clean.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "antigravity-framerepo/scaffold/processing/algorithm_template.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "src/qgis_manager/cli/commands/package.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "src/qgis_manager/cli/commands/hooks.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "src/qgis_manager/config.py": {
+      "src/qgis_manager/hooks.py": {
         "fan_in": 1,
         "fan_out": 0,
         "cbo": 1
@@ -5342,62 +5233,12 @@
         "fan_out": 0,
         "cbo": 1
       },
-      "src/qgis_manager/hooks.py": {
-        "fan_in": 1,
-        "fan_out": 0,
-        "cbo": 1
-      },
-      "src/qgis_manager/__init__.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "generator_export/generator.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "scaffold/skills/data-science/scripts/validate_dataset.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "tests/test_discovery.py": {
-        "fan_in": 0,
-        "fan_out": 1,
-        "cbo": 1
-      },
-      "bootstrap.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "src/qgis_manager/cli/commands/deploy.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "tests/test_v061_patch.py": {
-        "fan_in": 0,
-        "fan_out": 1,
-        "cbo": 1
-      },
-      "src/qgis_manager/cli/commands/init.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "tests/test_ignore_system.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
-      "src/qgis_manager/cli/commands/bump.py": {
-        "fan_in": 0,
-        "fan_out": 0,
-        "cbo": 0
-      },
       "scaffold/skills/data-science/scripts/generate_mock_data.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "src/qgis_manager/cli.py": {
         "fan_in": 0,
         "fan_out": 0,
         "cbo": 0
@@ -5407,7 +5248,202 @@
         "fan_out": 0,
         "cbo": 0
       },
+      "antigravity-framerepo/scaffold/ui/dialog_template.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "src/qgis_manager/cli/__init__.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "src/qgis_manager/cli/commands/compile.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "src/qgis_manager/cli/commands/hooks.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "src/qgis_manager/cli/base.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "tests/test_core.py": {
+        "fan_in": 0,
+        "fan_out": 1,
+        "cbo": 1
+      },
+      "tests/test_rcc_modernization.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "tests/test_validation.py": {
+        "fan_in": 0,
+        "fan_out": 1,
+        "cbo": 1
+      },
+      "tests/test_ignore.py": {
+        "fan_in": 0,
+        "fan_out": 1,
+        "cbo": 1
+      },
+      "tests/test_ignore_system.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "tests/test_validation_deep.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "src/qgis_manager/discovery.py": {
+        "fan_in": 2,
+        "fan_out": 0,
+        "cbo": 2
+      },
+      "antigravity-framerepo/scaffold/skills/data-science/scripts/validate_dataset.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "src/qgis_manager/cli/commands/validate.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "src/qgis_manager/cli/commands/bump.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "scaffold/skills/data-science/scripts/validate_dataset.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "src/qgis_manager/cli/commands/deploy.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "src/qgis_manager/cli/commands/clean.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "tests/test_discovery.py": {
+        "fan_in": 0,
+        "fan_out": 1,
+        "cbo": 1
+      },
+      "src/qgis_manager/validation.py": {
+        "fan_in": 1,
+        "fan_out": 0,
+        "cbo": 1
+      },
+      "tests/test_config.py": {
+        "fan_in": 0,
+        "fan_out": 1,
+        "cbo": 1
+      },
+      "src/qgis_manager/cli/commands/analyze.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "tests/test_deployment_optimization.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
       "src/qgis_manager/cli/commands/install_deps.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "src/qgis_manager/cli/app.py": {
+        "fan_in": 1,
+        "fan_out": 0,
+        "cbo": 1
+      },
+      "antigravity-framerepo/scaffold/processing/algorithm_template.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "antigravity-framerepo/bootstrap.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "src/qgis_manager/dependencies.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "scaffold/ui/dialog_template.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "bootstrap.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "src/qgis_manager/cli/commands/package.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "src/qgis_manager/config.py": {
+        "fan_in": 1,
+        "fan_out": 0,
+        "cbo": 1
+      },
+      "tests/test_fix_exclusions.py": {
+        "fan_in": 0,
+        "fan_out": 1,
+        "cbo": 1
+      },
+      "tests/test_v061_patch.py": {
+        "fan_in": 0,
+        "fan_out": 1,
+        "cbo": 1
+      },
+      "antigravity-framerepo/scaffold/skills/data-science/scripts/generate_mock_data.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "antigravity-framerepo/scripts/skill_sync.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "src/qgis_manager/cli/commands/init.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "antigravity-framerepo/scaffold/skills/data-science/examples/eda_template.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "generator_export/generator.py": {
+        "fan_in": 0,
+        "fan_out": 0,
+        "cbo": 0
+      },
+      "tests/test_hooks_native.py": {
         "fan_in": 0,
         "fan_out": 0,
         "cbo": 0
@@ -5524,6 +5560,19 @@
       "max_severity": "high"
     },
     {
+      "module": "src/qgis_manager/cli/app.py",
+      "issues": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 141,
+          "description": "Too broad exception handler"
+        }
+      ],
+      "total_issues": 1,
+      "max_severity": "high"
+    },
+    {
       "module": "src/qgis_manager/cli/commands/analyze.py",
       "issues": [
         {
@@ -5534,6 +5583,31 @@
         }
       ],
       "total_issues": 1,
+      "max_severity": "high"
+    },
+    {
+      "module": "src/qgis_manager/cli/commands/bump.py",
+      "issues": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 72,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 187,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 239,
+          "description": "Too broad exception handler"
+        }
+      ],
+      "total_issues": 3,
       "max_severity": "high"
     },
     {
@@ -5576,6 +5650,19 @@
       "max_severity": "high"
     },
     {
+      "module": "src/qgis_manager/cli/commands/hooks.py",
+      "issues": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 61,
+          "description": "Too broad exception handler"
+        }
+      ],
+      "total_issues": 1,
+      "max_severity": "high"
+    },
+    {
       "module": "src/qgis_manager/cli/commands/init.py",
       "issues": [
         {
@@ -5595,114 +5682,6 @@
           "pattern": "except Exception:",
           "severity": "low",
           "line": 38,
-          "description": "Too broad exception handler"
-        }
-      ],
-      "total_issues": 1,
-      "max_severity": "high"
-    },
-    {
-      "module": "src/qgis_manager/config.py",
-      "issues": [
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 39,
-          "description": "Too broad exception handler"
-        },
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 71,
-          "description": "Too broad exception handler"
-        }
-      ],
-      "total_issues": 2,
-      "max_severity": "high"
-    },
-    {
-      "module": "src/qgis_manager/hooks.py",
-      "issues": [
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 58,
-          "description": "Too broad exception handler"
-        },
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 120,
-          "description": "Too broad exception handler"
-        }
-      ],
-      "total_issues": 2,
-      "max_severity": "high"
-    },
-    {
-      "module": "src/qgis_manager/ignore.py",
-      "issues": [
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 118,
-          "description": "Too broad exception handler"
-        },
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 101,
-          "description": "Too broad exception handler"
-        }
-      ],
-      "total_issues": 2,
-      "max_severity": "high"
-    },
-    {
-      "module": "src/qgis_manager/cli/app.py",
-      "issues": [
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 141,
-          "description": "Too broad exception handler"
-        }
-      ],
-      "total_issues": 1,
-      "max_severity": "high"
-    },
-    {
-      "module": "src/qgis_manager/cli/commands/bump.py",
-      "issues": [
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 72,
-          "description": "Too broad exception handler"
-        },
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 187,
-          "description": "Too broad exception handler"
-        },
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 239,
-          "description": "Too broad exception handler"
-        }
-      ],
-      "total_issues": 3,
-      "max_severity": "high"
-    },
-    {
-      "module": "src/qgis_manager/cli/commands/hooks.py",
-      "issues": [
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 61,
           "description": "Too broad exception handler"
         }
       ],
@@ -5736,28 +5715,22 @@
       "max_severity": "high"
     },
     {
-      "module": "src/qgis_manager/core.py",
+      "module": "src/qgis_manager/config.py",
       "issues": [
         {
           "pattern": "except Exception:",
           "severity": "low",
-          "line": 254,
+          "line": 39,
           "description": "Too broad exception handler"
         },
         {
           "pattern": "except Exception:",
           "severity": "low",
-          "line": 291,
-          "description": "Too broad exception handler"
-        },
-        {
-          "pattern": "except Exception:",
-          "severity": "low",
-          "line": 115,
+          "line": 71,
           "description": "Too broad exception handler"
         }
       ],
-      "total_issues": 3,
+      "total_issues": 2,
       "max_severity": "high"
     },
     {
@@ -5809,32 +5782,92 @@
       ],
       "total_issues": 4,
       "max_severity": "high"
+    },
+    {
+      "module": "src/qgis_manager/hooks.py",
+      "issues": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 58,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 120,
+          "description": "Too broad exception handler"
+        }
+      ],
+      "total_issues": 2,
+      "max_severity": "high"
+    },
+    {
+      "module": "src/qgis_manager/ignore.py",
+      "issues": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 118,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 101,
+          "description": "Too broad exception handler"
+        }
+      ],
+      "total_issues": 2,
+      "max_severity": "high"
+    },
+    {
+      "module": "src/qgis_manager/core.py",
+      "issues": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 254,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 284,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 323,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 115,
+          "description": "Too broad exception handler"
+        }
+      ],
+      "total_issues": 4,
+      "max_severity": "high"
+    },
+    {
+      "module": "src/qgis_manager/validation.py",
+      "issues": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 236,
+          "description": "Too broad exception handler"
+        }
+      ],
+      "total_issues": 1,
+      "max_severity": "high"
     }
   ],
   "qgis_compliance": {},
   "optimizations": [
-    {
-      "module": "src/qgis_manager/ignore.py",
-      "suggestions": [
-        {
-          "type": "complexity_refactoring",
-          "priority": "high",
-          "message": "Consider breaking down large logic",
-          "severity": "low"
-        }
-      ]
-    },
-    {
-      "module": "src/qgis_manager/validation.py",
-      "suggestions": [
-        {
-          "type": "complexity_refactoring",
-          "priority": "high",
-          "message": "Consider breaking down large logic",
-          "severity": "low"
-        }
-      ]
-    },
     {
       "module": "src/qgis_manager/cli/commands/bump.py",
       "suggestions": [
@@ -5858,6 +5891,17 @@
       ]
     },
     {
+      "module": "src/qgis_manager/ignore.py",
+      "suggestions": [
+        {
+          "type": "complexity_refactoring",
+          "priority": "high",
+          "message": "Consider breaking down large logic",
+          "severity": "low"
+        }
+      ]
+    },
+    {
       "module": "src/qgis_manager/core.py",
       "suggestions": [
         {
@@ -5869,7 +5913,18 @@
         {
           "type": "module_too_large",
           "priority": "medium",
-          "message": "Large module (549 lines)",
+          "message": "Large module (581 lines)",
+          "severity": "low"
+        }
+      ]
+    },
+    {
+      "module": "src/qgis_manager/validation.py",
+      "suggestions": [
+        {
+          "type": "complexity_refactoring",
+          "priority": "high",
+          "message": "Consider breaking down large logic",
           "severity": "low"
         }
       ]
@@ -5904,7 +5959,7 @@
     "hotspots": [
       {
         "path": "src/qgis_manager/core.py",
-        "commits": 18
+        "commits": 19
       },
       {
         "path": "src/qgis_manager/cli.py",
@@ -5916,29 +5971,29 @@
       },
       {
         "path": "src/qgis_manager/discovery.py",
-        "commits": 10
+        "commits": 11
       },
       {
-        "path": "tests/test_discovery.py",
+        "path": "src/qgis_manager/validation.py",
         "commits": 7
       }
     ],
     "churn": {
       "available": true,
       "period_days": 30,
-      "added": 17756,
-      "deleted": 1218,
-      "total_churn": 18974,
-      "files_changed": 176
+      "added": 21555,
+      "deleted": 3818,
+      "total_churn": 25373,
+      "files_changed": 198
     },
     "is_repo": true
   },
-  "timestamp": 1771456113.7453852,
+  "timestamp": 1771469781.7814124,
   "structure": {
-    "tree": "./\n    .ai_context_cache.json\n    .gitattributes\n    .gitignore\n    .pre-commit-config.yaml\n    AI_CONTEXT.md\n    CHANGELOG.md\n    LICENSE\n    ... (+11 more)\n    src/\n        qgis_manager/\n            __init__.py\n            cli.py\n            config.py\n            constants.py\n            core.py\n            dependencies.py\n            discovery.py\n            ... (+2 more)\n            templates/\n                default/\n                    __init__.py.tmpl\n                    metadata.txt.tmpl\n                    plugin.py.tmpl\n                processing/\n                    provider.py.tmpl\n                dockwidget/\n            cli/\n                __init__.py\n                app.py\n                base.py\n                commands/\n                    __init__.py\n                    analyze.py\n                    bump.py\n                    clean.py\n                    compile.py\n                    deploy.py\n                    hooks.py\n                    ... (+3 more)\n    tests/\n        test_cli.py\n        test_config.py\n        test_core.py\n        test_deployment_optimization.py\n        test_discovery.py\n        test_fix_exclusions.py\n        test_hooks.py\n        ... (+6 more)\n    analysis_results/\n        PROJECT_SUMMARY.md\n        analyzer.log\n        project_context.json\n    docs/\n        DEVELOPMENT_LOG.md\n        research/\n            CLI_EXPANSION_PROPOSAL.md\n            COMPETITIVE_ANALYSIS.md\n            RECOMMENDATIONS.md\n            distribution_research.md\n            qgis_manager_dev_roadmap.md\n        plans/\n            badges_expansion_plan.md\n            bump_implementation_plan.md\n            cli_refactor_plan.md\n            deployment_optimization_plan.md\n            distribution_plan.md\n            documentation_reorg_plan.md\n            hooks_expansion_plan.md\n            ... (+4 more)\n        walkthroughs/\n            walkthrough.md\n        releases/\n            GITHUB_RELEASE_v0.3.1.md\n            GITHUB_RELEASE_v0.3.2.md\n            GITHUB_RELEASE_v0.3.3.md\n            GITHUB_RELEASE_v0.4.0.md\n            GITHUB_RELEASE_v0.4.1.md\n            GITHUB_RELEASE_v0.5.0.md\n            GITHUB_RELEASE_v0.6.0.md\n            ... (+9 more)\n        guides/\n            TUTORIAL.md\n            uv_modernization_guide.md\n        standards/\n            COMMIT_GUIDELINES.md\n            CONTRIBUTING.md\n        maintenance/\n            SESSION_LOG_modernization.md\n            sesion_2026-02-18_v0.6.1_release.md\n            sesion_2026-02-18_v0.6.1_release_task.md\n            v0.6.1_bug_patch_report.md\n        examples/\n    generator_export/\n        GENERATOR_MANUAL.md\n        generator.py\n        templates/\n            base/\n                __init__.py.tmpl\n                metadata.txt.tmpl\n            processing/\n                algorithm.py.tmpl\n            gui/\n                plugin.py.tmpl\n            map_tool/\n                plugin.py.tmpl\n    dist/\n        .gitignore\n        qgis_manage-0.6.1-py3-none-any.whl\n        qgis_manage-0.6.1.tar.gz\n    antigravity-framerepo/\n        BOOTSTRAP.md\n        LICENSE\n        README.md\n        antigravity_framework_starter_kit.zip\n        bootstrap.py\n        pyproject.toml\n        scaffold/\n            AGENTS.md\n            skills/\n                agentic-memory.md\n                coding-standards.md\n                commit-standards.md\n                data-science/\n                    SKILL.md\n            workflows/\n                cierra-sesion.md\n                ia-critic.md\n                inicia-sesion.md\n            ui/\n                dialog_template.py\n            processing/\n                algorithm_template.py\n            memory/\n                AGENT_LESSONS.md\n                agent_metrics.json\n        scripts/\n            skill_sync.py\n        docs/\n            AGENT_ARCHITECTURE.md\n            UPGRADE_FRAMEWORK_GEN2.md\n    scaffold/\n        AGENTS.md\n        skills/\n            agentic-memory.md\n            coding-standards.md\n            commit-standards.md\n            data-science/\n                SKILL.md\n                scripts/\n                    generate_mock_data.py\n                    validate_dataset.py\n                examples/\n                    eda_template.py\n        workflows/\n            cierra-sesion.md\n            ia-critic.md\n            inicia-sesion.md\n        ui/\n            dialog_template.py\n        processing/\n            algorithm_template.py\n        memory/\n            AGENT_LESSONS.md\n            agent_metrics.json",
+    "tree": "./\n    .ai_context_cache.json\n    .gitattributes\n    .gitignore\n    .pre-commit-config.yaml\n    AI_CONTEXT.md\n    CHANGELOG.md\n    LICENSE\n    ... (+11 more)\n    src/\n        qgis_manager/\n            __init__.py\n            cli.py\n            config.py\n            constants.py\n            core.py\n            dependencies.py\n            discovery.py\n            ... (+2 more)\n            templates/\n                default/\n                    __init__.py.tmpl\n                    metadata.txt.tmpl\n                    plugin.py.tmpl\n                processing/\n                    provider.py.tmpl\n                dockwidget/\n            cli/\n                __init__.py\n                app.py\n                base.py\n                commands/\n                    __init__.py\n                    analyze.py\n                    bump.py\n                    clean.py\n                    compile.py\n                    deploy.py\n                    hooks.py\n                    ... (+3 more)\n    tests/\n        test_cli.py\n        test_config.py\n        test_core.py\n        test_deployment_optimization.py\n        test_discovery.py\n        test_fix_exclusions.py\n        test_hooks.py\n        ... (+6 more)\n    analysis_results/\n        PROJECT_SUMMARY.md\n        analyzer.log\n        project_context.json\n    docs/\n        DEVELOPMENT_LOG.md\n        research/\n            CLI_EXPANSION_PROPOSAL.md\n            COMPETITIVE_ANALYSIS.md\n            RECOMMENDATIONS.md\n            distribution_research.md\n            qgis_manager_dev_roadmap.md\n        plans/\n            badges_expansion_plan.md\n            bump_implementation_plan.md\n            cli_refactor_plan.md\n            deployment_optimization_plan.md\n            distribution_plan.md\n            documentation_reorg_plan.md\n            hooks_expansion_plan.md\n            ... (+4 more)\n        walkthroughs/\n            walkthrough.md\n        releases/\n            GITHUB_RELEASE_v0.3.1.md\n            GITHUB_RELEASE_v0.3.2.md\n            GITHUB_RELEASE_v0.3.3.md\n            GITHUB_RELEASE_v0.4.0.md\n            GITHUB_RELEASE_v0.4.1.md\n            GITHUB_RELEASE_v0.5.0.md\n            GITHUB_RELEASE_v0.6.0.md\n            ... (+11 more)\n        guides/\n            TUTORIAL.md\n            uv_modernization_guide.md\n        standards/\n            COMMIT_GUIDELINES.md\n            CONTRIBUTING.md\n        maintenance/\n            SESSION_LOG_modernization.md\n            infrastructure_upgrade_20260218.md\n            sesion_2026-02-18_v0.6.1_release.md\n            sesion_2026-02-18_v0.6.1_release_task.md\n            v0.6.1_bug_patch_report.md\n        examples/\n    generator_export/\n        GENERATOR_MANUAL.md\n        generator.py\n        templates/\n            base/\n                __init__.py.tmpl\n                metadata.txt.tmpl\n            processing/\n                algorithm.py.tmpl\n            gui/\n                plugin.py.tmpl\n            map_tool/\n                plugin.py.tmpl\n    dist/\n        .gitignore\n        qgis_manage-0.6.3-py3-none-any.whl\n        qgis_manage-0.6.3.tar.gz\n    antigravity-framerepo/\n        BOOTSTRAP.md\n        LICENSE\n        README.md\n        antigravity_framework_starter_kit.zip\n        bootstrap.py\n        pyproject.toml\n        scaffold/\n            AGENTS.md\n            skills/\n                agentic-memory.md\n                coding-standards.md\n                commit-standards.md\n                data-science/\n                    SKILL.md\n            workflows/\n                cierra-sesion.md\n                ia-critic.md\n                inicia-sesion.md\n            ui/\n                dialog_template.py\n            processing/\n                algorithm_template.py\n            memory/\n                AGENT_LESSONS.md\n                agent_metrics.json\n        scripts/\n            skill_sync.py\n        docs/\n            AGENT_ARCHITECTURE.md\n            UPGRADE_FRAMEWORK_GEN2.md\n    scaffold/\n        AGENTS.md\n        skills/\n            agentic-memory.md\n            coding-standards.md\n            commit-standards.md\n            data-science/\n                SKILL.md\n                scripts/\n                    generate_mock_data.py\n                    validate_dataset.py\n                examples/\n                    eda_template.py\n        workflows/\n            cierra-sesion.md\n            ia-critic.md\n            inicia-sesion.md\n        ui/\n            dialog_template.py\n        processing/\n            algorithm_template.py\n        memory/\n            AGENT_LESSONS.md\n            agent_metrics.json",
     "modules_count": 51,
     "file_types": {
-      ".md": 141,
+      ".md": 144,
       ".py": 52,
       ".tmpl": 9,
       ".json": 6,
@@ -5953,12 +6008,12 @@
       ".log": 1
     },
     "size_stats": {
-      "total_files": 315,
-      "total_size_mb": 1.3,
+      "total_files": 318,
+      "total_size_mb": 1.34,
       "python_files": 52,
       "python_size_mb": 0.17,
-      "avg_file_size_kb": 4.23,
-      "python_percentage": 12.82
+      "avg_file_size_kb": 4.31,
+      "python_percentage": 12.72
     }
   },
   "manual_notes": ""

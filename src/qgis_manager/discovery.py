@@ -161,7 +161,7 @@ def get_source_files(project_root: Path, include_dev: bool = False) -> Iterator[
 
     # We copy everything except excluded items at the root level
     for item in project_root.iterdir():
-        if matcher.should_exclude(item):
+        if item.is_symlink() or matcher.should_exclude(item):
             continue
 
         yield item

@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.4] - 2026-02-19
+
+### Improved
+- **Architectural Resilience**: Improved `create_plugin_package` and `get_source_files` in `core.py` and `discovery.py` to correctly ignore `is_symlink()`, preventing infinite recursion bugs.
+- **Robust Cache Cleaning**: Expanded `clean_artifacts` to purge `.pytest_cache`, `.ruff_cache`, and QGIS specific files (`*.qpj`, `*.cpg`).
+- **Ignore Parser Compatibility**: `load_ignore_patterns` now treats `.qgisignore` exclusively, overriding `.gitignore` completely. Modified `IgnoreMatcher` to support implicit directory recursion semantics, identically to Git logic.
+- **Official QGIS Validation**: The version validator was rewritten from a simple regex to full Semantic Versioning 2.0.0 support, enabling prereleases validation (e.g. `1.0.0-beta`).
+
 ## [0.6.3] - 2026-02-18
 
 ### Fixed

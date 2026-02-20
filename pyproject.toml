@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "qgis-manage"
-version = "0.6.3"
+version = "0.6.4"
 description = "A modern CLI for managing QGIS plugin development, deployment, and packaging."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -103,3 +103,12 @@ warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true
 check_untyped_defs = true
+
+[dependency-groups]
+dev = [
+    "ai-context-core>=3.2.1",
+    "mypy>=1.19.1",
+    "pre-commit>=4.5.1",
+    "qgis-plugin-analyzer>=1.10.0",
+    "ruff>=0.14.10",
+]

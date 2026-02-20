@@ -89,7 +89,11 @@ def load_ignore_patterns(project_root: Path, include_dev: bool = False):
             patterns.append(f"/{d}/**/*")
 
     # 1. Try to load from .gitignore or .qgisignore
-    for ignore_name in [".gitignore", ".qgisignore"]:
+    ignore_loaded = False
+    for ignore_name in [".qgisignore", ".gitignore"]:
+        if ignore_loaded:
+            break
+
         ignore_file = project_root / ignore_name
         if ignore_file.exists():
             try:
@@ -98,6 +102,7 @@ def load_ignore_patterns(project_root: Path, include_dev: bool = False):
                         line = line.strip()
                         if line and not line.startswith("#"):
                             patterns.append(line)
+                ignore_loaded = True
             except Exception:
                 pass
 
@@ -129,7 +134,7 @@ class IgnoreMatcher:
         self.patterns = load_ignore_patterns(project_root, include_dev)
 
     def should_exclude(self, path: Path) -> bool:
-        """Determines if a path should be excluded using fnmatch."""
+        """Determine if a path should be excluded (fnmatch with Git-like semantics)."""
         try:
             rel_path = path.relative_to(self.project_root)
         except ValueError:
@@ -151,7 +156,13 @@ class IgnoreMatcher:
                 # Global matching (matches any part of the path or the whole path)
                 if any(fnmatch.fnmatch(part, p) for part in parts):
                     return True
+
+                # Match full path
                 if fnmatch.fnmatch(path_str, p) or fnmatch.fnmatch(path_str, f"*/{p}"):
+                    return True
+
+                # Implicit recursion for directories
+                if path_str.startswith(f"{p}/") or f"/{p}/" in path_str:
                     return True
 
         return False

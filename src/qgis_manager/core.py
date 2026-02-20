@@ -397,13 +397,23 @@ def compile_qt_resources(
 def clean_artifacts(project_root: Path):
     """Clean build artifacts."""
     logger.info("Cleaning artifacts...")
-    for item in project_root.rglob("__pycache__"):
-        shutil.rmtree(item)
-        logger.debug(f"  🗑️ {item.relative_to(project_root)}")
 
-    for item in project_root.rglob("*.pyc"):
-        item.unlink()
-        logger.debug(f"  🗑️ {item.relative_to(project_root)}")
+    # Directorios a eliminar
+    cache_dirs = ["__pycache__", ".pytest_cache", ".ruff_cache"]
+    for dir_name in cache_dirs:
+        for item in project_root.rglob(dir_name):
+            if item.is_dir():
+                shutil.rmtree(item)
+                logger.debug(f"  🗑️ {item.relative_to(project_root)}")
+
+    # Archivos a eliminar
+    cache_files = ["*.pyc", "*.qpj", "*.cpg"]
+    for file_pattern in cache_files:
+        for item in project_root.rglob(file_pattern):
+            if item.is_file():
+                item.unlink()
+                logger.debug(f"  🗑️ {item.relative_to(project_root)}")
+
     logger.info("✨ Clean complete.")
 
 
@@ -450,7 +460,11 @@ def create_plugin_package(
             items_to_zip.append((item, f"{slug}/{item.name}"))
         elif item.is_dir():
             for file_path in item.rglob("*"):
-                if file_path.is_file() and not matcher.should_exclude(file_path):
+                if (
+                    file_path.is_file()
+                    and not file_path.is_symlink()
+                    and not matcher.should_exclude(file_path)
+                ):  # noqa: E501
                     arcname = f"{slug}/{file_path.relative_to(project_root)}"
                     items_to_zip.append((file_path, arcname))
 

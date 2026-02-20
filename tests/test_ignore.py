@@ -63,6 +63,45 @@ class TestIgnoreMatcher(unittest.TestCase):
             pycache = tmp_path / "__pycache__"
             self.assertTrue(matcher.should_exclude(pycache))
 
+    def test_exclusive_qgisignore(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+
+            # Create a .gitignore that ignores 'should_be_included.txt'
+            gitignore = tmp_path / ".gitignore"
+            gitignore.write_text("should_be_included.txt\n", encoding="utf-8")
+
+            # Create a .qgisignore that ignores 'should_be_excluded.txt'
+            qgisignore = tmp_path / ".qgisignore"
+            qgisignore.write_text("should_be_excluded.txt\n", encoding="utf-8")
+
+            matcher = IgnoreMatcher(tmp_path)
+
+            # Because .qgisignore exists, .gitignore should be ignored entirely.
+            # So 'should_be_included.txt' must NOT be excluded.
+            included = tmp_path / "should_be_included.txt"
+            self.assertFalse(matcher.should_exclude(included))
+
+            # And 'should_be_excluded.txt' must be excluded.
+            self.assertTrue(matcher.should_exclude(tmp_path / "should_be_excluded.txt"))
+
+    def test_implicit_recursion(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            qgisignore = tmp_path / ".qgisignore"
+            # Pattern 'logs/debug' without wildcards
+            qgisignore.write_text("logs/debug\n", encoding="utf-8")
+
+            matcher = IgnoreMatcher(tmp_path)
+
+            # A deep file inside logs/debug should be excluded
+            deep_file = tmp_path / "logs" / "debug" / "nested" / "file.txt"
+            self.assertTrue(matcher.should_exclude(deep_file))
+
+            # A directory matching exactly should be excluded
+            exact_dir = tmp_path / "logs" / "debug"
+            self.assertTrue(matcher.should_exclude(exact_dir))
+
 
 if __name__ == "__main__":
     unittest.main()

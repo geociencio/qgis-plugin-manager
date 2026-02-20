@@ -339,7 +339,7 @@ wheels = [
 
 [[package]]
 name = "qgis-manage"
-version = "0.6.2"
+version = "0.6.4"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
@@ -355,6 +355,15 @@ dev = [
     { name = "types-setuptools" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "ai-context-core" },
+    { name = "mypy" },
+    { name = "pre-commit" },
+    { name = "qgis-plugin-analyzer" },
+    { name = "ruff" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "ai-context-core", marker = "extra == 'dev'", specifier = ">=3.2.1" },
@@ -366,6 +375,15 @@ requires-dist = [
     { name = "types-setuptools", marker = "extra == 'dev'", specifier = ">=80.9.0.20251223" },
 ]
 provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "ai-context-core", specifier = ">=3.2.1" },
+    { name = "mypy", specifier = ">=1.19.1" },
+    { name = "pre-commit", specifier = ">=4.5.1" },
+    { name = "qgis-plugin-analyzer", specifier = ">=1.10.0" },
+    { name = "ruff", specifier = ">=0.14.10" },
+]
 
 [[package]]
 name = "qgis-plugin-analyzer"

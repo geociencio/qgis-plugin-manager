@@ -31,11 +31,12 @@ class TestValidation(unittest.TestCase):
         self.assertTrue(validate_version("2.5.3"))
         self.assertTrue(validate_version("0.1"))
         self.assertTrue(validate_version("10.20.30"))
+        self.assertTrue(validate_version("1.0.0-beta"))
 
     def test_validate_version_invalid(self):
         self.assertFalse(validate_version("1"))
         self.assertFalse(validate_version("v1.0.0"))
-        self.assertFalse(validate_version("1.0.0-beta"))
+        self.assertFalse(validate_version("1.0.invalid"))
         self.assertFalse(validate_version("invalid"))
 
     def test_validate_email_valid(self):
