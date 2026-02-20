@@ -1,16 +1,35 @@
-# Release Notes - v0.6.4
+# Release Notes - qgis-manage v0.6.4
 
-**Fecha**: 2026-02-19
+We are pleased to announce the release of **qgis-manage v0.6.4**. This patch focuses on architectural hardening of the core, packaging, and validation subsystems, addressing edge cases identified during real-world plugin development.
 
-Esta actualización menor (`v0.6.4`) y la subversión previa (`0.6.4` integrada) se enfocan exclusivamente en blindar la arquitectura del core, el validador y el empaquetador de la herramienta, subsanando vulnerabilidades arquitectónicas durante el desarrollo local y el despliegue automático.
+## 🚀 What's Improved
 
-## 🚀 Mejoras Principales (Improvements)
+### 🔗 Symlink Safety in Packaging and Discovery
+`qgis-manage package` and the internal file discovery engine (`get_source_files`) now explicitly skip symbolic links, preventing infinite recursion crashes when a project contains circular or deeply nested symlinks.
 
-- **Prevención de Symlinks**: `qgis-manage package` y los empaquetadores internos ya no colapsarán al encontrarse un symlink recursivo; estos son automáticamente evadidos.
-- **Limpieza de Proyecto (Cache)**: `qgis-manage clean` ahora es más agresivo purgando directorios residuales del entorno de desarrollo como `.pytest_cache`, `.ruff_cache` ademá de los subproductos espaciales escondidos `*.qpj` y `*.cpg`.
-- **Ignore Parser Exclusivo**: Si usas un `.qgisignore`, la herramienta ignorará categóricamente el `.gitignore`. Además, el parser ahora entiende de "Implicit Directory Recursion", logrando paridad completa con el comportamiento standard de Git.
-- **QGIS Metadata SemVer**: Se ha flexibilizado la validación de versiones reemplazando la lógica simple por un parser oficial SemVer 2.0; esto significa que tu `metadata.txt` ahora puede usar tags de Pre-Releases como `1.0.0-beta.1` sin encender advertencias.
+### 🧹 Extended Cache Cleaning
+`qgis-manage clean` now removes a wider range of development artifacts:
+- `.pytest_cache` and `.ruff_cache` directories
+- QGIS/Shapefile sidecar files: `*.qpj`, `*.cpg`
 
-## 🐛 Fixes
-- Line length and regex formatting issues en el código fuente (Ruff `E501`).
-- `test_validation.py` fue actualizado para aceptar versiones beta.
+### 📂 Exclusive `.qgisignore` Support
+If a `.qgisignore` file is present in the project root, `qgis-manage` will **no longer merge** it with `.gitignore`. The `.qgisignore` takes full precedence, allowing you to define package-specific exclusions independently of your Git configuration.
+
+Additionally, `IgnoreMatcher` now correctly handles **implicit directory recursion**: a pattern like `logs/debug` will now match all files nested under `logs/debug/`, consistent with standard Git ignore behavior.
+
+### ✅ Semantic Versioning 2.0 Validator
+The version validator in `validation.py` was rewritten using the official [SemVer 2.0.0](https://semver.org/) specification. Pre-release identifiers such as `1.0.0-beta.1` and `1.0.0-alpha` are now valid in `metadata.txt`.
+
+## 🐛 Bug Fixes
+- Fixed `E501` (line-too-long) linting errors in `core.py` and `validation.py`.
+- Updated `test_validation.py` to correctly accept pre-release version strings.
+
+## 📦 Installation
+```bash
+pip install qgis-manage==0.6.4
+# or
+uv tool install qgis-manage@latest
+```
+
+## 📄 Full Changelog
+See [CHANGELOG.md](../../CHANGELOG.md) for a complete list of changes.
