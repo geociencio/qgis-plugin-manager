@@ -107,7 +107,7 @@ def run_hook(
 
         if result.returncode != 0:
             logger.error(
-                f"❌ Hook command '{name}' failed " f"(exit code {result.returncode})"
+                f"❌ Hook command '{name}' failed (exit code {result.returncode})"
             )
             if result.stdout:
                 logger.error(f"STDOUT: {result.stdout}")

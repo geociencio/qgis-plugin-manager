@@ -1,4 +1,4 @@
-# Release Notes - qgis-manage v0.6.4
+# Release Notes - qgis-manage v0.6.4 - improve symlink safety, cache cleaning, SemVer validation and exclusive qgisignore loading
 
 We are pleased to announce the release of **qgis-manage v0.6.4**. This patch focuses on architectural hardening of the core, packaging, and validation subsystems, addressing edge cases identified during real-world plugin development.
 

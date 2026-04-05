@@ -1,60 +1,73 @@
 ---
-description: Workflow guiado para refactorización de código con validación de complejidad
+description: Guided workflow for code refactoring with complexity validation
 agent: Senior Architect
-skills: [qgis-core, geological-logic]
+skills: [domain-logic, domain-logic]
 validation: |
-  - Verificar que complejidad ciclomática se redujo (CC < 15)
-  - Confirmar que tests siguen pasando después de refactorización
-  - Validar que no se introdujeron violaciones de arquitectura
+  - Verify that cyclomatic complexity decreased (CC < 15)
+  - Confirm that tests still pass after refactoring
+  - Validate that no architecture violations were introduced
 ---
 
-Este workflow guía la refactorización de código siguiendo los estándares del proyecto y usando conocimiento especializado de skills.
+# Workflow: Refactor Code
 
-## Cuándo Usar Este Workflow
+This workflow guides code refactoring following project standards and using specialized knowledge from skills.
 
-- Cuando `qgis-analyzer` detecta métodos con CC > 15
-- Cuando `AI_CONTEXT.md` identifica deuda técnica crítica
-- Antes de añadir nuevas funcionalidades a módulos complejos
+## When to Use This Workflow
 
+- When `qgis-analyzer` detects methods with CC > 15.
+- When `AI_CONTEXT.md` identifies critical technical debt.
+- Before adding new features to complex modules.
 
-## Pasos de Refactorización
+## Refactoring Steps
 
-1. **Identificar Objetivo de Refactorización**:
+1. **Identify Refactoring Target**:
    // turbo
    ```bash
-   qgis-analyzer analyze .
+   uv run ai-ctx analyze .
    ```
 
-   🤖 **Agent Action**: Analizar `analysis_results/PROJECT_SUMMARY.md` para identificar hotspots y deuda técnica.
+   🤖 **Agent Action**: Analyze `analysis_results/PROJECT_SUMMARY.md` to identify hotspots (CC > 15) and technical debt.
 
-2. **Cargar Contexto Especializado**:
+2. **Quick Auto-Correction** (Optional):
+   // turbo
+   ```bash
+   uv run qgis-analyzer fix --dry-run .
+   ```
+   🤖 **Agent Action**: If safe auto-corrections are available, apply them using `fix --apply` before proceeding with manual refactoring.
 
-   🤖 **Agent Action**: Según el módulo, cargar skill apropiado (geological-logic, qgis-core, o ui-framework).
+3. **Load Specialized Context**:
 
-3. **Aplicar Refactorización**:
+   🤖 **Agent Action**: Depending on the module, load the appropriate skill (**domain-logic**, **domain-logic**, or **ui-framework**).
 
-   🤖 **Agent Action**: Aplicar principios SOLID y reducir complejidad ciclomática.
+4. **Apply Refactoring**:
 
-4. **Validar con Tests**:
+   🤖 **Agent Action**: Apply SOLID principles and reduce cyclomatic complexity.
+
+5. **Validate with Tests**:
    // turbo
    ```bash
    make docker-test
    ```
 
-   🤖 **Agent Action**: Usar skill **qa-docker** para asegurar que no hay regresiones.
+   🤖 **Agent Action**: Use **qa-standards** skill to ensure no regressions.
 
-5. **Verificar Métricas de Calidad**:
+6. **Verify Quality Metrics**:
    // turbo
    ```bash
-   qgis-analyzer analyze .
+   uv run ai-ctx analyze .
    ```
 
-   🤖 **Agent Action**: Confirmar mejora en el Quality Score y reducción de CC.
+   🤖 **Agent Action**: Confirm improvement in Quality Score and reduction in Cyclomatic Complexity (CC).
 
-6. **Commit de Refactorización**:
-   Usar workflow `/crea-commit` con mensaje técnico estructurado.
+6.5 Complexity Audit (Auditor Reflection) 🤖
+- **Agent Reflection**: Activate the **@auditor** role.
+- **Verification**: Ensure the refactor didn't introduce new architecture violations or hide complexity in "wrapper" functions.
+- **Pattern Match**: Confirm adherence to the "Extract-then-Compute" standard.
 
-## Resultado Esperado
-- Código más mantenible, testeable y con menor complejidad ciclomática.
-- Cero regresiones funcionales confirmadas por tests.
-- Documentación técnica (docstrings) actualizada.
+7. **Refactoring Commit**:
+   Use `/create-commit` workflow with a structured technical message.
+
+## Expected Result
+- More maintainable, testable code with reduced cyclomatic complexity.
+- Zero functional regressions confirmed by tests.
+- Technical documentation (docstrings) updated.

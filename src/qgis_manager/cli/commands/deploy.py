@@ -67,8 +67,7 @@ class DeployCommand(BaseCommand):
             if args.purge_backups:
                 target_dir = get_qgis_plugin_dir(target_profile)
                 msg = (
-                    f"🗑️  Purge all backups for '{slug}' "
-                    f"in profile '{target_profile}'?"
+                    f"🗑️  Purge all backups for '{slug}' in profile '{target_profile}'?"
                 )
                 if click.confirm(msg):
                     from ...core import rotate_backups

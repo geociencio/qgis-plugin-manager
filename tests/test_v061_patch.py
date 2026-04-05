@@ -38,8 +38,7 @@ class TestV061Patch(unittest.TestCase):
         metadata_file = self.tmp_path / "metadata.txt"
         # The % character in changelog used to crash ConfigParser due to interpolation
         content = (
-            "[general]\nname=Test\nversion=1.0\n"
-            "changelog=Performance improved by 50%\n"
+            "[general]\nname=Test\nversion=1.0\nchangelog=Performance improved by 50%\n"
         )
         metadata_file.write_text(content, encoding="utf-8")
 

@@ -1,57 +1,57 @@
 ---
 name: release-management
-description: Estándares para el proceso de liberación de herramientas CLI con validación de calidad.
-trigger: al preparar lanzamientos, actualizar versiones o usar el workflow /release-plugin
+description: Standards for the release process of CLI tools with quality validation.
+trigger: when preparing releases, updating versions, or using the /release-plugin workflow.
 ---
 
-# Gestión de Releases (Herramientas CLI)
+# Release Management (CLI Tools)
 
-Controla el ciclo de vida de las versiones de la herramienta, garantizando que cada entrega cumpla con los estándares de calidad de PyPI y el proyecto.
+Controls the lifecycle of tool versions, ensuring that each delivery meets PyPI and project quality standards.
 
-## Cuándo usar este skill
-- Al finalizar una fase de desarrollo y preparar una nueva versión.
-- Al actualizar `pyproject.toml` o `metadata.txt`.
-- Al generar notas de versión o actualizar el changelog.
-- Al usar el workflow `/release-plugin`.
+## When to use this skill
+- When finishing a development phase and preparing a new release.
+- When updating `pyproject.toml` or `metadata.txt`.
+- When generating release notes or updating the changelog.
+- When using the `/release-plugin` workflow.
 
-## Grado de Libertad
-- **Estricto**: El proceso de 5 fases y los requisitos de calidad son innegociables.
+## Degree of Freedom
+- **Strict**: The 5-phase process and quality requirements are non-negotiable.
 
-## Workflow Detallado
+## Detailed Workflow
 
-### Fase 1: Calidad y Preparación
-1. **Análisis de Calidad**:
+### Phase 1: Quality and Preparation
+1. **Quality Analysis**:
    ```bash
    uv run ruff check . && uv run mypy src/
    ```
-   - Validar: Cero errores de linting y tipado.
-2. **Actualizar Badges**: Reflejar métricas en `README.md` (CI, PyPI status).
+   - Validate: Zero linting and typing errors.
+2. **Update Badges**: Reflect metrics in `README.md` (CI, PyPI status).
 
-### Fase 2: Versionado y Documentación
-1. **Sincronización**: Usar `qgis-manage bump` para actualizar versiones en `pyproject.toml` y `metadata.txt`.
-2. **Reglas Semver**:
-   - MAJOR (X): Cambios incompatibles.
-   - MINOR (Y): Nuevas funcionalidades.
-   - PATCH (Z): Correcciones.
-3. **Notas de Versión**: Generar en `docs/releases/RELEASE_NOTES_vX.Y.Z.md`.
+### Phase 2: Versioning and Documentation
+1. **Synchronization**: Use `qgis-manage bump` to update versions in `pyproject.toml` and `metadata.txt`.
+2. **Semver Rules**:
+   - MAJOR (X): Incompatible API changes.
+   - MINOR (Y): New functionalities in a backward-compatible manner.
+   - PATCH (Z): Backward-compatible bug fixes.
+3. **Release Notes**: Generate in `docs/releases/RELEASE_NOTES_vX.Y.Z.md`.
 
-### Fase 3: Verificación Técnica
-1. Lograr que el 100% de los tests pasen vía `uv run pytest`.
-2. Verificar la integridad de la CLI con `uv run qgis-manage --help`.
+### Phase 3: Technical Verification
+1. Ensure 100% of tests pass via `uv run pytest`.
+2. Verify CLI integrity with `uv run qgis-manage --help`.
 
-### Fase 4: Git y Etiquetado
-1. Commit de release: `chore(release): prepare vX.Y.Z`.
-2. Etiqueta: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`.
+### Phase 4: Git and Tagging
+1. Release commit: `chore(release): prepare vX.Y.Z`.
+2. Tag: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`.
 3. Push: `git push origin main --tags`.
 
-### Fase 5: Construcción y Distribución
+### Phase 5: Build and Distribution
 1. Build: `uv build`.
-2. Validar artefactos en `dist/`: `.whl` (Wheel) y `.tar.gz` (Source Distribution).
-3. Carga: `uv publish` para subir a PyPI y crear release en GitHub.
+2. Validate artifacts in `dist/`: `.whl` (Wheel) and `.tar.gz` (Source Distribution).
+3. Publish: `uv publish` to upload to PyPI and create a GitHub release.
 
-## Checklist de Calidad
-- [ ] ¿Pasa los chequeos de `ruff` y `mypy` al 100%?
-- [ ] ¿Se ha usado `bump` para sincronizar versiones?
-- [ ] ¿Se han generado los artefactos de build (`uv build`)?
-- [ ] ¿Se han seguido las reglas de Git Tagging?
-- [ ] ¿Todos los tests pasaron satisfactoriamente?
+## Quality Checklist
+- [ ] Does the code pass 100% of `ruff` and `mypy` checks?
+- [ ] Was `bump` used to synchronize versions?
+- [ ] Were build artifacts generated (`uv build`)?
+- [ ] Were Git Tagging rules followed?
+- [ ] Did all tests pass successfully?

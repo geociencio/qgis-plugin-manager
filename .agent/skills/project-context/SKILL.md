@@ -1,42 +1,36 @@
 ---
 name: project-context
-description: Resumen del propósito, arquitectura y estructura del proyecto SecInterp.
-trigger: al iniciar nuevas tareas, solicitar resúmenes o explicar la arquitectura del plugin.
+description: Summary of the purpose and architecture of qgis-plugin-manager.
+trigger: when starting new tasks, requesting summaries, or explaining the project architecture.
 ---
 
-# Contexto del Proyecto SecInterp
+# Project Context: qgis-plugin-manager
 
-Proporciona una visión integral del plugin de QGIS para interpretación de secciones geológicas, facilitando la toma de decisiones arquitectónicas coherentes.
+`qgis-plugin-manager` is a Python CLI tool built to manage the lifecycle, versioning, scaffolding, and testing of QGIS plugins programmatically.
 
-## Cuándo usar este skill
-- Al inicio de una sesión para refrescar la arquitectura.
-- Al proponer cambios estructurales o nuevas integraciones.
-- Cuando el usuario solicita un estado actual del proyecto.
+## When to use this skill
+- At the start of a session to refresh the architecture of this CLI.
+- When modifying or adding subcommands to the CLI using Typer.
+- When the user requests a current status of the QGIS framework.
 
-## Grado de Libertad
-- **Guiado**: Utilizar esta información como marco de referencia para proponer soluciones alineadas con la visión del proyecto.
+## Degree of Freedom
+- **Strictly guided**: It must be considered that the current development focuses purely on modern Python (Typer and uv), NOT on internal QGIS logic.
 
-## Workflow
-1. **Lectura**: Consultar `AI_CONTEXT.md` y `PROJECT_SUMMARY.md`.
-2. **Análisis**: Identificar los límites entre `core`, `gui` y `exporters`.
-3. **Validación**: Asegurar que las nuevas propuestas no violen el desacoplamiento definido.
+## Instructions and Rules
 
-## Instrucciones y Reglas
+### Core Architecture
+- CLI built on **Typer**.
+- Packaging and environment execution managed 100% by **uv**.
+- Mandatory and strict static validations using **ruff** (linting) and **mypy** (typing).
+- Follows the Antigravity Gen 5 agent standard: custom agent logic is isolated in `.agent`, while blueprints for creating QGIS plugins are injected from `scaffold/`.
 
-### Propósito
-SecInterp es una herramienta avanzada para geólogos que permite interpolar datos de sondajes en secciones 2D/3D dentro de QGIS, optimizando el flujo de trabajo de modelamiento.
+### Main Folder Structure
+- `src/qgis_manager/`: The main source code of the CLI application.
+- `scripts/`: Base MCP tools and skill synchronization tools for the Gen 5 ecosystem.
+- `scaffold/`: Base templates and blueprints (QGIS, Mining) that the CLI uses to inject configuration into target systems.
+- `docs/`: Documentation, guides, and release notes mapped from `pyproject.toml`.
 
-### Arquitectura Core
-- **Local First**: Prioriza el rendimiento local y el manejo eficiente de memoria.
-- **Agnóstico a la UI**: El núcleo del procesamiento debe funcionar sin depender de elementos gráficos de Qt.
-- **Validación de 3 Niveles**: (Tipo, Esquema, Negocio) en todos los servicios de dominio.
-
-### Estructura de Carpetas
-- `core/`: Cerebro del plugin (servidores, lógica de sondajes).
-- `gui/`: Interfaz de usuario dinámica y responsiva.
-- `exporters/`: Lógica de exportación multi-formato.
-
-## Checklist de Calidad
-- [ ] ¿La propuesta respeta la separación Core/GUI?
-- [ ] ¿Se alinea con la visión "Local First"?
-- [ ] ¿Se mantiene la integridad de la validación de 3 niveles?
+## Quality Checklist
+- [ ] Do changes to the CLI maintain command compatibility (properly added to Typer)?
+- [ ] Did local tests pass using `pytest`, `ruff`, and `mypy` via `uv run`?
+- [ ] Does the change respect the separation between the manager tool (CLI) and the target templates/plugins?
