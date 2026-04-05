@@ -1,16 +1,16 @@
 # PROJECT SUMMARY - qgis-plugin-manager
-Analysis Date: 2026-02-18 21:56:21
+Analysis Date: 2026-04-05 17:09:33
 Analyzer Version: 3.1.1 (Ai-Context-Core)
 
 ## 📊 KEY METRICS
-- **Quality Score**: 77.1/100
-- **Source Lines (SLOC)**: 3,557
-- **Total Physical Lines**: 5,388
-- **Maintainability**: 43.1
+- **Quality Score**: 74.5/100
+- **Source Lines (SLOC)**: 3,425
+- **Total Physical Lines**: 5,113
+- **Maintainability**: 41.3
 - **Test Coverage**: 14 test files
 
 ## 📁 STRUCTURE
-**Total Modules**: 51
+**Total Modules**: 42
 
 ```tree
 ./
@@ -67,6 +67,7 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
         analyzer.log
         project_context.json
     docs/
+        CHANGELOG.md
         DEVELOPMENT_LOG.md
         research/
             CLI_EXPANSION_PROPOSAL.md
@@ -93,7 +94,7 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
             GITHUB_RELEASE_v0.4.1.md
             GITHUB_RELEASE_v0.5.0.md
             GITHUB_RELEASE_v0.6.0.md
-            ... (+11 more)
+            ... (+12 more)
         guides/
             TUTORIAL.md
             uv_modernization_guide.md
@@ -105,8 +106,12 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
             infrastructure_upgrade_20260218.md
             sesion_2026-02-18_v0.6.1_release.md
             sesion_2026-02-18_v0.6.1_release_task.md
+            session_2026-04-05_gen5_sync.md
             v0.6.1_bug_patch_report.md
         examples/
+        architecture/
+            CORE_VALIDATION_IMPROVEMENTS.md
+            IGNORE_PARSER_IMPROVEMENTS.md
     generator_export/
         GENERATOR_MANUAL.md
         generator.py
@@ -122,77 +127,45 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
                 plugin.py.tmpl
     dist/
         .gitignore
-        qgis_manage-0.6.3-py3-none-any.whl
-        qgis_manage-0.6.3.tar.gz
-    antigravity-framerepo/
-        BOOTSTRAP.md
-        LICENSE
-        README.md
-        antigravity_framework_starter_kit.zip
-        bootstrap.py
-        pyproject.toml
-        scaffold/
-            AGENTS.md
+        qgis_manage-0.6.4-py3-none-any.whl
+        qgis_manage-0.6.4.tar.gz
+    scaffold/
+        mining/
             skills/
-                agentic-memory.md
-                coding-standards.md
-                commit-standards.md
-                data-science/
+                geological-logic/
+                    SKILL.md
+        qgis/
+            skills/
+                qa-docker/
+                    SKILL.md
+                qgis-core/
+                    SKILL.md
+                qgis-migration-4x/
+                    SKILL.md
+                ui-framework/
                     SKILL.md
             workflows/
-                cierra-sesion.md
-                ia-critic.md
-                inicia-sesion.md
-            ui/
-                dialog_template.py
-            processing/
-                algorithm_template.py
-            memory/
-                AGENT_LESSONS.md
-                agent_metrics.json
-        scripts/
-            skill_sync.py
-        docs/
-            AGENT_ARCHITECTURE.md
-            UPGRADE_FRAMEWORK_GEN2.md
-    scaffold/
-        AGENTS.md
-        skills/
-            agentic-memory.md
-            coding-standards.md
-            commit-standards.md
-            data-science/
-                SKILL.md
-                scripts/
-                    generate_mock_data.py
-                    validate_dataset.py
-                examples/
-                    eda_template.py
-        workflows/
-            cierra-sesion.md
-            ia-critic.md
-            inicia-sesion.md
-        ui/
-            dialog_template.py
-        processing/
-            algorithm_template.py
-        memory/
-            AGENT_LESSONS.md
-            agent_metrics.json
+                audit-plugin.md
+                release-plugin.md
+                run-tests-in-qgis.md
+    scripts/
+        mcp_server.py
+        security_scan.py
+        skill_sync.py
 ```
 
 ## 🚨 CRITICAL ISSUES
 ### 🔒 Security Issues:
-- **antigravity-framerepo/bootstrap.py**: 4 issues (Max: HIGH)
-- **antigravity-framerepo/scaffold/skills/data-science/scripts/validate_dataset.py**: 1 issues (Max: HIGH)
-- **antigravity-framerepo/scripts/skill_sync.py**: 2 issues (Max: HIGH)
+- **bootstrap.py**: 4 issues (Max: HIGH)
+- **scripts/mcp_server.py**: 4 issues (Max: HIGH)
+- **scripts/security_scan.py**: 1 issues (Max: HIGH)
 
 ## 💡 MAIN RECOMMENDATIONS
+### scripts/mcp_server.py
+- Consider breaking down large logic
+### scripts/security_scan.py
+- Consider breaking down large logic
 ### src/qgis_manager/cli/commands/bump.py
-- Consider breaking down large logic
-### src/qgis_manager/cli/commands/hooks.py
-- Consider breaking down large logic
-### src/qgis_manager/ignore.py
 - Consider breaking down large logic
 
 ## 🏗️ DESIGN PATTERNS
@@ -201,18 +174,18 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
 
 ## 🔄 GIT ANALYSIS
 ### Code Churn (last 30 days)
-- **Files Changed**: 198
-- **Additions**: +21555
-- **Deletions**: -3818
-- **Total Churn**: 25373
+- **Files Changed**: 67
+- **Additions**: +2001
+- **Deletions**: -2202
+- **Total Churn**: 4203
 
 ### 🔥 Hotspots
-- `src/qgis_manager/core.py`: 19 commits
+- `src/qgis_manager/core.py`: 20 commits
 - `src/qgis_manager/cli.py`: 14 commits
+- `src/qgis_manager/discovery.py`: 12 commits
 - `tests/test_core.py`: 12 commits
-- `src/qgis_manager/discovery.py`: 11 commits
-- `src/qgis_manager/validation.py`: 7 commits
+- `src/qgis_manager/validation.py`: 8 commits
 
 ## 📈 COMPLEXITY DISTRIBUTION
-- **Average Complexity**: 9.29
-- **Max Complexity**: 80
+- **Average Complexity**: 11.40
+- **Max Complexity**: 85

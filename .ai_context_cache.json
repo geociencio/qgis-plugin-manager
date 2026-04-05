@@ -1,14 +1,14 @@
 {
   "tests/test_validation.py": {
-    "hash": "ac900943b522ae8f710b7c999131d647c63687ab199ee75c994605f305e703b4",
-    "mtime": 1771451152.8925686,
-    "size": 4893,
+    "hash": "fb047d1b502eb22a49ea6ed4cca81cd7d78d953963e5a93d2faef566390ce368",
+    "mtime": 1771565612.037594,
+    "size": 4950,
     "data": {
       "path": "tests/test_validation.py",
-      "lines": 134,
-      "sloc": 115,
-      "loc": 115,
-      "file_size_kb": 4.7783203125,
+      "lines": 135,
+      "sloc": 116,
+      "loc": 116,
+      "file_size_kb": 4.833984375,
       "complexity": 7,
       "imports": [
         "unittest",
@@ -69,13 +69,13 @@
         "coverage": 0.0
       },
       "halstead": {
-        "vocabulary": 61,
-        "length": 244,
-        "volume": 1220,
-        "difficulty": 10.0,
-        "effort": 12200.0
+        "vocabulary": 62,
+        "length": 247,
+        "volume": 1235,
+        "difficulty": 9.96,
+        "effort": 12295.83
       },
-      "maintenance_index": 32.5,
+      "maintenance_index": 32.38,
       "syntax_error": false,
       "unused_imports": [],
       "qgis_compliance": {
@@ -99,7 +99,7 @@
       "ast_security": [],
       "patterns": {}
     },
-    "timestamp": 1771442719.6377566
+    "timestamp": 1775422878.1667721
   },
   "antigravity-framerepo/bootstrap.py": {
     "hash": "3ec92007fcb99eebc3dc28913386cd417f7c7ab37acd41eb08382b21deb1641d",
@@ -1190,16 +1190,16 @@
     "timestamp": 1771446262.113008
   },
   "src/qgis_manager/discovery.py": {
-    "hash": "654af15a2c66074e5fa23b73b15a56e9f3fcfdbbb898c7ee8246b2d302d4e8f7",
-    "mtime": 1771456024.966525,
-    "size": 6078,
+    "hash": "065afeb8bd32d7edafa304d79c9f06b830d1d0d6889005d9563f7c956ac6bc4e",
+    "mtime": 1771565319.6586554,
+    "size": 6099,
     "data": {
       "path": "src/qgis_manager/discovery.py",
       "lines": 167,
       "sloc": 70,
       "loc": 70,
-      "file_size_kb": 5.935546875,
-      "complexity": 14,
+      "file_size_kb": 5.9560546875,
+      "complexity": 15,
       "imports": [
         "configparser",
         "logging",
@@ -1241,12 +1241,12 @@
       },
       "halstead": {
         "vocabulary": 72,
-        "length": 186,
-        "volume": 1116,
-        "difficulty": 14.52,
-        "effort": 16200.3
+        "length": 188,
+        "volume": 1128,
+        "difficulty": 14.61,
+        "effort": 16476.2
       },
-      "maintenance_index": 36.53,
+      "maintenance_index": 36.36,
       "syntax_error": false,
       "unused_imports": [],
       "qgis_compliance": {
@@ -1295,18 +1295,18 @@
       ],
       "patterns": {}
     },
-    "timestamp": 1771456113.6847777
+    "timestamp": 1775422878.2650383
   },
   "src/qgis_manager/hooks.py": {
-    "hash": "3fad3328af093d1ea5d4e6338f0254ff07dbc5be02bf24252bb8dc1e2f375aa9",
-    "mtime": 1771451152.8910985,
-    "size": 3653,
+    "hash": "5c8bdd0477409e8d5f3543265af78d95cf34b481fea72d4c829d1c941669a7d5",
+    "mtime": 1775422760.8771446,
+    "size": 3649,
     "data": {
       "path": "src/qgis_manager/hooks.py",
       "lines": 122,
       "sloc": 80,
       "loc": 80,
-      "file_size_kb": 3.5673828125,
+      "file_size_kb": 3.5634765625,
       "complexity": 15,
       "imports": [
         "importlib.util",
@@ -1384,19 +1384,19 @@
       ],
       "patterns": {}
     },
-    "timestamp": 1771456113.6543396
+    "timestamp": 1775422878.265147
   },
   "src/qgis_manager/validation.py": {
-    "hash": "2330e79818fad4a953513a70aa4e8b814bce5a99db153cd4f4f42adbe976233a",
-    "mtime": 1771465375.6934876,
-    "size": 11108,
+    "hash": "768b292bbf013697f9a53885db3400e659f88b124cbe77a877238d64e49ad86c",
+    "mtime": 1771565655.2072062,
+    "size": 11456,
     "data": {
       "path": "src/qgis_manager/validation.py",
-      "lines": 346,
-      "sloc": 164,
-      "loc": 164,
-      "file_size_kb": 10.84765625,
-      "complexity": 43,
+      "lines": 351,
+      "sloc": 166,
+      "loc": 166,
+      "file_size_kb": 11.1875,
+      "complexity": 44,
       "imports": [
         "re",
         "dataclasses.dataclass",
@@ -1449,13 +1449,13 @@
         "coverage": 100.0
       },
       "halstead": {
-        "vocabulary": 155,
-        "length": 452,
-        "volume": 3164,
-        "difficulty": 17.97,
-        "effort": 56862.24
+        "vocabulary": 156,
+        "length": 457,
+        "volume": 3199,
+        "difficulty": 18.04,
+        "effort": 57717.17
       },
-      "maintenance_index": 21.39,
+      "maintenance_index": 21.11,
       "syntax_error": false,
       "unused_imports": [],
       "qgis_compliance": {
@@ -1480,7 +1480,7 @@
           "type": "spaghetti_code",
           "severity": "high",
           "message": "Function 'validate_metadata' is Spaghetti Code (CC: 28)",
-          "line": 261,
+          "line": 266,
           "value": 28
         }
       ],
@@ -1488,13 +1488,13 @@
         {
           "pattern": "except Exception:",
           "severity": "low",
-          "line": 236,
+          "line": 241,
           "description": "Too broad exception handler"
         }
       ],
       "patterns": {}
     },
-    "timestamp": 1771469781.681675
+    "timestamp": 1775422878.265373
   },
   "tests/test_cli.py": {
     "hash": "02e8b9d763ad9ec1700eb9b7526e36444b13f1f0b2fb4a3b6c2e2e82dd9f4bb0",
@@ -2057,15 +2057,15 @@
     "timestamp": 1771446262.1057987
   },
   "tests/test_ignore.py": {
-    "hash": "239c76be00d796d3460cd9744e8beef32d3592087a6f51753225a2d9d87f5310",
-    "mtime": 1771451152.8935146,
-    "size": 2491,
+    "hash": "fbb4204f1699b094d2dd1a8f47d2b85e00dee697bfd900c599e3b639b9ee2b19",
+    "mtime": 1771566145.412644,
+    "size": 4226,
     "data": {
       "path": "tests/test_ignore.py",
-      "lines": 68,
-      "sloc": 41,
-      "loc": 41,
-      "file_size_kb": 2.4326171875,
+      "lines": 107,
+      "sloc": 62,
+      "loc": 62,
+      "file_size_kb": 4.126953125,
       "complexity": 2,
       "imports": [
         "tempfile",
@@ -2079,7 +2079,9 @@
       "functions": [
         "test_default_exclusions(1 args)",
         "test_qgisignore_overrides(1 args)",
-        "test_include_dev(1 args)"
+        "test_include_dev(1 args)",
+        "test_exclusive_qgisignore(1 args)",
+        "test_implicit_recursion(1 args)"
       ],
       "docstrings": {
         "module": false,
@@ -2089,7 +2091,9 @@
         "functions": {
           "test_default_exclusions": false,
           "test_qgisignore_overrides": false,
-          "test_include_dev": false
+          "test_include_dev": false,
+          "test_exclusive_qgisignore": false,
+          "test_implicit_recursion": false
         }
       },
       "entry_point_info": {
@@ -2098,18 +2102,18 @@
       },
       "has_main": true,
       "type_hints": {
-        "total_functions": 3,
+        "total_functions": 5,
         "typed_functions": 0,
         "coverage": 0.0
       },
       "halstead": {
-        "vocabulary": 38,
-        "length": 122,
-        "volume": 610,
-        "difficulty": 9.28,
-        "effort": 5661.56
+        "vocabulary": 52,
+        "length": 197,
+        "volume": 985,
+        "difficulty": 10.37,
+        "effort": 10214.02
       },
-      "maintenance_index": 45.05,
+      "maintenance_index": 39.67,
       "syntax_error": false,
       "unused_imports": [],
       "qgis_compliance": {
@@ -2117,7 +2121,7 @@
         "i18n_usage": {
           "tr": 0,
           "translate": 0,
-          "total_strings": 7
+          "total_strings": 15
         },
         "gdal_import_style": "Modern",
         "qt_transition": {
@@ -2133,7 +2137,7 @@
       "ast_security": [],
       "patterns": {}
     },
-    "timestamp": 1771456113.6547043
+    "timestamp": 1775422878.1662984
   },
   "scaffold/skills/data-science/examples/eda_template.py": {
     "hash": "76ed7c82c5e939face99d7db49df5ba433d37283215ab1a121caf0f4845a1243",
@@ -2954,16 +2958,16 @@
     "timestamp": 1771446262.1974008
   },
   "src/qgis_manager/core.py": {
-    "hash": "a1e2da86c259c44ffee5eeca6769c2f236ce1ed175364e2e169a8ced593744df",
-    "mtime": 1771465375.8618655,
-    "size": 19239,
+    "hash": "d8af0ec4dad05c6b928abd87ca9cbd155386ce22739ef7244f3bc4da68886db8",
+    "mtime": 1771565653.1998205,
+    "size": 19702,
     "data": {
       "path": "src/qgis_manager/core.py",
-      "lines": 581,
-      "sloc": 390,
-      "loc": 390,
-      "file_size_kb": 18.7880859375,
-      "complexity": 80,
+      "lines": 595,
+      "sloc": 400,
+      "loc": 400,
+      "file_size_kb": 19.240234375,
+      "complexity": 85,
       "imports": [
         "logging",
         "os",
@@ -3026,13 +3030,13 @@
         "coverage": 50.0
       },
       "halstead": {
-        "vocabulary": 277,
-        "length": 898,
-        "volume": 7184,
-        "difficulty": 25.75,
-        "effort": 184981.07
+        "vocabulary": 285,
+        "length": 918,
+        "volume": 7344,
+        "difficulty": 25.48,
+        "effort": 187148.22
       },
-      "maintenance_index": 5.72,
+      "maintenance_index": 4.74,
       "syntax_error": false,
       "unused_imports": [],
       "qgis_compliance": {
@@ -3071,7 +3075,7 @@
           "type": "magic_number",
           "severity": "low",
           "message": "Magic number detected: 4096",
-          "line": 471,
+          "line": 485,
           "value": 4096
         },
         {
@@ -3110,7 +3114,7 @@
       ],
       "patterns": {}
     },
-    "timestamp": 1771469781.665882
+    "timestamp": 1775422878.2649276
   },
   "src/qgis_manager/dependencies.py": {
     "hash": "7b5e2850733989b3cfc6cfeabb5905776c7ebac0e64d23335d89a79ee99c8110",
@@ -4118,15 +4122,15 @@
     "timestamp": 1771446262.1235414
   },
   "src/qgis_manager/cli/commands/deploy.py": {
-    "hash": "19473d26e20f0d79a7759af17aeb1832c2043081eda7aecca7f1e6ebc46735c1",
-    "mtime": 1771451152.886104,
-    "size": 7273,
+    "hash": "673fbebead2e99df40fca56acfabd05c5f5ada55dd5812a08c2892de66259a2e",
+    "mtime": 1775422760.8771446,
+    "size": 7249,
     "data": {
       "path": "src/qgis_manager/cli/commands/deploy.py",
-      "lines": 193,
-      "sloc": 149,
-      "loc": 149,
-      "file_size_kb": 7.1025390625,
+      "lines": 192,
+      "sloc": 148,
+      "loc": 148,
+      "file_size_kb": 7.0791015625,
       "complexity": 27,
       "imports": [
         "argparse",
@@ -4184,7 +4188,7 @@
         "difficulty": 16.68,
         "effort": 38997.84
       },
-      "maintenance_index": 25.37,
+      "maintenance_index": 25.44,
       "syntax_error": false,
       "unused_imports": [],
       "qgis_compliance": {
@@ -4216,21 +4220,21 @@
           "type": "magic_number",
           "severity": "low",
           "message": "Magic number detected: 40",
-          "line": 137,
+          "line": 136,
           "value": 40
         },
         {
           "type": "magic_number",
           "severity": "low",
           "message": "Magic number detected: 40",
-          "line": 137,
+          "line": 136,
           "value": 40
         },
         {
           "type": "magic_number",
           "severity": "low",
           "message": "Magic number detected: 5",
-          "line": 160,
+          "line": 159,
           "value": 5
         }
       ],
@@ -4238,13 +4242,13 @@
         {
           "pattern": "except Exception:",
           "severity": "low",
-          "line": 191,
+          "line": 190,
           "description": "Too broad exception handler"
         }
       ],
       "patterns": {}
     },
-    "timestamp": 1771446262.1235802
+    "timestamp": 1775422878.2647164
   },
   "src/qgis_manager/cli/commands/init.py": {
     "hash": "b46734b7486fe71f7167c674f38582952fe9173b175bca82248317998981f66c",
@@ -4634,16 +4638,16 @@
     "timestamp": 1771456113.6845896
   },
   "src/qgis_manager/ignore.py": {
-    "hash": "d83e45ceb3f4154c376fb0b93622d4fdbba6d14377e9dd54850af8dad26e05b1",
-    "mtime": 1771461646.7183435,
-    "size": 6241,
+    "hash": "f59a02ce5791982dfe9f52260aa4a7d7e8cba8214c6f2537d0d00c9a673ab9b5",
+    "mtime": 1771566171.5316582,
+    "size": 6562,
     "data": {
       "path": "src/qgis_manager/ignore.py",
-      "lines": 171,
-      "sloc": 99,
-      "loc": 99,
-      "file_size_kb": 6.0947265625,
-      "complexity": 28,
+      "lines": 182,
+      "sloc": 105,
+      "loc": 105,
+      "file_size_kb": 6.408203125,
+      "complexity": 31,
       "imports": [
         "fnmatch",
         "sys",
@@ -4691,13 +4695,13 @@
         "coverage": 33.33333333333333
       },
       "halstead": {
-        "vocabulary": 88,
-        "length": 237,
-        "volume": 1422,
-        "difficulty": 15.24,
-        "effort": 21666.79
+        "vocabulary": 90,
+        "length": 254,
+        "volume": 1524,
+        "difficulty": 17.39,
+        "effort": 26501.77
       },
-      "maintenance_index": 30.62,
+      "maintenance_index": 29.45,
       "syntax_error": false,
       "unused_imports": [],
       "qgis_compliance": {
@@ -4736,14 +4740,14 @@
           "type": "magic_number",
           "severity": "low",
           "message": "Magic number detected: 3",
-          "line": 109,
+          "line": 114,
           "value": 3
         },
         {
           "type": "magic_number",
           "severity": "low",
           "message": "Magic number detected: 11",
-          "line": 109,
+          "line": 114,
           "value": 11
         }
       ],
@@ -4751,13 +4755,13 @@
         {
           "pattern": "except Exception:",
           "severity": "low",
-          "line": 118,
+          "line": 123,
           "description": "Too broad exception handler"
         },
         {
           "pattern": "except Exception:",
           "severity": "low",
-          "line": 101,
+          "line": 106,
           "description": "Too broad exception handler"
         }
       ],
@@ -4775,7 +4779,7 @@
         ]
       }
     },
-    "timestamp": 1771456113.6544456
+    "timestamp": 1775422878.2652404
   },
   "tests/test_deployment_optimization.py": {
     "hash": "5e43217578feab2bfa3d5777652425c3f60b3a48d3bd1496756d720b4b66894f",
@@ -4896,15 +4900,15 @@
     "timestamp": 1771456113.6546626
   },
   "tests/test_v061_patch.py": {
-    "hash": "932528ebca626c8584f9aad3b4a731b16b155b54e120b2a9b6af00a33d2319a8",
-    "mtime": 1771455862.257398,
-    "size": 3071,
+    "hash": "a0857300376e6180aa1d1ab9111768465c575dd50aa7e4e89e09dd61f45fff0b",
+    "mtime": 1775422760.8761446,
+    "size": 3056,
     "data": {
       "path": "tests/test_v061_patch.py",
-      "lines": 82,
-      "sloc": 57,
-      "loc": 57,
-      "file_size_kb": 2.9990234375,
+      "lines": 81,
+      "sloc": 56,
+      "loc": 56,
+      "file_size_kb": 2.984375,
       "complexity": 4,
       "imports": [
         "tempfile",
@@ -4953,7 +4957,7 @@
         "difficulty": 7.67,
         "effort": 4719.77
       },
-      "maintenance_index": 41.63,
+      "maintenance_index": 41.8,
       "syntax_error": false,
       "unused_imports": [],
       "qgis_compliance": {
@@ -4977,7 +4981,7 @@
       "ast_security": [],
       "patterns": {}
     },
-    "timestamp": 1771456113.6547866
+    "timestamp": 1775422878.1666565
   },
   "src/qgis_manager/cli/commands/bump.py": {
     "hash": "d1e08a207b1a41a7510b51f1dbf685e2e3761a9be625f7ce70e792a5fbb6216c",
@@ -5215,5 +5219,382 @@
       "patterns": {}
     },
     "timestamp": 1771456113.6844769
+  },
+  "scripts/mcp_server.py": {
+    "hash": "44e5f2f0190eae8ed6323b5687a167597fcd6da7092ec53916f917aedcb54929",
+    "mtime": 1775422760.8771446,
+    "size": 8462,
+    "data": {
+      "path": "scripts/mcp_server.py",
+      "lines": 223,
+      "sloc": 194,
+      "loc": 194,
+      "file_size_kb": 8.263671875,
+      "complexity": 26,
+      "imports": [
+        "__future__.annotations",
+        "json",
+        "logging",
+        "sys",
+        "typing.Any",
+        "os"
+      ],
+      "classes": [
+        "SecInterpMCPServer"
+      ],
+      "functions": [
+        "__init__(1 args)",
+        "run(1 args)",
+        "handle_request(2 args)",
+        "call_tool(4 args)",
+        "_generate_test_template(3 args)",
+        "_audit_decoupling(2 args)",
+        "_get_lessons(2 args)"
+      ],
+      "docstrings": {
+        "module": false,
+        "classes": {
+          "SecInterpMCPServer": true
+        },
+        "functions": {
+          "__init__": false,
+          "run": true,
+          "handle_request": true,
+          "call_tool": true,
+          "_generate_test_template": false,
+          "_audit_decoupling": false,
+          "_get_lessons": false
+        }
+      },
+      "entry_point_info": {
+        "is_entry_point": true,
+        "type": "main_guard"
+      },
+      "has_main": true,
+      "type_hints": {
+        "total_functions": 7,
+        "typed_functions": 5,
+        "coverage": 71.42857142857143
+      },
+      "halstead": {
+        "vocabulary": 147,
+        "length": 407,
+        "volume": 2849,
+        "difficulty": 18.53,
+        "effort": 52781.47
+      },
+      "maintenance_index": 22.41,
+      "syntax_error": false,
+      "unused_imports": [
+        "__future__.annotations"
+      ],
+      "qgis_compliance": {
+        "processing_framework": false,
+        "i18n_usage": {
+          "tr": 0,
+          "translate": 0,
+          "total_strings": 55
+        },
+        "gdal_import_style": "Modern",
+        "qt_transition": {
+          "pyqt5_imports": [],
+          "pyqt6_imports": []
+        },
+        "signals_slots": {
+          "legacy": 0,
+          "modern": 0
+        }
+      },
+      "antipatterns": [
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 32601",
+          "line": 125,
+          "value": 32601
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 5",
+          "line": 73,
+          "value": 5
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 32603",
+          "line": 161,
+          "value": 32603
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 5",
+          "line": 150,
+          "value": 5
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 32602",
+          "line": 155,
+          "value": 32602
+        }
+      ],
+      "ast_security": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 157,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 194,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 217,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 89,
+          "description": "Too broad exception handler"
+        }
+      ],
+      "patterns": {}
+    },
+    "timestamp": 1775422878.2643282
+  },
+  "scripts/security_scan.py": {
+    "hash": "b961b2e02d5b980fb81d4baf199566a8f04f5ab4f2fd05b55e9dacd48be66f53",
+    "mtime": 1775422760.8751447,
+    "size": 6086,
+    "data": {
+      "path": "scripts/security_scan.py",
+      "lines": 194,
+      "sloc": 132,
+      "loc": 132,
+      "file_size_kb": 5.943359375,
+      "complexity": 19,
+      "imports": [
+        "argparse",
+        "json",
+        "subprocess",
+        "sys",
+        "pathlib.Path"
+      ],
+      "classes": [
+        "SecurityScanner"
+      ],
+      "functions": [
+        "__init__(3 args)",
+        "_run_command(3 args)",
+        "run_bandit(1 args)",
+        "run_detect_secrets(1 args)",
+        "run_flake8(1 args)",
+        "_save_report(3 args)",
+        "run_all(1 args)",
+        "main"
+      ],
+      "docstrings": {
+        "module": true,
+        "classes": {
+          "SecurityScanner": true
+        },
+        "functions": {
+          "__init__": false,
+          "_run_command": true,
+          "run_bandit": true,
+          "run_detect_secrets": true,
+          "run_flake8": true,
+          "_save_report": true,
+          "run_all": true,
+          "main": false
+        }
+      },
+      "entry_point_info": {
+        "is_entry_point": true,
+        "type": "main_guard"
+      },
+      "has_main": true,
+      "type_hints": {
+        "total_functions": 8,
+        "typed_functions": 5,
+        "coverage": 62.5
+      },
+      "halstead": {
+        "vocabulary": 124,
+        "length": 340,
+        "volume": 2040,
+        "difficulty": 18.9,
+        "effort": 38556.0
+      },
+      "maintenance_index": 28.01,
+      "syntax_error": false,
+      "unused_imports": [],
+      "qgis_compliance": {
+        "processing_framework": false,
+        "i18n_usage": {
+          "tr": 0,
+          "translate": 0,
+          "total_strings": 44
+        },
+        "gdal_import_style": "Modern",
+        "qt_transition": {
+          "pyqt5_imports": [],
+          "pyqt6_imports": []
+        },
+        "signals_slots": {
+          "legacy": 0,
+          "modern": 0
+        }
+      },
+      "antipatterns": [
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 70",
+          "line": 121,
+          "value": 70
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 70",
+          "line": 123,
+          "value": 70
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 70",
+          "line": 132,
+          "value": 70
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 70",
+          "line": 134,
+          "value": 70
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 70",
+          "line": 156,
+          "value": 70
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 2",
+          "line": 116,
+          "value": 2
+        }
+      ],
+      "ast_security": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 46,
+          "description": "Too broad exception handler"
+        }
+      ],
+      "patterns": {}
+    },
+    "timestamp": 1775422878.2644932
+  },
+  "scripts/skill_sync.py": {
+    "hash": "c6e70b1189d500325224302243a2abd6a5ed41d3bdf5ba9997cd9880cdbe4be8",
+    "mtime": 1775422760.8771446,
+    "size": 4788,
+    "data": {
+      "path": "scripts/skill_sync.py",
+      "lines": 143,
+      "sloc": 104,
+      "loc": 104,
+      "file_size_kb": 4.67578125,
+      "complexity": 20,
+      "imports": [
+        "re",
+        "pathlib.Path",
+        "yaml"
+      ],
+      "classes": [],
+      "functions": [
+        "sync_skills",
+        "sync_workflows"
+      ],
+      "docstrings": {
+        "module": false,
+        "classes": {},
+        "functions": {
+          "sync_skills": false,
+          "sync_workflows": true
+        }
+      },
+      "entry_point_info": {
+        "is_entry_point": true,
+        "type": "main_guard"
+      },
+      "has_main": true,
+      "type_hints": {
+        "total_functions": 2,
+        "typed_functions": 0,
+        "coverage": 0.0
+      },
+      "halstead": {
+        "vocabulary": 102,
+        "length": 296,
+        "volume": 1776,
+        "difficulty": 16.87,
+        "effort": 29955.2
+      },
+      "maintenance_index": 30.56,
+      "syntax_error": false,
+      "unused_imports": [],
+      "qgis_compliance": {
+        "processing_framework": false,
+        "i18n_usage": {
+          "tr": 0,
+          "translate": 0,
+          "total_strings": 48
+        },
+        "gdal_import_style": "Modern",
+        "qt_transition": {
+          "pyqt5_imports": [],
+          "pyqt6_imports": []
+        },
+        "signals_slots": {
+          "legacy": 0,
+          "modern": 0
+        }
+      },
+      "antipatterns": [],
+      "ast_security": [
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 30,
+          "description": "Too broad exception handler"
+        },
+        {
+          "pattern": "except Exception:",
+          "severity": "low",
+          "line": 116,
+          "description": "Too broad exception handler"
+        }
+      ],
+      "patterns": {}
+    },
+    "timestamp": 1775422878.2646074
   }
 }

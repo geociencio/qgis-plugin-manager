@@ -86,6 +86,7 @@ package = true
 [tool.ruff]
 line-length = 88
 target-version = "py310"
+exclude = ["scripts/"]
 
 [tool.ruff.lint]
 select = ["E", "F", "B", "I", "W", "UP", "N"]
