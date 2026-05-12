@@ -46,6 +46,11 @@ class DeployCommand(BaseCommand):
             action="store_true",
             help="Remove all existing backups for this plugin",
         )
+        parser.add_argument(
+            "--qgis-version",
+            type=int,
+            help="Major QGIS version (3 or 4)",
+        )
 
     def execute(self, args: argparse.Namespace) -> int:
         try:
@@ -57,6 +62,7 @@ class DeployCommand(BaseCommand):
 
             # Defaults
             target_profile = args.profile or settings.profile
+            qgis_version = args.qgis_version or settings.qgis_version
             use_backup = not args.no_backup if args.no_backup else settings.backup
 
             # Pre-info
@@ -65,7 +71,7 @@ class DeployCommand(BaseCommand):
 
             # Handle --purge-backups
             if args.purge_backups:
-                target_dir = get_qgis_plugin_dir(target_profile)
+                target_dir = get_qgis_plugin_dir(target_profile, version=qgis_version)
                 msg = (
                     f"🗑️  Purge all backups for '{slug}' in profile '{target_profile}'?"
                 )
@@ -82,7 +88,29 @@ class DeployCommand(BaseCommand):
             if args.profile and Path(args.profile).is_absolute():
                 target_path = Path(args.profile)
             else:
-                target_dir = get_qgis_plugin_dir(target_profile)
+                target_dir = get_qgis_plugin_dir(target_profile, version=qgis_version)
+
+                # Interactive check for directory existence
+                if not target_dir.exists():
+                    click.echo(
+                        click.style(
+                            f"⚠️  Target directory does not exist: {target_dir}",
+                            fg="yellow",
+                        )
+                    )
+                    if not click.confirm("Do you want to create it?"):
+                        manual_path = click.prompt(
+                            "Please enter the absolute path to the plugins directory "
+                            "(or press Enter to abort)",
+                            default="",
+                        )
+                        if not manual_path:
+                            click.echo("Aborted.")
+                            return 1
+                        target_dir = Path(manual_path)
+                    else:
+                        target_dir.mkdir(parents=True)
+
                 target_path = target_dir / slug
 
             # Pre-deploy hook
@@ -92,6 +120,7 @@ class DeployCommand(BaseCommand):
                 "project_root": root,
                 "metadata": metadata,
                 "profile": target_profile,
+                "qgis_version": qgis_version,
                 "target_path": target_path,
                 "args": vars(args),
             }
@@ -106,7 +135,9 @@ class DeployCommand(BaseCommand):
                     return 1
 
             if args.interactive:
-                if not click.confirm(f"🚀 Deploy to profile '{target_profile}'?"):
+                if not click.confirm(
+                    f"🚀 Deploy to profile '{target_profile}' (QGIS {qgis_version})?"
+                ):
                     click.echo("Aborted by user.")
                     return 1
 
@@ -171,6 +202,7 @@ class DeployCommand(BaseCommand):
                 root,
                 no_backup=not use_backup,
                 profile=target_profile,
+                qgis_version=qgis_version,
                 max_backups=settings.max_backups,
             )
 

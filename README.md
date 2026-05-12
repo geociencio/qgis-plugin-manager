@@ -69,10 +69,13 @@ qgis-manage init "My Plugin" --author "Tester" --email "test@test.com" --templat
 ```
 
 ### 2. Development & Deployment
-Speed up your local iteration.
+Speed up your local iteration with QGIS 3 and QGIS 4 support.
 ```bash
-# Smart deploy to default QGIS profile
+# Smart deploy to default QGIS 3 profile
 qgis-manage deploy
+
+# Deploy to QGIS 4 profile
+qgis-manage deploy --qgis-version 4
 
 # Deploy to a specific profile with backup rotation
 qgis-manage deploy --profile production --max-backups 5
@@ -80,6 +83,8 @@ qgis-manage deploy --profile production --max-backups 5
 # Purge old backups to save space
 qgis-manage deploy --purge-backups
 ```
+
+**💡 Smart Path Detection**: `qgis-manage` automatically detects your plugins directory across Linux, macOS, and Windows. If a profile doesn't exist, it will interactively ask if you want to create it or specify a custom location.
 
 ### 3. Advanced Hooks (`hooks`)
 Manage and test your native Python hooks.
@@ -135,7 +140,9 @@ Leverage YOUR existing configuration. No new files needed.
 
 ```toml
 [tool.qgis-manager]
-max_backups = 5  # Control backup rotation
+qgis_version = 4  # Target QGIS 4 by default
+max_backups = 5   # Control backup rotation
+profile = "default"
 
 [tool.qgis-manager.ignore]
 ignore = [

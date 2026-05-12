@@ -13,6 +13,7 @@ class Settings:
     """Store application settings."""
 
     profile: str = "default"
+    qgis_version: int = 3
     backup: bool = True
     max_backups: int = 3
     auto_compile: bool = True
@@ -31,6 +32,9 @@ def load_config() -> Settings:
                 data = tomllib.load(f)
                 defaults = data.get("defaults", {})
                 settings.profile = defaults.get("profile", settings.profile)
+                settings.qgis_version = defaults.get(
+                    "qgis_version", settings.qgis_version
+                )
                 settings.backup = defaults.get("backup", settings.backup)
                 settings.max_backups = defaults.get("max_backups", settings.max_backups)
                 settings.auto_compile = defaults.get(
@@ -58,6 +62,9 @@ def load_project_config(project_root: Path, base_settings: Settings) -> Settings
                 # Overrides from pyproject.toml
                 base_settings.profile = tool_config.get(
                     "profile", base_settings.profile
+                )
+                base_settings.qgis_version = tool_config.get(
+                    "qgis_version", base_settings.qgis_version
                 )
                 base_settings.backup = tool_config.get("backup", base_settings.backup)
                 base_settings.max_backups = tool_config.get(

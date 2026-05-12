@@ -51,23 +51,24 @@ from .ignore import IgnoreMatcher
 logger = logging.getLogger(__name__)
 
 
-def get_qgis_plugin_dir(profile: str = "default") -> Path:
-    """Detect the QGIS plugin directory based on the OS."""
+def get_qgis_plugin_dir(profile: str = "default", version: int = 3) -> Path:
+    """Detect the QGIS plugin directory based on the OS and version."""
     if sys.platform == "linux":
         return (
-            Path.home() / f".local/share/QGIS/QGIS3/profiles/{profile}/python/plugins"
+            Path.home()
+            / f".local/share/QGIS/QGIS{version}/profiles/{profile}/python/plugins"
         )
     elif sys.platform == "darwin":
         return (
             Path.home()
-            / "Library/Application Support/QGIS/QGIS3/profiles"
+            / f"Library/Application Support/QGIS/QGIS{version}/profiles"
             / profile
             / "python/plugins"
         )
     elif sys.platform == "win32":
         return (
             Path(os.environ["APPDATA"])
-            / f"QGIS/QGIS3/profiles/{profile}/python/plugins"
+            / f"QGIS/QGIS{version}/profiles/{profile}/python/plugins"
         )
     else:
         raise OSError(f"Unsupported platform: {sys.platform}")
@@ -151,6 +152,7 @@ def deploy_plugin(
     dest_dir: Path | None = None,
     no_backup: bool = False,
     profile: str = "default",
+    qgis_version: int = 3,
     callback: Callable[[int], Any] | None = None,
     max_backups: int = 3,
 ):
@@ -159,7 +161,7 @@ def deploy_plugin(
     slug = metadata["slug"]
 
     if dest_dir is None:
-        dest_dir = get_qgis_plugin_dir(profile)
+        dest_dir = get_qgis_plugin_dir(profile, version=qgis_version)
 
     target_path = dest_dir / slug
 

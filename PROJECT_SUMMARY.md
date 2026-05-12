@@ -1,12 +1,12 @@
 # PROJECT SUMMARY - qgis-plugin-manager
-Analysis Date: 2026-04-05 17:09:33
+Analysis Date: 2026-05-11 22:11:21
 Analyzer Version: 3.1.1 (Ai-Context-Core)
 
 ## 📊 KEY METRICS
-- **Quality Score**: 74.5/100
-- **Source Lines (SLOC)**: 3,425
-- **Total Physical Lines**: 5,113
-- **Maintainability**: 41.3
+- **Quality Score**: 74.3/100
+- **Source Lines (SLOC)**: 3,474
+- **Total Physical Lines**: 5,165
+- **Maintainability**: 41.2
 - **Test Coverage**: 14 test files
 
 ## 📁 STRUCTURE
@@ -69,6 +69,7 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
     docs/
         CHANGELOG.md
         DEVELOPMENT_LOG.md
+        MAINTENANCE_QGIS_MANAGE.md
         research/
             CLI_EXPANSION_PROPOSAL.md
             COMPETITIVE_ANALYSIS.md
@@ -173,11 +174,6 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
 - **get_ignore_func** in `src/qgis_manager/ignore.py` (50%)
 
 ## 🔄 GIT ANALYSIS
-### Code Churn (last 30 days)
-- **Files Changed**: 67
-- **Additions**: +2001
-- **Deletions**: -2202
-- **Total Churn**: 4203
 
 ### 🔥 Hotspots
 - `src/qgis_manager/core.py`: 20 commits
@@ -187,5 +183,5 @@ Analyzer Version: 3.1.1 (Ai-Context-Core)
 - `src/qgis_manager/validation.py`: 8 commits
 
 ## 📈 COMPLEXITY DISTRIBUTION
-- **Average Complexity**: 11.40
+- **Average Complexity**: 11.50
 - **Max Complexity**: 85

@@ -1669,15 +1669,15 @@
     "timestamp": 1771442719.7043405
   },
   "tests/test_core.py": {
-    "hash": "d536dd11b4b2f3caf531dc608d549da3f043ad2c9faa9fde115c0feab42ec471",
-    "mtime": 1771455862.3636029,
-    "size": 8607,
+    "hash": "34b34426f2be2b0a9c5299e23bc04f09660a92499f64dee8e77139c4a1079cd7",
+    "mtime": 1778551594.3302875,
+    "size": 9233,
     "data": {
       "path": "tests/test_core.py",
-      "lines": 242,
-      "sloc": 170,
-      "loc": 170,
-      "file_size_kb": 8.4052734375,
+      "lines": 253,
+      "sloc": 181,
+      "loc": 181,
+      "file_size_kb": 9.0166015625,
       "complexity": 4,
       "imports": [
         "tempfile",
@@ -1747,13 +1747,13 @@
         "coverage": 0.0
       },
       "halstead": {
-        "vocabulary": 117,
-        "length": 411,
-        "volume": 2466,
-        "difficulty": 13.14,
-        "effort": 32397.36
+        "vocabulary": 124,
+        "length": 441,
+        "volume": 2646,
+        "difficulty": 13.28,
+        "effort": 35127.93
       },
-      "maintenance_index": 27.06,
+      "maintenance_index": 26.25,
       "syntax_error": false,
       "unused_imports": [],
       "qgis_compliance": {
@@ -1778,35 +1778,91 @@
           "type": "magic_number",
           "severity": "low",
           "message": "Magic number detected: 2",
-          "line": 111,
+          "line": 122,
           "value": 2
         },
         {
           "type": "magic_number",
           "severity": "low",
           "message": "Magic number detected: 2",
-          "line": 206,
+          "line": 217,
           "value": 2
         },
         {
           "type": "magic_number",
           "severity": "low",
+          "message": "Magic number detected: 3",
+          "line": 25,
+          "value": 3
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 4",
+          "line": 26,
+          "value": 4
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 3",
+          "line": 31,
+          "value": 3
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 3",
+          "line": 43,
+          "value": 3
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 4",
+          "line": 44,
+          "value": 4
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 3",
+          "line": 51,
+          "value": 3
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 4",
+          "line": 52,
+          "value": 4
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 3",
+          "line": 58,
+          "value": 3
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
           "message": "Magic number detected: 100",
-          "line": 179,
+          "line": 190,
           "value": 100
         },
         {
           "type": "magic_number",
           "severity": "low",
           "message": "Magic number detected: 2",
-          "line": 210,
+          "line": 221,
           "value": 2
         }
       ],
       "ast_security": [],
       "patterns": {}
     },
-    "timestamp": 1771456113.6546173
+    "timestamp": 1778551881.8011453
   },
   "tests/test_discovery.py": {
     "hash": "a20ba6000b38030477824b28060e2eac2dd82dd50e85ba3d5a7db89f4dd37c1e",
@@ -2782,15 +2838,15 @@
     "timestamp": 1771446262.1237183
   },
   "src/qgis_manager/config.py": {
-    "hash": "ee6c80b9bf5aaa34f29049eaac08e06b06d714521afa82b8f7656e6d29cc6f03",
-    "mtime": 1771451152.8899956,
-    "size": 2642,
+    "hash": "6b72658a62d910aba8866363148da195b05ccdf7b5cb8d93b669ae067cc59ce6",
+    "mtime": 1778551501.7483315,
+    "size": 2941,
     "data": {
       "path": "src/qgis_manager/config.py",
-      "lines": 73,
-      "sloc": 52,
-      "loc": 52,
-      "file_size_kb": 2.580078125,
+      "lines": 80,
+      "sloc": 59,
+      "loc": 59,
+      "file_size_kb": 2.8720703125,
       "complexity": 6,
       "imports": [
         "sys",
@@ -2828,13 +2884,13 @@
         "coverage": 100.0
       },
       "halstead": {
-        "vocabulary": 46,
-        "length": 117,
-        "volume": 585,
-        "difficulty": 9.15,
-        "effort": 5355.0
+        "vocabulary": 47,
+        "length": 128,
+        "volume": 640,
+        "difficulty": 9.89,
+        "effort": 6328.0
       },
-      "maintenance_index": 42.38,
+      "maintenance_index": 40.91,
       "syntax_error": false,
       "unused_imports": [],
       "qgis_compliance": {
@@ -2859,7 +2915,14 @@
           "type": "magic_number",
           "severity": "low",
           "message": "Magic number detected: 3",
-          "line": 17,
+          "line": 16,
+          "value": 3
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 3",
+          "line": 18,
           "value": 3
         },
         {
@@ -2881,19 +2944,19 @@
         {
           "pattern": "except Exception:",
           "severity": "low",
-          "line": 39,
+          "line": 43,
           "description": "Too broad exception handler"
         },
         {
           "pattern": "except Exception:",
           "severity": "low",
-          "line": 71,
+          "line": 78,
           "description": "Too broad exception handler"
         }
       ],
       "patterns": {}
     },
-    "timestamp": 1771446262.197327
+    "timestamp": 1778551881.8008947
   },
   "src/qgis_manager/constants.py": {
     "hash": "accdba4fb253e5e1fa9509a1e657ed911d3ade7b45d0494de995325e8a6e889a",
@@ -2958,15 +3021,15 @@
     "timestamp": 1771446262.1974008
   },
   "src/qgis_manager/core.py": {
-    "hash": "d8af0ec4dad05c6b928abd87ca9cbd155386ce22739ef7244f3bc4da68886db8",
-    "mtime": 1771565653.1998205,
-    "size": 19702,
+    "hash": "dedf60a53f49039702e619dfa8bf2f2c9699792c05acf8ab64fb8751f755a99f",
+    "mtime": 1778551514.4331882,
+    "size": 19818,
     "data": {
       "path": "src/qgis_manager/core.py",
-      "lines": 595,
-      "sloc": 400,
-      "loc": 400,
-      "file_size_kb": 19.240234375,
+      "lines": 597,
+      "sloc": 402,
+      "loc": 402,
+      "file_size_kb": 19.353515625,
       "complexity": 85,
       "imports": [
         "logging",
@@ -2988,10 +3051,10 @@
       ],
       "classes": [],
       "functions": [
-        "get_qgis_plugin_dir(1 args)",
+        "get_qgis_plugin_dir(2 args)",
         "rotate_backups(3 args)",
         "sync_directory(3 args)",
-        "deploy_plugin(6 args)",
+        "deploy_plugin(7 args)",
         "compile_docs(2 args)",
         "get_rcc_tool",
         "verify_resource_patch(1 args)",
@@ -3030,13 +3093,13 @@
         "coverage": 50.0
       },
       "halstead": {
-        "vocabulary": 285,
-        "length": 918,
-        "volume": 7344,
-        "difficulty": 25.48,
-        "effort": 187148.22
+        "vocabulary": 288,
+        "length": 929,
+        "volume": 7432,
+        "difficulty": 25.57,
+        "effort": 190011.47
       },
-      "maintenance_index": 4.74,
+      "maintenance_index": 4.65,
       "syntax_error": false,
       "unused_imports": [],
       "qgis_compliance": {
@@ -3061,28 +3124,42 @@
           "type": "magic_number",
           "severity": "low",
           "message": "Magic number detected: 3",
+          "line": 54,
+          "value": 3
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
+          "message": "Magic number detected: 3",
           "line": 155,
           "value": 3
         },
         {
           "type": "magic_number",
           "severity": "low",
+          "message": "Magic number detected: 3",
+          "line": 157,
+          "value": 3
+        },
+        {
+          "type": "magic_number",
+          "severity": "low",
           "message": "Magic number detected: 100",
-          "line": 196,
+          "line": 198,
           "value": 100
         },
         {
           "type": "magic_number",
           "severity": "low",
           "message": "Magic number detected: 4096",
-          "line": 485,
+          "line": 487,
           "value": 4096
         },
         {
           "type": "dead_code",
           "severity": "medium",
           "message": "Unreachable code detected",
-          "line": 269,
+          "line": 271,
           "value": 1
         }
       ],
@@ -3090,31 +3167,31 @@
         {
           "pattern": "except Exception:",
           "severity": "low",
-          "line": 254,
+          "line": 256,
           "description": "Too broad exception handler"
         },
         {
           "pattern": "except Exception:",
           "severity": "low",
-          "line": 284,
+          "line": 286,
           "description": "Too broad exception handler"
         },
         {
           "pattern": "except Exception:",
           "severity": "low",
-          "line": 323,
+          "line": 325,
           "description": "Too broad exception handler"
         },
         {
           "pattern": "except Exception:",
           "severity": "low",
-          "line": 115,
+          "line": 116,
           "description": "Too broad exception handler"
         }
       ],
       "patterns": {}
     },
-    "timestamp": 1775422878.2649276
+    "timestamp": 1778551881.8010566
   },
   "src/qgis_manager/dependencies.py": {
     "hash": "7b5e2850733989b3cfc6cfeabb5905776c7ebac0e64d23335d89a79ee99c8110",
@@ -4122,16 +4199,16 @@
     "timestamp": 1771446262.1235414
   },
   "src/qgis_manager/cli/commands/deploy.py": {
-    "hash": "673fbebead2e99df40fca56acfabd05c5f5ada55dd5812a08c2892de66259a2e",
-    "mtime": 1775422760.8771446,
-    "size": 7249,
+    "hash": "eedd37617933f9f4368aad184c851ea7a8790eb39910e992b2fbf76adb07ed30",
+    "mtime": 1778551531.6389937,
+    "size": 8602,
     "data": {
       "path": "src/qgis_manager/cli/commands/deploy.py",
-      "lines": 192,
-      "sloc": 148,
-      "loc": 148,
-      "file_size_kb": 7.0791015625,
-      "complexity": 27,
+      "lines": 224,
+      "sloc": 177,
+      "loc": 177,
+      "file_size_kb": 8.400390625,
+      "complexity": 31,
       "imports": [
         "argparse",
         "pathlib.Path",
@@ -4182,13 +4259,13 @@
         "coverage": 80.0
       },
       "halstead": {
-        "vocabulary": 140,
-        "length": 334,
-        "volume": 2338,
-        "difficulty": 16.68,
-        "effort": 38997.84
+        "vocabulary": 152,
+        "length": 376,
+        "volume": 2632,
+        "difficulty": 17.14,
+        "effort": 45099.42
       },
-      "maintenance_index": 25.44,
+      "maintenance_index": 22.84,
       "syntax_error": false,
       "unused_imports": [],
       "qgis_compliance": {
@@ -4196,7 +4273,7 @@
         "i18n_usage": {
           "tr": 0,
           "translate": 0,
-          "total_strings": 37
+          "total_strings": 44
         },
         "gdal_import_style": "Modern",
         "qt_transition": {
@@ -4212,29 +4289,29 @@
         {
           "type": "spaghetti_code",
           "severity": "high",
-          "message": "Function 'execute' is Spaghetti Code (CC: 27)",
-          "line": 50,
-          "value": 27
+          "message": "Function 'execute' is Spaghetti Code (CC: 31)",
+          "line": 55,
+          "value": 31
         },
         {
           "type": "magic_number",
           "severity": "low",
           "message": "Magic number detected: 40",
-          "line": 136,
+          "line": 167,
           "value": 40
         },
         {
           "type": "magic_number",
           "severity": "low",
           "message": "Magic number detected: 40",
-          "line": 136,
+          "line": 167,
           "value": 40
         },
         {
           "type": "magic_number",
           "severity": "low",
           "message": "Magic number detected: 5",
-          "line": 159,
+          "line": 190,
           "value": 5
         }
       ],
@@ -4242,13 +4319,13 @@
         {
           "pattern": "except Exception:",
           "severity": "low",
-          "line": 190,
+          "line": 222,
           "description": "Too broad exception handler"
         }
       ],
       "patterns": {}
     },
-    "timestamp": 1775422878.2647164
+    "timestamp": 1778551881.800616
   },
   "src/qgis_manager/cli/commands/init.py": {
     "hash": "b46734b7486fe71f7167c674f38582952fe9173b175bca82248317998981f66c",
