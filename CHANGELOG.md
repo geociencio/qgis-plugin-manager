@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-05-12
+
+### Added
+- **QGIS 4 Support**: Implemented full compatibility for deploying plugins to QGIS 4 profiles across all platforms (Linux, macOS, Windows).
+- **Multi-Version Path Detection**: Updated `get_qgis_plugin_dir` to dynamically resolve paths based on the major QGIS version.
+- **Interactive Deployment**: The `deploy` command now validates profile existence interactively, allowing users to create missing directories or specify custom paths manually.
+- **CLI Flag `--qgis-version`**: New option in the `deploy` command to target specific QGIS versions (defaults to 3).
+- **Enhanced Configuration**: Added `qgis_version` to `tool.qgis-manager` in `pyproject.toml` for persistent version targeting.
+
+### Changed
+- **Core Architecture**: Refactored `deploy_plugin` to propagate version settings through the deployment lifecycle.
+- **Settings Model**: Integrated `qgis_version` into the standard `Settings` dataclass.
+
+### Improved
+- **Test Coverage**: Added cross-platform unit tests for QGIS 4 path detection.
+- **Documentation**: Updated `README.md` and added detailed release notes for v0.7.0.
+
 ## [0.6.4] - 2026-02-19
 
 ### Improved
