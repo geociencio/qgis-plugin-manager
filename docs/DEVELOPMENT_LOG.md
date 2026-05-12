@@ -1,5 +1,20 @@
 # Development Log: qgis-manage
 
+## [2026-05-12] Summary: QGIS 4 Support and Release v0.7.0
+Implemented full support for QGIS 4 deployment and released version 0.7.0. This session focused on removing hardcoded paths and improving the interactive CLI experience.
+
+**Milestones:**
+- Added `qgis_version` support to core path detection and configuration.
+- Enhanced `deploy` command with `--qgis-version` flag and interactive directory creation.
+- Updated documentation and test suite for multi-version validation.
+- Formally released `v0.7.0` (bump, changelog, tagging, build).
+
+**Pending debt:**
+- Validate Typer blueprints in `/scaffold`.
+- Resolve `ruff` issues in `scripts/` (currently bypassed/excluded).
+
+---
+
 ## [2026-02-18] Resumen: Modernización y v0.6.1 Release
 Se ha completado la transición de `qgis-plugin-manager` a `qgis-manage`. Esta sesión fue el pilar de la fase de modernización, entregando un núcleo modular, herramientas de versionado automatizado, un sistema de hooks avanzado y cumplimiento total con los estándares de QGIS.
 

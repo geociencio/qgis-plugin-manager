@@ -6,6 +6,11 @@ This file records technical lessons, user preferences, and solutions to complex 
 
 ## 🧠 Critical Lessons
 
+### QGIS 4 and Multi-version Path Detection
+- **Lesson [2026-05-12]**: When supporting multiple software versions, use dynamic path templates (e.g., `QGIS{version}`) instead of hardcoded strings. This allows for easy extension to future versions (e.g., QGIS 5) with minimal code changes.
+- **Lesson [2026-05-12]**: Interactive CLI validation is a powerful fallback. If a detected path doesn't exist, asking the user to create it or provide a manual path prevents the "unsupported environment" dead-end and makes the tool more flexible.
+- **Lesson [2026-05-12]**: In class-based CLI commands (Typer or Argparse), ensure that settings and command-line arguments are merged correctly, giving priority to explicit CLI flags over persistent settings.
+
 ### Gen 5 Architecture
 - **Lesson [2026-04-05]**: The Separation of Concerns between `.agent/` (active development env) and `scaffold/` (distribution blueprints) is the core architectural principle of Gen 5. Never mix domain-specific skills (qgis-core, qa-docker) in the agent's active skill set when the primary project is a CLI tool. These belong in `scaffold/qgis/skills/`.
 - **Lesson [2026-04-05]**: When syncing from a master framerepo using `cp -ra` interactively, it may stall waiting for overwrite confirmation. Always use `rsync -av --delete` with explicit source/destination for deterministic results.
