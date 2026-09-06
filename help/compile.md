@@ -1,7 +1,7 @@
 # qgis-manage compile
 
 ```text
-qgis-manage compile v0.8.0
+qgis-manage compile v0.9.0
 Compile resources, UI files and translations
 
 Usage: qgis-manage compile [-h] [--type {resources,translations,docs,all}]
