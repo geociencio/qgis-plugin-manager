@@ -447,7 +447,7 @@ def compile_qt_resources(
     res_type: str = "all",
     callback: Callable[[str], Any] | None = None,
 ):
-    """Compile Qt resources, translations, and documentation."""
+    """Compile Qt resources, UI files, translations, and documentation."""
     if res_type in ["resources", "all"]:
         # Compile .ui files to Python (pyuic)
         compile_ui_files(project_root, callback=callback)

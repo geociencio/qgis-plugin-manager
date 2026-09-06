@@ -128,9 +128,9 @@ qgis-manage deploy --purge-backups
 **💡 Smart Path Detection**: `qgis-manage` automatically detects your plugins directory across Linux, macOS, and Windows. If a profile doesn't exist, it will interactively ask if you want to create it or specify a custom location.
 
 ### 3. Resource Compilation (`compile`)
-Compile Qt resources, translations, and documentation.
+Compile Qt resources, UI files, translations, and documentation.
 ```bash
-# Compile resources, translations and docs
+# Compile .ui, .qrc, .ts and docs
 qgis-manage compile
 
 # Compile only translations
@@ -169,6 +169,9 @@ qgis-manage package
 
 # Package with strict compliance check (fails if binaries or errors found)
 qgis-manage package --repo-check --sync-version
+
+# Stamp git build info (commit SHA, commit number, datetime, experimental)
+qgis-manage package --stamp
 ```
 
 ### 7. Maintenance & Quality

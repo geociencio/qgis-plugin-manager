@@ -2,7 +2,7 @@
 
 ```text
 qgis-manage compile v0.8.0
-Compile resources and translations
+Compile resources, UI files and translations
 
 Usage: qgis-manage compile [-h] [--type {resources,translations,docs,all}]
                            [path]

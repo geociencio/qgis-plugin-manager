@@ -27,7 +27,7 @@ class CompileCommand(BaseCommand):
 
     @property
     def help(self) -> str:
-        return "Compile resources and translations"
+        return "Compile resources, UI files and translations"
 
     def configure_parser(self, parser: argparse.ArgumentParser) -> None:
         self.add_common_args(parser, include_profile=False)
