@@ -15,6 +15,7 @@ Subcommands:
     init               Initialize a new QGIS plugin project scaffolding
     clean              Remove Python cache files and build artifacts
     analyze            Run QGIS Plugin Analyzer on the project
+    security           Run a security audit (secrets and PyQGIS rules)
     validate           Validate metadata.txt compliance and project structure
     install-deps       Install plugin dependencies to a local folder
     hooks              Manage and test plugin hooks

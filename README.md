@@ -226,6 +226,9 @@ qgis-manage validate --strict --repo
 # Run QGIS Plugin Analyzer on the project
 qgis-manage analyze
 
+# Run a security audit (secrets and PyQGIS rules)
+qgis-manage security --strict
+
 # Install plugin dependencies into a local folder
 qgis-manage install-deps --target libs
 
@@ -235,6 +238,8 @@ qgis-manage clean
 # Remove the deployed plugin from the QGIS profile
 qgis-manage dclean
 ```
+
+> **Note**: `analyze` and `security` rely on [qgis-plugin-analyzer](https://pypi.org/project/qgis-plugin-analyzer/), available via the `dev` extra (`uv add --group dev qgis-plugin-analyzer`).
 
 ---
 

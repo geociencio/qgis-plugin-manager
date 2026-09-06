@@ -35,6 +35,7 @@ class CLIApp:
         from .commands.init import InitCommand
         from .commands.install_deps import InstallDepsCommand
         from .commands.package import PackageCommand
+        from .commands.security import SecurityCommand
         from .commands.validate import ValidateCommand
 
         command_classes: list[type[BaseCommand]] = [
@@ -45,6 +46,7 @@ class CLIApp:
             InitCommand,
             CleanCommand,
             AnalyzeCommand,
+            SecurityCommand,
             ValidateCommand,
             InstallDepsCommand,
             HooksCommand,

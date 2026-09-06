@@ -1,12 +1,12 @@
 """Analyze command implementation."""
 
 import argparse
-import subprocess
 from pathlib import Path
 
 import click
 
 from ...discovery import find_project_root
+from ..analyzer import run_qgis_analyzer
 from ..base import BaseCommand
 
 
@@ -34,20 +34,10 @@ class AnalyzeCommand(BaseCommand):
             root = find_project_root(Path(args.path))
             click.echo(f"🔍 Analyzing project at {root}...")
 
-            # Check if qgis-analyzer is installed
-            try:
-                subprocess.run(
-                    ["qgis-analyzer", "--version"], capture_output=True, check=True
-                )
-                cmd = ["qgis-analyzer", "analyze", str(root)]
-            except (subprocess.CalledProcessError, FileNotFoundError):
-                # Try via uv run
-                cmd = ["uv", "run", "qgis-analyzer", "analyze", str(root)]
-
-            result = subprocess.run(cmd, check=False)
-            if result.returncode != 0:
+            code = run_qgis_analyzer(root, "analyze")
+            if code != 0:
                 click.echo("❌ Analysis failed.")
-                return result.returncode
+                return code
 
             return 0
 

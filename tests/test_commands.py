@@ -56,7 +56,7 @@ class TestInstallDepsCommand(_CommandTestBase):
 
 
 class TestAnalyzeCommand(_CommandTestBase):
-    @patch("qgis_manager.cli.commands.analyze.subprocess.run")
+    @patch("qgis_manager.cli.analyzer.subprocess.run")
     @patch("qgis_manager.cli.commands.analyze.find_project_root")
     def test_analyze_direct(self, mock_find, mock_run):
         mock_find.return_value = Path(tempfile.mkdtemp())
@@ -64,13 +64,36 @@ class TestAnalyzeCommand(_CommandTestBase):
         exit_code, _, _ = self._invoke(["analyze"])
         self.assertEqual(exit_code, 0)
 
-    @patch("qgis_manager.cli.commands.analyze.subprocess.run")
+    @patch("qgis_manager.cli.analyzer.subprocess.run")
     @patch("qgis_manager.cli.commands.analyze.find_project_root")
     def test_analyze_fallback_to_uv(self, mock_find, mock_run):
         mock_find.return_value = Path(tempfile.mkdtemp())
         mock_run.side_effect = [FileNotFoundError(), Mock(returncode=0)]
         exit_code, _, _ = self._invoke(["analyze"])
         self.assertEqual(exit_code, 0)
+
+
+class TestSecurityCommand(_CommandTestBase):
+    @patch("qgis_manager.cli.analyzer.subprocess.run")
+    @patch("qgis_manager.cli.commands.security.find_project_root")
+    def test_security_success(self, mock_find, mock_run):
+        mock_find.return_value = Path(tempfile.mkdtemp())
+        mock_run.return_value.returncode = 0
+        exit_code, output, _ = self._invoke(["security"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("security scan", output.lower())
+        # qgis-analyzer invoked with --deep
+        last_call = mock_run.call_args_list[-1][0][0]
+        self.assertIn("security", last_call)
+        self.assertIn("--deep", last_call)
+
+    @patch("qgis_manager.cli.analyzer.subprocess.run")
+    @patch("qgis_manager.cli.commands.security.find_project_root")
+    def test_security_failure(self, mock_find, mock_run):
+        mock_find.return_value = Path(tempfile.mkdtemp())
+        mock_run.return_value.returncode = 1
+        exit_code, _, _ = self._invoke(["security"])
+        self.assertEqual(exit_code, 1)
 
 
 class TestValidateCommand(_CommandTestBase):
