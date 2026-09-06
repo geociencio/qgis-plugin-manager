@@ -25,10 +25,10 @@ without requiring external dependencies like pathspec.
 """
 
 import fnmatch
-import tomllib
 from pathlib import Path
 
 from .constants import DEFAULT_EXCLUDE_PATTERNS
+from .toml_utils import load_toml
 
 
 def load_ignore_patterns(project_root: Path, include_dev: bool = False):
@@ -73,16 +73,11 @@ def load_ignore_patterns(project_root: Path, include_dev: bool = False):
     # 2. Try to load from pyproject.toml
     pyproject = project_root / "pyproject.toml"
     if pyproject.exists():
-        try:
-            with open(pyproject, "rb") as f:
-                data = tomllib.load(f)
-
-                tool_config = data.get("tool", {}).get("qgis-manager", {})
-                custom_ignores = tool_config.get("ignore", [])
-                if isinstance(custom_ignores, list):
-                    patterns.extend(custom_ignores)
-        except Exception:
-            pass
+        data = load_toml(pyproject)
+        tool_config = data.get("tool", {}).get("qgis-manager", {})
+        custom_ignores = tool_config.get("ignore", [])
+        if isinstance(custom_ignores, list):
+            patterns.extend(custom_ignores)
 
     return patterns
 

@@ -6,10 +6,16 @@ from pathlib import Path
 import click
 
 from ...config import load_config, load_project_config
-from ...core import compile_qt_resources, deploy_plugin, get_qgis_plugin_dir
+from ...core import (
+    compile_qt_resources,
+    count_compile_steps,
+    deploy_plugin,
+    get_qgis_plugin_dir,
+)
 from ...discovery import find_project_root, get_plugin_metadata
 from ...hooks import run_hook
 from ..base import BaseCommand
+from ..progress import make_compile_callback
 
 
 class DeployCommand(BaseCommand):
@@ -114,7 +120,7 @@ class DeployCommand(BaseCommand):
             target_path = target_dir / slug
 
             # Pre-deploy hook
-            pre_hook = settings.hooks.get("pre-deploy")
+            pre_hook = settings.hooks.get("pre_deploy")
             # Build context for native hooks
             hook_ctx = {
                 "project_root": root,
@@ -131,7 +137,7 @@ class DeployCommand(BaseCommand):
                         click.echo("⏭️  Skipping hook.")
                         pre_hook = None
 
-                if not run_hook("pre-deploy", pre_hook, root, context=hook_ctx):
+                if not run_hook("pre_deploy", pre_hook, root, context=hook_ctx):
                     return 1
 
             if args.interactive:
@@ -142,11 +148,7 @@ class DeployCommand(BaseCommand):
                     return 1
 
             if not args.no_compile and settings.auto_compile:
-                # Calculate steps: qrcs + ts + 1 (docs)
-                qrc_count = len(list(root.rglob("*.qrc")))
-                ts_count = len(list(root.rglob("*.ts")))
-                has_docs = (root / "docs" / "source" / "conf.py").exists()
-                total_steps = qrc_count + ts_count + (1 if has_docs else 0)
+                total_steps = count_compile_steps(root, "all")
 
                 if total_steps > 0:
                     with click.progressbar(
@@ -154,46 +156,9 @@ class DeployCommand(BaseCommand):
                         label="📚 Compiling resources and docs",
                         show_pos=True,
                     ) as bar:
-
-                        def comp_callback(line):
-                            import time
-
-                            icons = {
-                                "Recurso": "🔨",
-                                "Trad": "🌍",
-                                "Documentación": "📚",
-                            }
-                            msg = line.split(":", 1)[1] if ":" in line else line
-                            short_msg = msg[:40] + "..." if len(msg) > 40 else msg
-
-                            if line.startswith("START:"):
-                                icon = "🛠️"
-                                for k, v in icons.items():
-                                    if k in msg:
-                                        icon = v
-                                        break
-                                bar.label = f"{icon} {short_msg}"
-                                bar.update(0)
-                            elif line.startswith("PROGRESS:"):
-                                spinner = [
-                                    "⠋",
-                                    "⠙",
-                                    "⠹",
-                                    "⠸",
-                                    "⠼",
-                                    "⠴",
-                                    "⠦",
-                                    "⠧",
-                                    "⠇",
-                                    "⠏",
-                                ]
-                                s = spinner[int(time.time() * 5) % len(spinner)]
-                                bar.label = f"📚 {s} {short_msg}"
-                                bar.update(0)
-                            elif line.startswith("DONE:"):
-                                bar.update(1)
-
-                        compile_qt_resources(root, "all", callback=comp_callback)
+                        compile_qt_resources(
+                            root, "all", callback=make_compile_callback(bar)
+                        )
 
             click.echo(f"🚀 Deploying '{metadata['name']}' ({slug}) to {target_path}")
 
@@ -208,14 +173,14 @@ class DeployCommand(BaseCommand):
             )
 
             # Post-deploy hook
-            post_hook = settings.hooks.get("post-deploy")
+            post_hook = settings.hooks.get("post_deploy")
             if post_hook or (root / "plugin_hooks.py").exists():
                 if args.interactive:
                     if not click.confirm("🪝  Execute post-deploy hook?"):
                         click.echo("⏭️  Skipping hook.")
                         post_hook = None
 
-                run_hook("post-deploy", post_hook, root, context=hook_ctx)
+                run_hook("post_deploy", post_hook, root, context=hook_ctx)
 
             click.echo(click.style("✨ Deployment complete!", fg="green", bold=True))
             return 0

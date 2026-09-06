@@ -25,7 +25,7 @@ profile = "prod"
 backup = false
 auto_compile = false
 [tool.qgis-manager.hooks]
-pre-deploy = "echo 1"
+pre_deploy = "echo 1"
 """,
                 encoding="utf-8",
             )
@@ -36,7 +36,7 @@ pre-deploy = "echo 1"
             self.assertEqual(settings.profile, "prod")
             self.assertFalse(settings.backup)
             self.assertFalse(settings.auto_compile)
-            self.assertEqual(settings.hooks["pre-deploy"], "echo 1")
+            self.assertEqual(settings.hooks["pre_deploy"], "echo 1")
 
     @patch("pathlib.Path.home")
     def test_load_config_no_file(self, mock_home):

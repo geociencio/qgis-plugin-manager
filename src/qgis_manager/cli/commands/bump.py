@@ -2,13 +2,17 @@
 
 import argparse
 import logging
-import re
-import tomllib
 from pathlib import Path
 
 import click
 
-from ...discovery import find_project_root, get_plugin_metadata, save_plugin_metadata
+from ...discovery import (
+    find_project_root,
+    get_plugin_metadata,
+    save_plugin_metadata,
+    sync_metadata_version,
+)
+from ...toml_utils import get_project_version, set_project_version
 from ..base import BaseCommand
 
 logger = logging.getLogger(__name__)
@@ -135,16 +139,14 @@ class BumpCommand(BaseCommand):
         Returns:
             Exit code.
         """
-        version = self._get_pyproject_version(root)
+        version = get_project_version(root / "pyproject.toml")
         if not version:
             click.echo(click.style("❌ No version found in pyproject.toml", fg="red"))
             return 1
 
         click.echo(f"🔄 Syncing version {version} to metadata.txt...")
-        metadata = get_plugin_metadata(root)
-        if metadata.get("version") != version:
-            metadata["version"] = version
-            save_plugin_metadata(root, metadata)
+        synced = sync_metadata_version(root)
+        if synced:
             click.echo(click.style("✅ metadata.txt updated.", fg="green"))
         else:
             click.echo("✅ Already in sync.")
@@ -160,33 +162,11 @@ class BumpCommand(BaseCommand):
         Returns:
             Version string or None if not found.
         """
-        v = self._get_pyproject_version(root)
+        v = get_project_version(root / "pyproject.toml")
         if v:
             return v
         metadata = get_plugin_metadata(root)
         return metadata.get("version")
-
-    def _get_pyproject_version(self, root: Path) -> str | None:
-        """Read version from pyproject.toml.
-
-        Args:
-            root: Project root directory.
-
-        Returns:
-            Version string or None.
-        """
-        pyproj = root / "pyproject.toml"
-        if not pyproj.exists():
-            return None
-
-        try:
-            with open(pyproj, "rb") as f:
-                data = tomllib.load(f)
-                version = data.get("project", {}).get("version")
-                return str(version) if version else None
-        except Exception as e:
-            logger.debug(f"Failed to read pyproject.toml version: {e}")
-            return None
 
     def _update_version_in_files(self, root: Path, version: str) -> bool:
         """Update version in all tracked files.
@@ -203,32 +183,11 @@ class BumpCommand(BaseCommand):
         # 1. Update pyproject.toml
         pyproj = root / "pyproject.toml"
         if pyproj.exists():
-            content = pyproj.read_text(encoding="utf-8")
-            # Try to find version in [project] section safely
-            match = re.search(
-                r"(\[project\].*?version\s*=\s*\")[^\"]+(\")", content, re.DOTALL
-            )
-            if match:
-                new_content = (
-                    content[: match.start(0)]
-                    + match.group(1)
-                    + version
-                    + match.group(2)
-                    + content[match.end(0) :]
-                )
-                pyproj.write_text(new_content, encoding="utf-8")
+            if set_project_version(pyproj, version):
                 click.echo("  📝 Updated pyproject.toml")
             else:
-                # Fallback to simple replacement
-                new_content = re.sub(
-                    r"(version\s*=\s*\")[^\"]+(\")", rf"\1{version}\2", content, count=1
-                )
-                if new_content != content:
-                    pyproj.write_text(new_content, encoding="utf-8")
-                    click.echo("  📝 Updated pyproject.toml (simple match)")
-                else:
-                    logger.warning("Could not find version entry in pyproject.toml")
-                    success = False
+                logger.warning("Could not find version entry in pyproject.toml")
+                success = False
 
         # 2. Update metadata.txt
         try:

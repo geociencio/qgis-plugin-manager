@@ -7,7 +7,8 @@ import click
 
 from ...core import create_plugin_package
 from ...dependencies import install_external_libs
-from ...discovery import find_project_root
+from ...discovery import find_project_root, sync_metadata_version
+from ...toml_utils import get_project_version
 from ..base import BaseCommand
 
 
@@ -45,22 +46,10 @@ class PackageCommand(BaseCommand):
 
             # 1. Version Sync (Optional)
             if getattr(args, "sync_version", False):
-                import tomllib
-
-                from ...discovery import get_plugin_metadata, save_plugin_metadata
-
-                # Check pyproject.toml directly for standard [project] version
-                pyproj = root / "pyproject.toml"
-                if pyproj.exists():
-                    with open(pyproj, "rb") as f:
-                        data = tomllib.load(f)
-                        py_version = data.get("project", {}).get("version")
-                        if py_version:
-                            metadata = get_plugin_metadata(root)
-                            if metadata.get("version") != py_version:
-                                click.echo(f"🔄 Syncing version to {py_version}...")
-                                metadata["version"] = py_version
-                                save_plugin_metadata(root, metadata)
+                py_version = get_project_version(root / "pyproject.toml")
+                if py_version:
+                    click.echo(f"🔄 Syncing version to {py_version}...")
+                    sync_metadata_version(root)
 
             # 2. Compliance Check (Optional)
             if getattr(args, "repo_check", False):
@@ -68,20 +57,24 @@ class PackageCommand(BaseCommand):
                 from ...validation import (
                     validate_metadata,
                     validate_official_compliance,
+                    validate_project_structure,
                 )
 
                 click.echo("🔍 Running official repository compliance check...")
                 metadata = fetch_metadata(root)
                 meta_res = validate_metadata(metadata)
                 repo_res = validate_official_compliance(root)
+                struct_res = validate_project_structure(root, metadata)
 
-                if not meta_res.is_valid or not repo_res.is_valid:
+                if not (
+                    meta_res.is_valid and repo_res.is_valid and struct_res.is_valid
+                ):
                     click.echo(
                         click.style(
                             "❌ Package compliance failed:", fg="red", bold=True
                         )
                     )
-                    for err in meta_res.errors + repo_res.errors:
+                    for err in meta_res.errors + repo_res.errors + struct_res.errors:
                         click.echo(f"  • {err}")
                     return 1
                 click.echo(click.style("✅ Compliance check passed!", fg="green"))

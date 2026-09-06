@@ -1,8 +1,9 @@
 import logging
 import subprocess
 import sys
-import tomllib
 from pathlib import Path
+
+from .toml_utils import load_toml
 
 logger = logging.getLogger(__name__)
 
@@ -13,16 +14,11 @@ def get_dependencies(project_root: Path) -> list[str]:
     if not pyproject_path.exists():
         return []
 
-    try:
-        with open(pyproject_path, "rb") as f:
-            data = tomllib.load(f)
-            # We look for [tool.qgis-manager.dependencies]
-            tool_config = data.get("tool", {}).get("qgis-manager", {})
-            deps = tool_config.get("dependencies", [])
-            return [str(d) for d in deps] if isinstance(deps, list) else []
-    except Exception as e:
-        logger.error(f"Error reading dependencies from pyproject.toml: {e}")
-        return []
+    data = load_toml(pyproject_path)
+    # We look for [tool.qgis-manager.dependencies]
+    tool_config = data.get("tool", {}).get("qgis-manager", {})
+    deps = tool_config.get("dependencies", [])
+    return [str(d) for d in deps] if isinstance(deps, list) else []
 
 
 def install_external_libs(project_root: Path, target_dir: str = "libs") -> bool:

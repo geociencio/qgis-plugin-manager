@@ -17,7 +17,7 @@ def execute_python_hook(
 
     Args:
         project_root: Root directory of the plugin
-        hook_name: Name of the hook (e.g., 'pre-deploy')
+        hook_name: Name of the hook (e.g., 'pre_deploy')
         context: Dictionary with project context
 
     Returns:
@@ -27,7 +27,7 @@ def execute_python_hook(
     if not hooks_file.exists():
         return True
 
-    # Normalize hook name: 'pre-deploy' -> 'pre_deploy'
+    # Normalize hook name: 'pre-deploy' -> 'pre_deploy' for backward compatibility
     func_name = hook_name.replace("-", "_")
 
     try:

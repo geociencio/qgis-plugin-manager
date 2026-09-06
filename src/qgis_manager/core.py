@@ -258,15 +258,33 @@ def compile_docs(project_root: Path, callback: Callable[[str], Any] | None = Non
 
 
 def get_rcc_tool() -> str | None:
-    """Find the best available RCC tool."""
+    """Find the best available RCC tool on the system PATH."""
     tools = ["pyside6-rcc", "pyside2-rcc", "pyrcc5"]
     for tool in tools:
-        try:
-            subprocess.run([tool, "--version"], capture_output=True, check=False)
+        if shutil.which(tool):
             return tool
-        except FileNotFoundError:
-            continue
     return None
+
+
+def count_compile_steps(project_root: Path, res_type: str) -> int:
+    """Count the number of compilation steps for a resource type.
+
+    Args:
+        project_root: Root directory of the plugin project.
+        res_type: One of "resources", "translations", "docs", or "all".
+
+    Returns:
+        Total number of steps to compile.
+    """
+    total = 0
+    if res_type in ["resources", "all"]:
+        total += len(list(project_root.rglob("*.qrc")))
+    if res_type in ["translations", "all"]:
+        total += len(list(project_root.rglob("*.ts")))
+    if res_type in ["docs", "all"]:
+        if (project_root / "docs" / "source" / "conf.py").exists():
+            total += 1
+    return total
 
 
 def verify_resource_patch(py_file: Path) -> bool:

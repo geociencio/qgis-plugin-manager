@@ -2,6 +2,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from qgis_manager.core import get_rcc_tool, patch_resource_file
 
@@ -13,10 +14,14 @@ class TestRCCModernization(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.test_dir)
 
-    def test_get_rcc_tool(self):
-        tool = get_rcc_tool()
-        # On this system we know pyrcc5 is available
-        self.assertIn(tool, ["pyside6-rcc", "pyside2-rcc", "pyrcc5"])
+    @patch("shutil.which")
+    def test_get_rcc_tool(self, mock_which):
+        mock_which.side_effect = lambda tool: tool if tool == "pyrcc5" else None
+        self.assertEqual(get_rcc_tool(), "pyrcc5")
+
+    @patch("shutil.which", return_value=None)
+    def test_get_rcc_tool_none(self, mock_which):
+        self.assertIsNone(get_rcc_tool())
 
     def test_patch_resource_file(self):
         py_file = self.test_dir / "resources_rc.py"

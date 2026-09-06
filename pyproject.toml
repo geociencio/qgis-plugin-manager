@@ -43,6 +43,7 @@ Documentation = "https://github.com/geociencio/qgis-plugin-manager#readme"
 dev = [
     "mypy>=1.19.1",
     "pre-commit>=4.5.1",
+    "pytest>=8.0",
     "ruff>=0.14.10",
     "types-setuptools>=80.9.0.20251223",
     "ai-context-core>=3.2.1",
@@ -110,6 +111,11 @@ dev = [
     "ai-context-core>=3.2.1",
     "mypy>=1.19.1",
     "pre-commit>=4.5.1",
+    "pytest>=8.0",
     "qgis-plugin-analyzer>=1.10.0",
     "ruff>=0.14.10",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

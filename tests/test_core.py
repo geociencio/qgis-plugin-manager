@@ -108,7 +108,8 @@ class TestCore(unittest.TestCase):
             mock_copytree.assert_called()
 
     @patch("subprocess.run")
-    def test_compile_qt_resources(self, mock_run):
+    @patch("qgis_manager.core.get_rcc_tool", return_value="pyside6-rcc")
+    def test_compile_qt_resources(self, mock_get_tool, mock_run):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
             # Setup
@@ -119,7 +120,7 @@ class TestCore(unittest.TestCase):
             compile_qt_resources(tmp_path, res_type="resources")
 
             # Verify
-            self.assertEqual(mock_run.call_count, 2)
+            self.assertEqual(mock_run.call_count, 1)
             args = mock_run.call_args[0][0]
             self.assertEqual(args[0], "pyside6-rcc")
             self.assertEqual(args[-1], str(qrc_file))

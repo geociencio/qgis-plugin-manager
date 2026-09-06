@@ -33,6 +33,7 @@ from pathlib import Path
 from typing import Any
 
 from .ignore import IgnoreMatcher, load_ignore_patterns
+from .toml_utils import get_project_version
 
 logger = logging.getLogger(__name__)
 
@@ -144,6 +145,29 @@ def save_plugin_metadata(project_root: Path, metadata: dict[str, Any]) -> None:
     except Exception as e:
         logger.error(f"Error saving metadata.txt: {e}")
         raise
+
+
+def sync_metadata_version(project_root: Path) -> bool:
+    """Sync the metadata.txt version from pyproject.toml.
+
+    Args:
+        project_root: Root directory of the plugin project.
+
+    Returns:
+        True if metadata.txt was updated, False if it was already in sync
+        or if pyproject.toml has no version.
+    """
+    version = get_project_version(project_root / "pyproject.toml")
+    if not version:
+        return False
+
+    metadata = get_plugin_metadata(project_root)
+    if metadata.get("version") == version:
+        return False
+
+    metadata["version"] = version
+    save_plugin_metadata(project_root, metadata)
+    return True
 
 
 def get_source_files(project_root: Path, include_dev: bool = False) -> Iterator[Path]:
