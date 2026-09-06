@@ -22,7 +22,11 @@ class HooksCommand(BaseCommand):
         return "Manage and test plugin hooks"
 
     def configure_parser(self, parser: argparse.ArgumentParser) -> None:
-        self.add_common_args(parser, include_profile=False)
+        parser.add_argument(
+            "--path",
+            default=".",
+            help="Project directory path (default: current directory)",
+        )
         subparsers = parser.add_subparsers(dest="subcommand", help="Hooks subcommand")
 
         # List

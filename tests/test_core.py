@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -7,10 +8,15 @@ from qgis_manager.core import (
     clean_artifacts,
     compile_docs,
     compile_qt_resources,
+    count_compile_steps,
+    create_plugin_package,
     deploy_plugin,
     get_qgis_plugin_dir,
     init_plugin_project,
+    rotate_backups,
+    sync_directory,
 )
+from qgis_manager.ignore import IgnoreMatcher
 
 
 class TestCore(unittest.TestCase):
@@ -248,6 +254,63 @@ class TestCore(unittest.TestCase):
             self.assertIn("PROGRESS:done", callback_lines)
             self.assertIn("DONE:Documentación", callback_lines)
             self.assertIn("START:Documentación (html)", callback_lines)
+
+    def test_create_plugin_package(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / "metadata.txt").write_text(
+                "[general]\nname=My Plugin\nversion=1.0.0\n", encoding="utf-8"
+            )
+            (tmp_path / "plugin.py").write_text("print('hello')\n", encoding="utf-8")
+
+            output = tmp_path / "out"
+            zip_path = create_plugin_package(tmp_path, output_dir=output)
+
+            self.assertTrue(zip_path.exists())
+            self.assertTrue(zip_path.name.endswith(".zip"))
+            # SHA256 checksum file
+            checksum_file = Path(str(zip_path) + ".sha256")
+            self.assertTrue(checksum_file.exists())
+            # ZIP contains the plugin files under slug/
+            with zipfile.ZipFile(zip_path) as zf:
+                names = zf.namelist()
+            self.assertTrue(any(n.endswith("plugin.py") for n in names))
+            self.assertTrue(any(n.endswith("metadata.txt") for n in names))
+
+    def test_sync_directory_skips_self_recursion(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            src = Path(tmp_dir) / "src"
+            src.mkdir()
+            (src / "file.txt").write_text("data", encoding="utf-8")
+            # Destination inside source
+            dst = src / "nested" / "dst"
+            matcher = IgnoreMatcher(src)
+
+            sync_directory(src, dst, matcher)
+
+            # The nested dst should not have received a copy of itself
+            self.assertFalse((dst / "nested").exists())
+
+    def test_rotate_backups_no_limit(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            parent = Path(tmp_dir)
+            (parent / "plugin.bak.1").mkdir()
+            rotate_backups(parent, "plugin", 0)
+            self.assertTrue((parent / "plugin.bak.1").exists())
+
+    def test_count_compile_steps(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "resources.qrc").touch()
+            (root / "translations.ts").touch()
+            (root / "docs").mkdir()
+            (root / "docs" / "source").mkdir()
+            (root / "docs" / "source" / "conf.py").touch()
+
+            self.assertEqual(count_compile_steps(root, "all"), 3)
+            self.assertEqual(count_compile_steps(root, "resources"), 1)
+            self.assertEqual(count_compile_steps(root, "translations"), 1)
+            self.assertEqual(count_compile_steps(root, "docs"), 1)
 
 
 if __name__ == "__main__":

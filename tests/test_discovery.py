@@ -2,7 +2,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from qgis_manager.discovery import find_project_root, get_plugin_metadata, slugify
+from qgis_manager.discovery import (
+    find_project_root,
+    get_plugin_metadata,
+    save_plugin_metadata,
+    slugify,
+    sync_metadata_version,
+)
 
 
 class TestDiscovery(unittest.TestCase):
@@ -63,6 +69,56 @@ class TestDiscovery(unittest.TestCase):
             self.assertIn("plugin.py", basenames)
             self.assertIn("metadata.txt", basenames)
             self.assertIn("resources.qrc", basenames)
+
+    def test_sync_metadata_version_updates(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / "pyproject.toml").write_text(
+                '[project]\nname = "demo"\nversion = "1.2.3"\n', encoding="utf-8"
+            )
+            (tmp_path / "metadata.txt").write_text(
+                "[general]\nname = demo\nversion = 1.0.0\n", encoding="utf-8"
+            )
+
+            self.assertTrue(sync_metadata_version(tmp_path))
+            metadata = get_plugin_metadata(tmp_path)
+            self.assertEqual(metadata["version"], "1.2.3")
+
+    def test_sync_metadata_version_already_in_sync(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / "pyproject.toml").write_text(
+                '[project]\nname = "demo"\nversion = "1.2.3"\n', encoding="utf-8"
+            )
+            (tmp_path / "metadata.txt").write_text(
+                "[general]\nname = demo\nversion = 1.2.3\n", encoding="utf-8"
+            )
+
+            self.assertFalse(sync_metadata_version(tmp_path))
+
+    def test_sync_metadata_version_no_version(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / "pyproject.toml").write_text(
+                '[project]\nname = "demo"\n', encoding="utf-8"
+            )
+            self.assertFalse(sync_metadata_version(tmp_path))
+
+    def test_save_plugin_metadata_roundtrip(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / "metadata.txt").write_text(
+                "[general]\nname = demo\n", encoding="utf-8"
+            )
+
+            metadata = get_plugin_metadata(tmp_path)
+            metadata["version"] = "2.0.0"
+            metadata["slug"] = "should_not_persist"
+            save_plugin_metadata(tmp_path, metadata)
+
+            content = (tmp_path / "metadata.txt").read_text(encoding="utf-8")
+            self.assertIn("version=2.0.0", content)
+            self.assertNotIn("slug", content)
 
 
 if __name__ == "__main__":

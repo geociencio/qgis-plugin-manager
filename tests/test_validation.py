@@ -1,10 +1,16 @@
+import tempfile
 import unittest
+from pathlib import Path
 
 from qgis_manager.validation import (
     get_optional_fields,
     get_required_fields,
+    validate_boolean_field,
+    validate_category,
     validate_email,
     validate_metadata,
+    validate_official_compliance,
+    validate_tags,
     validate_url,
     validate_version,
 )
@@ -129,6 +135,56 @@ class TestValidation(unittest.TestCase):
         self.assertTrue(
             any("homepage" in warning.lower() for warning in result.warnings)
         )
+
+    def test_validate_category(self):
+        self.assertTrue(validate_category("Vector"))
+        self.assertTrue(validate_category("Processing"))
+        self.assertFalse(validate_category("Unknown"))
+
+    def test_validate_tags(self):
+        self.assertTrue(validate_tags("raster, processing"))
+        self.assertFalse(validate_tags(""))
+        self.assertFalse(validate_tags(",,"))
+
+    def test_validate_boolean_field(self):
+        self.assertTrue(validate_boolean_field("True"))
+        self.assertTrue(validate_boolean_field("False"))
+        self.assertFalse(validate_boolean_field("true"))
+        self.assertFalse(validate_boolean_field("yes"))
+
+    def test_validate_official_compliance_binary(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "LICENSE").write_text("GPL", encoding="utf-8")
+            (root / "plugin.so").touch()
+
+            result = validate_official_compliance(root)
+            self.assertFalse(result.is_valid)
+            self.assertTrue(any("binaries" in e.lower() for e in result.errors))
+
+    def test_validate_official_compliance_missing_license(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            result = validate_official_compliance(root)
+            self.assertFalse(result.is_valid)
+            self.assertTrue(any("LICENSE" in e for e in result.errors))
+
+    def test_validate_official_compliance_license_variant(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "LICENSE.md").write_text("GPL", encoding="utf-8")
+
+            result = validate_official_compliance(root)
+            self.assertFalse(result.is_valid)
+            self.assertTrue(any("LICENSE" in e for e in result.errors))
+
+    def test_validate_official_compliance_valid(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "LICENSE").write_text("GPL", encoding="utf-8")
+
+            result = validate_official_compliance(root)
+            self.assertTrue(result.is_valid)
 
 
 if __name__ == "__main__":
