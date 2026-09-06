@@ -12,6 +12,12 @@ from ..base import BaseCommand
 class InitCommand(BaseCommand):
     """Command to initialize a new QGIS plugin project scaffolding."""
 
+    examples = (
+        "    # Create a processing plugin\n"
+        '    qgis-manage init "My Plugin" --author "Tester" '
+        '--email "test@test.com" --template processing\n'
+    )
+
     @property
     def name(self) -> str:
         return "init"

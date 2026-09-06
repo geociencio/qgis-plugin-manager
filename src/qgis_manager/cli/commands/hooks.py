@@ -13,6 +13,13 @@ from ..base import BaseCommand
 class HooksCommand(BaseCommand):
     """Command to manage and test plugin hooks."""
 
+    examples = (
+        "    # List all defined hooks\n"
+        "    qgis-manage hooks list\n\n"
+        "    # Test the pre_deploy hook in isolation\n"
+        "    qgis-manage hooks test pre_deploy\n"
+    )
+
     @property
     def name(self) -> str:
         return "hooks"
@@ -27,7 +34,9 @@ class HooksCommand(BaseCommand):
             default=".",
             help="Project directory path (default: current directory)",
         )
-        subparsers = parser.add_subparsers(dest="subcommand", help="Hooks subcommand")
+        subparsers = parser.add_subparsers(
+            dest="subcommand", metavar="SUBCOMMAND", help="Hooks subcommand"
+        )
 
         # List
         subparsers.add_parser("list", help="List all defined hooks")

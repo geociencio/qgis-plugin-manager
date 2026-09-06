@@ -25,6 +25,13 @@ class BumpCommand(BaseCommand):
     from pyproject.toml to metadata.txt.
     """
 
+    examples = (
+        "    # Bump the patch version\n"
+        "    qgis-manage bump patch\n\n"
+        "    # Sync metadata.txt from pyproject.toml\n"
+        "    qgis-manage bump sync\n"
+    )
+
     @property
     def name(self) -> str:
         """Command name as it appears in the CLI."""
@@ -42,7 +49,9 @@ class BumpCommand(BaseCommand):
             parser: Argument parser to configure.
         """
         self.add_common_args(parser, include_profile=False)
-        subparsers = parser.add_subparsers(dest="subcommand", help="Bump subcommand")
+        subparsers = parser.add_subparsers(
+            dest="subcommand", metavar="SUBCOMMAND", help="Bump subcommand"
+        )
 
         subparsers.add_parser("major", help="Bump major version (X.y.z -> X+1.0.0)")
         subparsers.add_parser("minor", help="Bump minor version (x.Y.z -> x.Y+1.0)")

@@ -13,6 +13,11 @@ from ..base import BaseCommand
 class CleanCommand(BaseCommand):
     """Command to clean build artifacts."""
 
+    examples = (
+        "    # Clean Python cache and build artifacts\n"
+        "    qgis-manage clean\n"
+    )
+
     @property
     def name(self) -> str:
         return "clean"

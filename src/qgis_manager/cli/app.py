@@ -57,10 +57,16 @@ class CLIApp:
             Configured ArgumentParser instance.
         """
         from .. import __version__
+        from .parser import HelpfulArgumentParser
 
-        parser = argparse.ArgumentParser(
-            description="QGIS Plugin Manager - Modern CLI for plugin development"
+        parser = HelpfulArgumentParser(
+            prog="qgis-manage",
+            description="QGIS Plugin Manager - Modern CLI for plugin development.",
         )
+        parser.set_title(f"qgis-manage v{__version__}")
+        parser._positionals.title = "Subcommands"
+        parser._optionals.title = "General Options"
+
         parser.add_argument(
             "-v", "--version", action="version", version=f"%(prog)s {__version__}"
         )
@@ -76,12 +82,38 @@ class CLIApp:
             help="Path to log file",
         )
 
-        subparsers = parser.add_subparsers(dest="command", help="Command to execute")
+        subparsers = parser.add_subparsers(dest="command", metavar="SUBCOMMAND")
 
         # Register all commands
         for cmd in self.commands.values():
-            cmd_parser = subparsers.add_parser(cmd.name, help=cmd.help)
+            cmd_parser = subparsers.add_parser(
+                cmd.name,
+                prog=f"qgis-manage {cmd.name}",
+                help=cmd.help,
+                description=cmd.help,
+            )
+            cmd_parser.set_title(f"qgis-manage {cmd.name} v{__version__}")
+            cmd_parser._positionals.title = "Arguments"
+            cmd_parser._optionals.title = "Options"
+            if cmd.examples:
+                cmd_parser.epilog = f"Examples:\n{cmd.examples}"
             cmd.configure_parser(cmd_parser)
+
+        parser.epilog = (
+            "Examples:\n"
+            '    # Initialize a new processing plugin\n'
+            '    qgis-manage init "My Plugin" --author "Tester" '
+            '--email "test@test.com" --template processing\n'
+            "\n"
+            "    # Deploy to the default QGIS profile\n"
+            "    qgis-manage deploy\n"
+            "\n"
+            "    # Create a repo-ready ZIP package\n"
+            "    qgis-manage package --repo-check --sync-version\n"
+            "\n"
+            "Full documentation and error reports at: "
+            "https://github.com/geociencio/qgis-plugin-manager"
+        )
 
         return parser
 

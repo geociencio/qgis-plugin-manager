@@ -15,6 +15,13 @@ from ..base import BaseCommand
 class PackageCommand(BaseCommand):
     """Command to create a distributable ZIP package."""
 
+    examples = (
+        "    # Create a ZIP package\n"
+        "    qgis-manage package\n\n"
+        "    # Package with strict compliance check and version sync\n"
+        "    qgis-manage package --repo-check --sync-version\n"
+    )
+
     @property
     def name(self) -> str:
         return "package"

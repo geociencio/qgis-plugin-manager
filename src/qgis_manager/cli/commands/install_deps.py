@@ -13,6 +13,13 @@ from ..base import BaseCommand
 class InstallDepsCommand(BaseCommand):
     """Command to install plugin dependencies to a local folder."""
 
+    examples = (
+        "    # Install dependencies into the default 'libs' folder\n"
+        "    qgis-manage install-deps\n\n"
+        "    # Install into a custom target folder\n"
+        "    qgis-manage install-deps --target vendor\n"
+    )
+
     @property
     def name(self) -> str:
         return "install-deps"

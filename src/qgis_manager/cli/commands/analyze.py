@@ -13,6 +13,11 @@ from ..base import BaseCommand
 class AnalyzeCommand(BaseCommand):
     """Command to run QGIS Plugin Analyzer on the project."""
 
+    examples = (
+        "    # Run the QGIS plugin analyzer\n"
+        "    qgis-manage analyze\n"
+    )
+
     @property
     def name(self) -> str:
         return "analyze"

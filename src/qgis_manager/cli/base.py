@@ -10,6 +10,9 @@ class BaseCommand(ABC):
     Each command encapsulates its own argument configuration and execution logic.
     """
 
+    #: Usage examples rendered at the bottom of the command's ``--help`` output.
+    examples: str = ""
+
     @property
     @abstractmethod
     def name(self) -> str:

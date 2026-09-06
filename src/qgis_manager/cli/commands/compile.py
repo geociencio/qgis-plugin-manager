@@ -14,6 +14,13 @@ from ..progress import make_compile_callback
 class CompileCommand(BaseCommand):
     """Command to compile Qt resources, translations, and documentation."""
 
+    examples = (
+        "    # Compile resources and translations\n"
+        "    qgis-manage compile\n\n"
+        "    # Compile only translations\n"
+        "    qgis-manage compile --type translations\n"
+    )
+
     @property
     def name(self) -> str:
         return "compile"

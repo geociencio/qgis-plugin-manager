@@ -21,6 +21,15 @@ from ..progress import make_compile_callback
 class DeployCommand(BaseCommand):
     """Command to deploy the plugin to a local QGIS profile."""
 
+    examples = (
+        "    # Deploy to the default QGIS profile\n"
+        "    qgis-manage deploy\n\n"
+        "    # Deploy to a QGIS 4 profile\n"
+        "    qgis-manage deploy --qgis-version 4\n\n"
+        "    # Deploy without creating a backup\n"
+        "    qgis-manage deploy --no-backup\n"
+    )
+
     @property
     def name(self) -> str:
         return "deploy"

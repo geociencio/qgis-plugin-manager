@@ -20,6 +20,11 @@ class ValidateCommand(BaseCommand):
     QGIS repository compliance.
     """
 
+    examples = (
+        "    # Run deep structural validation\n"
+        "    qgis-manage validate --strict --repo\n"
+    )
+
     @property
     def name(self) -> str:
         """Command name as it appears in the CLI."""
