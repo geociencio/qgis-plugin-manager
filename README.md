@@ -8,7 +8,7 @@
 [![Checked with mypy](https://img.shields.io/badge/mypy-checked-blue)](http://mypy-lang.org/)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/geociencio/qgis-plugin-manager/graphs/commit-activity)
 [![License: GPL v2+](https://img.shields.io/badge/License-GPL%20v2%2B-blue.svg)](LICENSE)
-[![Code Quality](https://img.shields.io/badge/Code%20Quality-77.3%2F100-yellow)](analysis_results/PROJECT_SUMMARY.md)
+[![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen)](https://github.com/geociencio/qgis-plugin-manager)
 [![GitHub stars](https://img.shields.io/github/stars/geociencio/qgis-plugin-manager.svg?style=social&label=Star)](https://github.com/geociencio/qgis-plugin-manager/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/geociencio/qgis-plugin-manager.svg?style=social&label=Issue)](https://github.com/geociencio/qgis-plugin-manager/issues)
 
@@ -36,11 +36,13 @@
 - **Smart Synchronization (Sync v2.0)**: We use idempotent sync logic. Instead of slow "delete and copy", we only update modified files.
 - **Native Python Hooks Architecture**: Write your automation in pure Python via `plugin_hooks.py`. Hooks receive full project context (metadata, paths, profiles).
 - **Official Repository "First-Time-Right"**: Built-in `--repo-check` and structural validation catch errors *before* you upload to QGIS.
-- **AI-Agent Friendly**: Specifically designed to be easily automated by AI agents, featuring clear metadata and a modular command system.
+- **Automation-Friendly**: Structured `--help` output and a modular command system make it easy to script and integrate into CI pipelines.
 
 ---
 
 ## 📦 Installation
+
+Requires **Python 3.11+**.
 
 Install system-wide using `uv` (recommended):
 ```bash
@@ -56,6 +58,39 @@ Or using `pip`:
 ```bash
 pip install qgis-manage
 ```
+
+---
+
+## 📖 Help
+
+Every command provides a structured `--help` output with usage, options, and examples.
+
+```text
+$ qgis-manage --help
+
+qgis-manage v0.8.0
+QGIS Plugin Manager - Modern CLI for plugin development.
+
+Usage: qgis-manage [-h] ... SUBCOMMAND ...
+
+Subcommands:
+  deploy      Deploy the plugin to the local QGIS profile
+  compile     Compile resources and translations
+  package     Create distributable ZIP package
+  ...
+
+General Options:
+  -h, --help    show this help message and exit
+  ...
+
+Examples:
+    # Initialize a new processing plugin
+    qgis-manage init "My Plugin" --author "Tester" ...
+
+Full documentation and error reports at: https://github.com/geociencio/qgis-plugin-manager
+```
+
+The full command reference is also available as static Markdown files in the [`help/`](help/) directory. Regenerate them with `make help`.
 
 ---
 
@@ -77,8 +112,8 @@ qgis-manage deploy
 # Deploy to QGIS 4 profile
 qgis-manage deploy --qgis-version 4
 
-# Deploy to a specific profile with backup rotation
-qgis-manage deploy --profile production --max-backups 5
+# Deploy to a specific profile
+qgis-manage deploy --profile production
 
 # Purge old backups to save space
 qgis-manage deploy --purge-backups
@@ -86,7 +121,17 @@ qgis-manage deploy --purge-backups
 
 **💡 Smart Path Detection**: `qgis-manage` automatically detects your plugins directory across Linux, macOS, and Windows. If a profile doesn't exist, it will interactively ask if you want to create it or specify a custom location.
 
-### 3. Advanced Hooks (`hooks`)
+### 3. Resource Compilation (`compile`)
+Compile Qt resources, translations, and documentation.
+```bash
+# Compile resources, translations and docs
+qgis-manage compile
+
+# Compile only translations
+qgis-manage compile --type translations
+```
+
+### 4. Advanced Hooks (`hooks`)
 Manage and test your native Python hooks.
 ```bash
 # List all hooks from pyproject.toml and plugin_hooks.py
@@ -99,7 +144,7 @@ qgis-manage hooks init
 qgis-manage hooks test pre_deploy
 ```
 
-### 4. Automated Versioning (`bump`)
+### 5. Automated Versioning (`bump`)
 Keep your versions in sync across all project files.
 ```bash
 # Increment version (Patch, Minor, Major)
@@ -110,7 +155,7 @@ qgis-manage bump minor   # 0.1.1 -> 0.2.0
 qgis-manage bump sync
 ```
 
-### 5. Packaging & Compliance
+### 6. Packaging & Compliance
 Prepare for the Official QGIS Plugin Repository.
 ```bash
 # Create a "Repo-Ready" ZIP package
@@ -120,13 +165,16 @@ qgis-manage package
 qgis-manage package --repo-check --sync-version
 ```
 
-### 6. Maintenance & Quality
+### 7. Maintenance & Quality
 ```bash
 # Run deep structural validation
 qgis-manage validate --strict --repo
 
 # Run QGIS Plugin Analyzer on the project
 qgis-manage analyze
+
+# Install plugin dependencies into a local folder
+qgis-manage install-deps --target libs
 
 # Clean Python artifacts (__pycache__) and build files
 qgis-manage clean
@@ -156,7 +204,7 @@ post_deploy = "python scripts/notify.py"
 
 ## 🌍 Internationalization (i18n)
 
-Automated compilation and management of `.ts` and `.qm` files is handled by `qgis-manage compile`.
+Automated compilation and management of `.ts` and `.qm` translation files is handled by the `compile` command (see the Command Reference above).
 
 ## 📄 License
 GPL-2.0-or-later
