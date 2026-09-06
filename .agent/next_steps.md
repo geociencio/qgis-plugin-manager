@@ -1,12 +1,12 @@
 # Next Steps
 
-**Fecha**: 2026-05-12
-**Contexto**: Se ha completado la implementación del soporte multiversión (QGIS 3 y 4) y se ha lanzado la versión **v0.7.0**.
+**Date**: 2026-05-12
+**Context**: Multi-version support (QGIS 3 and 4) has been implemented and version **v0.7.0** has been released.
 
-**Pendientes (What's missing):**
-- [ ] **Validar las integraciones del CLI (Typer)** hacia las nuevas plantillas (blueprints) de `/scaffold`.
-- [ ] **Resolver las deudas de `ruff` en la carpeta `scripts/`**. Se recomienda agregar `exclude = ["scripts/"]` en el `pyproject.toml` o corregir los errores E501/E741 manualmente.
-- [ ] **Probar el despliegue interactivo en Windows y macOS** para confirmar que la creación de directorios funciona como se espera en entornos no-Linux.
+**Pending (What's missing):**
+- [ ] **Validate CLI integrations (Typer)** against the new blueprints in `/scaffold`.
+- [ ] **Resolve `ruff` debts in the `scripts/` folder**. Add `exclude = ["scripts/"]` to `pyproject.toml` or fix the E501/E741 violations manually.
+- [ ] **Test interactive deployment on Windows and macOS** to confirm that directory creation works as expected in non-Linux environments.
 
-**Comando para reanudar:**
+**Command to resume:**
 `/start-session`

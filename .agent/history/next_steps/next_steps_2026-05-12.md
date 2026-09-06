@@ -1,11 +1,11 @@
 # Next Steps
 
-**Fecha**: 2026-04-05
-**Contexto**: Se ha sincronizado todo el framework de qgis-plugin-manager con la arquitectura maestra de Antigravity Gen 5.
+**Date**: 2026-05-12
+**Context**: The entire qgis-plugin-manager framework has been synchronized with the Antigravity Gen 5 master architecture.
 
-**Pendientes (What's missing):**
-- Validar las integraciones del CLI (Typer) hacia las nuevas plantillas (blueprints) de `/scaffold`.
-- Resolver las deudas de `ruff` en la carpeta `scripts/` que actualmente se saltan mediante el `--no-verify` al hacer commits, o bien ignorarlas apropiadamente en la config de ruff.
+**Pending (What's missing):**
+- Validate the CLI (Typer) integrations against the new blueprints in `/scaffold`.
+- Resolve the `ruff` debts in the `scripts/` folder that are currently skipped via `--no-verify` on commits, or ignore them properly in the ruff config.
 
-**Comando para reanudar:**
+**Command to resume:**
 `/start-session`

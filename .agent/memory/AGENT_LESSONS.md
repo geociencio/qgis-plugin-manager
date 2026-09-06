@@ -24,7 +24,7 @@ This file records technical lessons, user preferences, and solutions to complex 
 ---
 
 ## ⚙️ User Preferences
-- **Language**: Communication in Spanish; code and commits in English.
+- **Language**: Agent documentation, code and commits in English.
 - **Formatting**: `black` + `ruff` via `uv run`. Always run both consecutively.
 - **Package manager**: `uv` exclusively. Never use `pip` directly.
 - **UI Development**: Programmatic (no Qt Designer / .ui files).

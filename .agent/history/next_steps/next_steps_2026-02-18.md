@@ -1,20 +1,20 @@
 # Next Steps: qgis-manage v0.6.1
 
-La versión **v0.6.1** ha sido liberada, etiquetada y construida exitosamente. El núcleo del sistema es ahora robusto, modular y altamente competitivo.
+Version **v0.6.1** has been released, tagged and built successfully. The core of the system is now robust, modular and highly competitive.
 
-## Objetivos Inmediatos
-1.  **Distribución a PyPI**: Ejecutar `uv publish` para subir los paquetes generados en `dist/` al registro oficial.
-2.  **Verificación de Instalación**: Validar que `pip install qgis-manage` funciona correctamente en un entorno limpio.
-3.  **Promoción**: Actualizar la documentación externa o redes sociales con el nuevo nombre y capacidades del manager.
+## Immediate Objectives
+1.  **Distribution to PyPI**: Run `uv publish` to upload the packages generated in `dist/` to the official registry.
+2.  **Installation Verification**: Validate that `pip install qgis-manage` works correctly in a clean environment.
+3.  **Promotion**: Update external documentation or social media with the new name and capabilities of the manager.
 
-## Errores Pendientes / Deuda Técnica
-- Ninguno crítico. La suite de 68 tests pasa al 100%.
+## Pending Errors / Technical Debt
+- None critical. The 68-test suite passes at 100%.
 
-## Comando para retomar
+## Command to resume
 ```bash
-/inicia-sesion
+/start-session
 ```
-o
+or
 ```bash
 uv run qgis-manage --help
 ```
