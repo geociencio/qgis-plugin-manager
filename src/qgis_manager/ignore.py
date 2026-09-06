@@ -25,44 +25,8 @@ without requiring external dependencies like pathspec.
 """
 
 import fnmatch
-import sys
+import tomllib
 from pathlib import Path
-
-# tomllib is 3.11+, fallback to a simple parser for 3.10
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    # Minimal TOML parser for the specific 'ignore' list in pyproject.toml
-    # This avoids adding 'tomli' as a dependency.
-    class TomlLoaderShim:
-        @staticmethod
-        def load(f):
-            content = f.read().decode("utf-8")
-            import re
-
-            # Try [tool.qgis-manager.ignore] section first
-            match = re.search(
-                r"\[tool\.qgis-manager\.ignore\]\s*ignore\s*=\s*\[(.*?)\]",
-                content,
-                re.DOTALL,
-            )
-            if match:
-                items_raw = match.group(1)
-                items = re.findall(r'"(.*?)"', items_raw)
-                return {"tool": {"qgis-manager": {"ignore": items}}}
-
-            # Fallback to [tool.qgis-manager] ignore key
-            match = re.search(
-                r"\[tool\.qgis-manager\]\s*ignore\s*=\s*\[(.*?)\]",
-                content,
-                re.DOTALL,
-            )
-            if match:
-                items_raw = match.group(1)
-                items = re.findall(r'"(.*?)"', items_raw)
-                return {"tool": {"qgis-manager": {"ignore": items}}}
-            return {}
-
 
 from .constants import DEFAULT_EXCLUDE_PATTERNS
 
@@ -111,10 +75,7 @@ def load_ignore_patterns(project_root: Path, include_dev: bool = False):
     if pyproject.exists():
         try:
             with open(pyproject, "rb") as f:
-                if sys.version_info >= (3, 11):
-                    data = tomllib.load(f)
-                else:
-                    data = TomlLoaderShim.load(f)
+                data = tomllib.load(f)
 
                 tool_config = data.get("tool", {}).get("qgis-manager", {})
                 custom_ignores = tool_config.get("ignore", [])

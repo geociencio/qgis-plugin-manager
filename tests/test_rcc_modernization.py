@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from src.qgis_manager.core import get_rcc_tool, patch_resource_file
+from qgis_manager.core import get_rcc_tool, patch_resource_file
 
 
 class TestRCCModernization(unittest.TestCase):

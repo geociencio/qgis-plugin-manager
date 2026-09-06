@@ -93,11 +93,7 @@ class CLIApp:
         """
         import logging
 
-        level = logging.INFO
-        if args.verbose == 1:
-            level = logging.DEBUG
-        elif args.verbose >= 2:
-            level = logging.DEBUG
+        level = logging.DEBUG if args.verbose >= 1 else logging.INFO
 
         log_format = "%(message)s"
         if args.verbose >= 1:

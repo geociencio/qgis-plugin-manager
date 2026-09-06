@@ -3,6 +3,7 @@
 import argparse
 import logging
 import re
+import tomllib
 from pathlib import Path
 
 import click
@@ -177,7 +178,6 @@ class BumpCommand(BaseCommand):
         pyproj = root / "pyproject.toml"
         if not pyproj.exists():
             return None
-        import tomllib
 
         try:
             with open(pyproj, "rb") as f:

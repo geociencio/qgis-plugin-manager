@@ -4,8 +4,8 @@ import time
 import unittest
 from pathlib import Path
 
-from src.qgis_manager.core import rotate_backups, sync_directory
-from src.qgis_manager.ignore import IgnoreMatcher
+from qgis_manager.core import rotate_backups, sync_directory
+from qgis_manager.ignore import IgnoreMatcher
 
 
 class TestDeploymentOptimization(unittest.TestCase):

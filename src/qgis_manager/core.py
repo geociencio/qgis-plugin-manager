@@ -188,7 +188,7 @@ def deploy_plugin(
             rel_target = target_path.resolve().relative_to(project_root.resolve())
             matcher.patterns.append(str(rel_target))
             matcher.patterns.append(f"/{rel_target}")
-    except (ValueError, Exception):
+    except Exception:
         pass
 
     logger.info(f"🚀 Syncing files to {target_path}")
@@ -267,8 +267,6 @@ def get_rcc_tool() -> str | None:
         except FileNotFoundError:
             continue
     return None
-
-    return False
 
 
 def verify_resource_patch(py_file: Path) -> bool:

@@ -7,7 +7,7 @@ name = "qgis-manage"
 version = "0.7.0"
 description = "A modern CLI for managing QGIS plugin development, deployment, and packaging."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = { text = "GPL-2.0-or-later" }
 authors = [
     { name = "Juan M Bernales", email = "juanbernales@gmail.com" }
@@ -20,9 +20,9 @@ classifiers = [
     "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: GIS",
     "Topic :: Software Development :: Build Tools",
     "Environment :: Console",
@@ -85,7 +85,7 @@ package = true
 
 [tool.ruff]
 line-length = 88
-target-version = "py310"
+target-version = "py311"
 exclude = ["scripts/"]
 
 [tool.ruff.lint]
@@ -99,7 +99,7 @@ section-order = ["future", "standard-library", "third-party", "first-party", "lo
 
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true

@@ -1,11 +1,6 @@
-import sys
+import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
 
 
 @dataclass
@@ -21,10 +16,9 @@ class Settings:
 
 
 def load_config() -> Settings:
-    """Load configuration from ~/.config/qgis-manager/config.toml and pyproject.toml."""
+    """Load configuration from ~/.config/qgis-manager/config.toml."""
     settings = Settings()
 
-    # 1. Load from ~/.config/qgis-manager/config.toml
     config_path = Path.home() / ".config" / "qgis-manager" / "config.toml"
     if config_path.exists():
         try:
@@ -44,9 +38,6 @@ def load_config() -> Settings:
             # Fallback to defaults on corrupt config
             pass
 
-    # 2. Load from pyproject.toml in project root (if exists)
-    # This logic might need to find the project root first, so it's typically called
-    # with a known root or we search upwards.
     return settings
 
 

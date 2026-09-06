@@ -63,7 +63,7 @@ class DeployCommand(BaseCommand):
             # Defaults
             target_profile = args.profile or settings.profile
             qgis_version = args.qgis_version or settings.qgis_version
-            use_backup = not args.no_backup if args.no_backup else settings.backup
+            use_backup = settings.backup if not args.no_backup else False
 
             # Pre-info
             metadata = get_plugin_metadata(root)
@@ -86,7 +86,7 @@ class DeployCommand(BaseCommand):
 
             # Destination determination
             if args.profile and Path(args.profile).is_absolute():
-                target_path = Path(args.profile)
+                target_dir = Path(args.profile)
             else:
                 target_dir = get_qgis_plugin_dir(target_profile, version=qgis_version)
 
@@ -111,7 +111,7 @@ class DeployCommand(BaseCommand):
                     else:
                         target_dir.mkdir(parents=True)
 
-                target_path = target_dir / slug
+            target_path = target_dir / slug
 
             # Pre-deploy hook
             pre_hook = settings.hooks.get("pre-deploy")
@@ -200,6 +200,7 @@ class DeployCommand(BaseCommand):
             # Deployment
             deploy_plugin(
                 root,
+                dest_dir=target_dir,
                 no_backup=not use_backup,
                 profile=target_profile,
                 qgis_version=qgis_version,

@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from src.qgis_manager.validation import validate_metadata, validate_project_structure
+from qgis_manager.validation import validate_metadata, validate_project_structure
 
 
 class TestStructuralValidation(unittest.TestCase):

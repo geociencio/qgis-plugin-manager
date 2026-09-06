@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from src.qgis_manager.ignore import IgnoreMatcher, load_ignore_patterns
+from qgis_manager.ignore import IgnoreMatcher, load_ignore_patterns
 
 
 class TestIgnoreSystem(unittest.TestCase):

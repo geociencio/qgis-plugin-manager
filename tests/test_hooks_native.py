@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from src.qgis_manager.hooks import run_hook
+from qgis_manager.hooks import run_hook
 
 
 class TestNativeHooks(unittest.TestCase):
