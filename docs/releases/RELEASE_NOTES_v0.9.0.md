@@ -32,6 +32,13 @@ Remove the deployed plugin from a QGIS profile.
 qgis-manage dclean
 ```
 
+### 🔒 Security Audit
+Run a focused security audit (secrets detection and PyQGIS rules) powered by `qgis-plugin-analyzer`.
+
+```bash
+qgis-manage security --strict
+```
+
 ## 🛠️ Improvements
 
 - **Cleanup**: `clean` now also removes compiled `.ui`/`.qrc` Python outputs and Sphinx `help/` output.

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Build metadata stamping**: `package --stamp` injects `version`, `commitSha1`, `commitNumber`, `dateTime` and `experimental` into the packaged `metadata.txt` without modifying the source. `--release-version` overrides the version.
 - **Plugin templates**: `init` now scaffolds from bundled templates (`default`, `processing`, `dockwidget`) via a minimal stdlib `{{ var }}` renderer.
 - **`dclean` command**: remove the deployed plugin from a QGIS profile.
+- **`security` command**: run a focused security audit (secrets and PyQGIS rules) via `qgis-plugin-analyzer` (`qgis-analyzer security --deep`).
 
 ### Changed
 - **Cleanup**: `clean` now also removes compiled `.ui`/`.qrc` Python outputs and Sphinx `help/` output.
