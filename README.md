@@ -22,14 +22,20 @@
 
 ### 📊 Ecosystem Comparison
 
-| Feature | pb_tool | qgis-plugin-ci | qgis-plugin-manager |
-| :--- | :--- | :--- | :--- |
-| **Configuration** | Legacy `.cfg` | Hybrid `.yml` | **Pure PEP 621 (TOML)** |
-| **Deployment** | Delete & Copy | N/A | **Smart Sync (rsync-like)** |
-| **Backups** | None | None | **Rotation & Multi-profile** |
-| **Hooks** | Shell only | Shell only | **Native Python + Shell** |
-| **Validation** | Basic | Schema only | **Deep Structure & Compliance** |
-| **Modern RCC** | Fixed tools | Limited | **Dynamic Tooling & Patching** |
+| Feature | pb_tool | qgis-plugin-ci | qgis-plugin-dev-tools | qgis-plugin-manager |
+| :--- | :--- | :--- | :--- | :--- |
+| **Configuration** | `pb_tool.cfg` (INI) | `.qgis-plugin-ci` (YAML) or `setup.cfg`/`pyproject.toml` | `pyproject.toml` | **`pyproject.toml` (PEP 621)** |
+| **Scaffolding** | `create` (templates) | — | — | `init` (templates) |
+| **Local deploy** | Delete & copy | — | — | **Smart sync (rsync-like)** |
+| **Backups** | None | None | None | **Rotation & multi-profile** |
+| **Hooks** | None | None | None | **Native Python + Shell** |
+| **Validation** | Config/environment | `metadata.txt` (schema) | — | **Deep structure & compliance** |
+| **Packaging** | `zip` + version stamp | `package`/`release` | `package` | `package` + `--repo-check` |
+| **Translations** | `lrelease` | **Transifex (full)** | — | `compile` (ts→qm) |
+| **RCC / UI** | auto pyuic + rcc | `.qrc` only | — | **Dynamic tooling + patching** |
+| **Runtime deps** | — | — | **vendoring** | `install-deps` |
+
+Related tools in the ecosystem: **QGIS Plugin Builder** (official GUI scaffolding inside QGIS), **qgis-plugin-repo** ([3liz](https://github.com/3liz/qgis-plugin-repo), merges `plugins.xml` for custom repositories), and **qgis_devtools** ([nextgis](https://github.com/nextgis/qgis_devtools), an in-QGIS debugging plugin).
 
 ### 🚀 Key Differentiators (USPs)
 
