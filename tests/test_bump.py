@@ -87,6 +87,26 @@ class TestBumpCommand(unittest.TestCase):
         self.assertEqual(exit_code, 1)
         self.assertIn("No subcommand", output)
 
+    @patch("qgis_manager.cli.commands.bump.find_project_root")
+    def test_bump_invalid_version(self, mock_find):
+        root = self._make_project("not.a.version")
+        mock_find.return_value = root
+
+        exit_code, _, _ = self._invoke(["bump", "patch"])
+
+        self.assertEqual(exit_code, 1)
+
+    @patch("qgis_manager.cli.commands.bump.save_plugin_metadata")
+    @patch("qgis_manager.cli.commands.bump.find_project_root")
+    def test_bump_metadata_update_failure(self, mock_find, mock_save):
+        root = self._make_project("1.2.3")
+        mock_find.return_value = root
+        mock_save.side_effect = OSError("permission denied")
+
+        exit_code, _, _ = self._invoke(["bump", "patch"])
+
+        self.assertEqual(exit_code, 1)
+
 
 if __name__ == "__main__":
     unittest.main()

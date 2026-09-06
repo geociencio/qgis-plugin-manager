@@ -44,6 +44,27 @@ pre_deploy = "echo 1"
         settings = load_config()
         self.assertEqual(settings.profile, "default")
 
+    @patch("pathlib.Path.home")
+    def test_load_config_with_file(self, mock_home):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            home = Path(tmp_dir)
+            cfg = home / ".config" / "qgis-manager" / "config.toml"
+            cfg.parent.mkdir(parents=True)
+            cfg.write_text(
+                '[defaults]\nprofile = "prod"\nqgis_version = 4\n'
+                "backup = false\nmax_backups = 5\nauto_compile = false\n",
+                encoding="utf-8",
+            )
+            mock_home.return_value = home
+
+            settings = load_config()
+
+            self.assertEqual(settings.profile, "prod")
+            self.assertEqual(settings.qgis_version, 4)
+            self.assertFalse(settings.backup)
+            self.assertEqual(settings.max_backups, 5)
+            self.assertFalse(settings.auto_compile)
+
 
 if __name__ == "__main__":
     unittest.main()

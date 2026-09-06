@@ -312,6 +312,78 @@ class TestCore(unittest.TestCase):
             self.assertEqual(count_compile_steps(root, "translations"), 1)
             self.assertEqual(count_compile_steps(root, "docs"), 1)
 
+    def test_create_plugin_package_callback(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / "metadata.txt").write_text(
+                "[general]\nname=My Plugin\nversion=1.0.0\n", encoding="utf-8"
+            )
+            (tmp_path / "plugin.py").write_text("print('hello')\n", encoding="utf-8")
+
+            calls = []
+            create_plugin_package(tmp_path, callback=lambda n: calls.append(n))
+
+            self.assertGreater(len(calls), 0)
+
+    def test_create_plugin_package_include_dev(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / "metadata.txt").write_text(
+                "[general]\nname=My Plugin\nversion=1.0.0\n", encoding="utf-8"
+            )
+            (tmp_path / "docs").mkdir()
+            (tmp_path / "docs" / "readme.md").write_text("docs", encoding="utf-8")
+
+            output = tmp_path / "out"
+            zip_path = create_plugin_package(
+                tmp_path, output_dir=output, include_dev=True
+            )
+            with zipfile.ZipFile(zip_path) as zf:
+                names = zf.namelist()
+            self.assertTrue(any("docs" in n for n in names))
+
+    @patch("qgis_manager.core.get_rcc_tool", return_value=None)
+    @patch("subprocess.run")
+    def test_compile_qt_resources_no_rcc_tool(self, mock_run, _mock_get_tool):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / "resources.qrc").touch()
+
+            compile_qt_resources(tmp_path, res_type="resources")
+
+            mock_run.assert_not_called()
+
+    @patch("subprocess.Popen")
+    def test_compile_docs_failure(self, mock_popen):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            docs_source = tmp_path / "docs" / "source"
+            docs_source.mkdir(parents=True)
+            (docs_source / "conf.py").touch()
+
+            mock_process = MagicMock()
+            mock_process.stdout = []
+            mock_process.returncode = 1
+            mock_popen.return_value = mock_process
+
+            compile_docs(tmp_path)
+
+            mock_popen.assert_called_once()
+
+    def test_patch_resource_file_verification_failure(self):
+        from qgis_manager.core import patch_resource_file
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            py_file = Path(tmp_dir) / "resources_rc.py"
+            py_file.write_text(
+                "from PyQt5 import QtCore\n    import resources_rc\n",
+                encoding="utf-8",
+            )
+
+            result = patch_resource_file(py_file)
+
+            self.assertTrue(result)
+
 
 if __name__ == "__main__":
     unittest.main()

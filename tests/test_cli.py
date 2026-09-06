@@ -76,6 +76,30 @@ class TestCLI(unittest.TestCase):
             tmp_path, "docs", callback=unittest.mock.ANY
         )
 
+    def test_cli_no_command(self):
+        exit_code, output, _ = self._invoke([])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("usage:", output.lower())
+
+    @patch("qgis_manager.cli.commands.deploy.DeployCommand.execute")
+    def test_cli_keyboard_interrupt(self, mock_exec):
+        mock_exec.side_effect = KeyboardInterrupt
+        exit_code, _, _ = self._invoke(["deploy"])
+        self.assertEqual(exit_code, 1)
+
+    @patch("qgis_manager.cli.commands.deploy.DeployCommand.execute")
+    def test_cli_generic_exception(self, mock_exec):
+        mock_exec.side_effect = RuntimeError("boom")
+        exit_code, _, error = self._invoke(["deploy"])
+        self.assertEqual(exit_code, 1)
+        self.assertIn("boom", error)
+
+    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    def test_cli_verbose(self, mock_find):
+        mock_find.side_effect = FileNotFoundError("No project found")
+        exit_code, _, _ = self._invoke(["--verbose", "deploy"])
+        self.assertEqual(exit_code, 1)
+
 
 if __name__ == "__main__":
     unittest.main()

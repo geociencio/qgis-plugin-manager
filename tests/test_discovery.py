@@ -1,6 +1,7 @@
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from qgis_manager.discovery import (
     find_project_root,
@@ -119,6 +120,33 @@ class TestDiscovery(unittest.TestCase):
             content = (tmp_path / "metadata.txt").read_text(encoding="utf-8")
             self.assertIn("version=2.0.0", content)
             self.assertNotIn("slug", content)
+
+    def test_get_plugin_metadata_malformed(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / "metadata.txt").write_text(
+                "no section header here\n", encoding="utf-8"
+            )
+
+            metadata = get_plugin_metadata(tmp_path)
+            self.assertEqual(metadata["name"], tmp_path.name)
+            self.assertEqual(metadata["slug"], slugify(tmp_path.name))
+
+    def test_get_plugin_metadata_missing_file(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            metadata = get_plugin_metadata(tmp_path)
+            self.assertEqual(metadata["version"], "unknown")
+
+    @patch("configparser.ConfigParser.write", side_effect=OSError("boom"))
+    def test_save_plugin_metadata_write_error(self, _mock_write):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / "metadata.txt").write_text(
+                "[general]\nname = demo\n", encoding="utf-8"
+            )
+            with self.assertRaises(OSError):
+                save_plugin_metadata(tmp_path, {"name": "demo"})
 
 
 if __name__ == "__main__":

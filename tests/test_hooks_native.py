@@ -2,8 +2,9 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
-from qgis_manager.hooks import run_hook
+from qgis_manager.hooks import execute_python_hook, run_hook
 
 
 class TestNativeHooks(unittest.TestCase):
@@ -69,6 +70,23 @@ def pre_deploy(context):
 
         self.assertTrue(success)
         self.assertTrue(marker_file.exists())
+
+    def test_native_hook_raises(self):
+        content = """
+def pre_deploy(context):
+    raise RuntimeError("boom")
+"""
+        self.hooks_file.write_text(content)
+
+        success = run_hook("pre_deploy", None, self.test_dir)
+
+        self.assertFalse(success)
+
+    @patch("importlib.util.spec_from_file_location", return_value=None)
+    def test_execute_python_hook_spec_none(self, _mock_spec):
+        self.hooks_file.write_text("def pre_deploy(context):\n    pass\n")
+
+        self.assertTrue(execute_python_hook(self.test_dir, "pre_deploy", {}))
 
 
 if __name__ == "__main__":

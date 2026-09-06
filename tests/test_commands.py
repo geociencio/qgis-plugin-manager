@@ -238,6 +238,64 @@ class TestHooksCommand(_CommandTestBase):
         self.assertEqual(exit_code, 0)
         self.assertIn("executed successfully", output)
 
+    @patch("qgis_manager.cli.commands.hooks.find_project_root")
+    def test_hooks_test_failure(self, mock_find):
+        root = Path(tempfile.mkdtemp())
+        (root / "plugin_hooks.py").write_text(
+            "def pre_deploy(context):\n    return False\n", encoding="utf-8"
+        )
+        mock_find.return_value = root
+        exit_code, _, _ = self._invoke(["hooks", "test", "pre_deploy"])
+        self.assertEqual(exit_code, 1)
+
+    @patch("qgis_manager.cli.commands.hooks.find_project_root")
+    def test_hooks_list_with_native_hooks(self, mock_find):
+        root = Path(tempfile.mkdtemp())
+        (root / "plugin_hooks.py").write_text(
+            "def pre_deploy(context):\n    pass\n", encoding="utf-8"
+        )
+        mock_find.return_value = root
+        exit_code, output, _ = self._invoke(["hooks", "list"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("pre_deploy", output)
+
+    @patch("qgis_manager.cli.commands.hooks.find_project_root")
+    def test_hooks_list_with_toml_hooks(self, mock_find):
+        root = Path(tempfile.mkdtemp())
+        (root / "pyproject.toml").write_text(
+            '[tool.qgis-manager.hooks]\npost_deploy = "echo hi"\n', encoding="utf-8"
+        )
+        mock_find.return_value = root
+        exit_code, output, _ = self._invoke(["hooks", "list"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("post_deploy", output)
+
+    @patch("qgis_manager.cli.commands.hooks.click.confirm")
+    @patch("qgis_manager.cli.commands.hooks.find_project_root")
+    def test_hooks_init_overwrite(self, mock_find, mock_confirm):
+        root = Path(tempfile.mkdtemp())
+        (root / "plugin_hooks.py").write_text("original\n", encoding="utf-8")
+        mock_find.return_value = root
+        mock_confirm.return_value = True
+
+        exit_code, _, _ = self._invoke(["hooks", "init"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertNotIn("original", (root / "plugin_hooks.py").read_text())
+
+    @patch("qgis_manager.cli.commands.hooks.click.confirm")
+    @patch("qgis_manager.cli.commands.hooks.find_project_root")
+    def test_hooks_init_declined(self, mock_find, mock_confirm):
+        root = Path(tempfile.mkdtemp())
+        (root / "plugin_hooks.py").write_text("original\n", encoding="utf-8")
+        mock_find.return_value = root
+        mock_confirm.return_value = False
+
+        exit_code, _, _ = self._invoke(["hooks", "init"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("original", (root / "plugin_hooks.py").read_text())
+
 
 class TestDeployCommand(_CommandTestBase):
     def _patch_common(self, mock_find, mock_load_config, mock_load_project):
@@ -305,6 +363,222 @@ class TestDeployCommand(_CommandTestBase):
         mock_find.side_effect = FileNotFoundError("No project found")
         exit_code, _, _ = self._invoke(["deploy"])
         self.assertEqual(exit_code, 1)
+
+    @patch("qgis_manager.core.rotate_backups")
+    @patch("qgis_manager.cli.commands.deploy.click.confirm")
+    @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
+    @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
+    @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
+    @patch("qgis_manager.cli.commands.deploy.load_project_config")
+    @patch("qgis_manager.cli.commands.deploy.load_config")
+    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    def test_deploy_purge_backups(
+        self,
+        mock_find,
+        mock_load_config,
+        mock_load_project,
+        mock_meta,
+        mock_dir,
+        mock_deploy,
+        mock_confirm,
+        mock_rotate,
+    ):
+        self._patch_common(mock_find, mock_load_config, mock_load_project)
+        mock_meta.return_value = {"name": "Test", "slug": "test"}
+        mock_dir.return_value = Path(tempfile.mkdtemp())
+        mock_confirm.side_effect = [True, True]
+
+        exit_code, output, _ = self._invoke(["deploy", "--purge-backups"])
+
+        self.assertEqual(exit_code, 0)
+        mock_rotate.assert_called_once()
+        mock_deploy.assert_called_once()
+        self.assertIn("Backups purged", output)
+
+    @patch("qgis_manager.cli.commands.deploy.click.confirm")
+    @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
+    @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
+    @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
+    @patch("qgis_manager.cli.commands.deploy.load_project_config")
+    @patch("qgis_manager.cli.commands.deploy.load_config")
+    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    def test_deploy_purge_backups_abort(
+        self,
+        mock_find,
+        mock_load_config,
+        mock_load_project,
+        mock_meta,
+        mock_dir,
+        mock_deploy,
+        mock_confirm,
+    ):
+        self._patch_common(mock_find, mock_load_config, mock_load_project)
+        mock_meta.return_value = {"name": "Test", "slug": "test"}
+        mock_dir.return_value = Path(tempfile.mkdtemp())
+        mock_confirm.side_effect = [True, False]
+
+        exit_code, _, _ = self._invoke(["deploy", "--purge-backups"])
+
+        self.assertEqual(exit_code, 0)
+        mock_deploy.assert_not_called()
+
+    @patch("qgis_manager.cli.commands.deploy.click.confirm")
+    @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
+    @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
+    @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
+    @patch("qgis_manager.cli.commands.deploy.load_project_config")
+    @patch("qgis_manager.cli.commands.deploy.load_config")
+    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    def test_deploy_creates_missing_target_dir(
+        self,
+        mock_find,
+        mock_load_config,
+        mock_load_project,
+        mock_meta,
+        mock_dir,
+        mock_deploy,
+        mock_confirm,
+    ):
+        root = self._patch_common(mock_find, mock_load_config, mock_load_project)
+        mock_meta.return_value = {"name": "Test", "slug": "test"}
+        missing = root / "plugins"
+        mock_dir.return_value = missing
+        mock_confirm.return_value = True
+
+        exit_code, _, _ = self._invoke(["deploy"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertTrue(missing.exists())
+        self.assertEqual(mock_deploy.call_args.kwargs["dest_dir"], missing)
+
+    @patch("qgis_manager.cli.commands.deploy.click.prompt")
+    @patch("qgis_manager.cli.commands.deploy.click.confirm")
+    @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
+    @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
+    @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
+    @patch("qgis_manager.cli.commands.deploy.load_project_config")
+    @patch("qgis_manager.cli.commands.deploy.load_config")
+    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    def test_deploy_manual_path(
+        self,
+        mock_find,
+        mock_load_config,
+        mock_load_project,
+        mock_meta,
+        mock_dir,
+        mock_deploy,
+        mock_confirm,
+        mock_prompt,
+    ):
+        root = self._patch_common(mock_find, mock_load_config, mock_load_project)
+        mock_meta.return_value = {"name": "Test", "slug": "test"}
+        mock_dir.return_value = root / "missing"
+        mock_confirm.return_value = False
+        mock_prompt.return_value = "/custom/plugins"
+
+        exit_code, _, _ = self._invoke(["deploy"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(
+            mock_deploy.call_args.kwargs["dest_dir"], Path("/custom/plugins")
+        )
+
+    @patch("qgis_manager.cli.commands.deploy.click.prompt")
+    @patch("qgis_manager.cli.commands.deploy.click.confirm")
+    @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
+    @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
+    @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
+    @patch("qgis_manager.cli.commands.deploy.load_project_config")
+    @patch("qgis_manager.cli.commands.deploy.load_config")
+    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    def test_deploy_abort_no_manual_path(
+        self,
+        mock_find,
+        mock_load_config,
+        mock_load_project,
+        mock_meta,
+        mock_dir,
+        mock_deploy,
+        mock_confirm,
+        mock_prompt,
+    ):
+        root = self._patch_common(mock_find, mock_load_config, mock_load_project)
+        mock_meta.return_value = {"name": "Test", "slug": "test"}
+        mock_dir.return_value = root / "missing"
+        mock_confirm.return_value = False
+        mock_prompt.return_value = ""
+
+        exit_code, _, _ = self._invoke(["deploy"])
+
+        self.assertEqual(exit_code, 1)
+        mock_deploy.assert_not_called()
+
+    @patch("qgis_manager.cli.commands.deploy.run_hook")
+    @patch("qgis_manager.cli.commands.deploy.click.confirm")
+    @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
+    @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
+    @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
+    @patch("qgis_manager.cli.commands.deploy.load_project_config")
+    @patch("qgis_manager.cli.commands.deploy.load_config")
+    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    def test_deploy_runs_hooks(
+        self,
+        mock_find,
+        mock_load_config,
+        mock_load_project,
+        mock_meta,
+        mock_dir,
+        mock_deploy,
+        mock_confirm,
+        mock_run_hook,
+    ):
+        root = self._patch_common(mock_find, mock_load_config, mock_load_project)
+        mock_meta.return_value = {"name": "Test", "slug": "test"}
+        mock_dir.return_value = Path(tempfile.mkdtemp())
+        mock_confirm.return_value = True
+        (root / "plugin_hooks.py").write_text(
+            "def pre_deploy(context):\n    return True\n", encoding="utf-8"
+        )
+        mock_run_hook.return_value = True
+
+        exit_code, _, _ = self._invoke(["deploy"])
+
+        self.assertEqual(exit_code, 0)
+        hook_names = [c.args[0] for c in mock_run_hook.call_args_list]
+        self.assertIn("pre_deploy", hook_names)
+        self.assertIn("post_deploy", hook_names)
+
+    @patch("qgis_manager.cli.commands.deploy.run_hook")
+    @patch("qgis_manager.cli.commands.deploy.click.confirm")
+    @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
+    @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
+    @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
+    @patch("qgis_manager.cli.commands.deploy.load_project_config")
+    @patch("qgis_manager.cli.commands.deploy.load_config")
+    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    def test_deploy_pre_hook_failure(
+        self,
+        mock_find,
+        mock_load_config,
+        mock_load_project,
+        mock_meta,
+        mock_dir,
+        mock_deploy,
+        mock_confirm,
+        mock_run_hook,
+    ):
+        root = self._patch_common(mock_find, mock_load_config, mock_load_project)
+        mock_meta.return_value = {"name": "Test", "slug": "test"}
+        mock_dir.return_value = Path(tempfile.mkdtemp())
+        (root / "plugin_hooks.py").write_text(
+            "def pre_deploy(context):\n    return False\n", encoding="utf-8"
+        )
+        mock_run_hook.return_value = False
+
+        exit_code, _, _ = self._invoke(["deploy"])
+
+        self.assertEqual(exit_code, 1)
+        mock_deploy.assert_not_called()
 
 
 if __name__ == "__main__":
