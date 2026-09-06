@@ -17,14 +17,14 @@ class TestProgress(unittest.TestCase):
         bar = FakeBar()
         callback = make_compile_callback(bar)
 
-        callback("START:Recurso icon.png")
+        callback("START:Resource icon.png")
         self.assertIn("🔨", bar.label)
-        self.assertIn("Recurso icon.png", bar.label)
+        self.assertIn("Resource icon.png", bar.label)
 
-        callback("START:Trad es.ts")
+        callback("START:Translation es.ts")
         self.assertIn("🌍", bar.label)
 
-        callback("START:Documentación")
+        callback("START:Documentation")
         self.assertIn("📚", bar.label)
 
     def test_progress_branch_updates_label(self):
@@ -38,14 +38,14 @@ class TestProgress(unittest.TestCase):
         bar = FakeBar()
         callback = make_compile_callback(bar)
 
-        callback("DONE:Recurso icon.png")
+        callback("DONE:Resource icon.png")
         self.assertEqual(bar.updates, [1])
 
     def test_shortens_long_messages(self):
         bar = FakeBar()
         callback = make_compile_callback(bar)
 
-        callback("START:Recurso " + "x" * 100)
+        callback("START:Resource " + "x" * 100)
         self.assertIn("...", bar.label)
 
 

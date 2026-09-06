@@ -94,7 +94,7 @@ def validate_version(version_str: str) -> bool:
     """
     pattern = r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-zA-Z0-9-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][a-zA-Z0-9-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$"  # noqa: E501
 
-    # QGIS mínimo a menudo solo tiene X.Y (ej "3.0"). Fallback simple si falla.  # noqa: E501
+    # QGIS minimum version is often only X.Y (e.g. "3.0"). Fall back if it fails.  # noqa: E501
     if re.match(r"^\d+\.\d+$", version_str):
         return True
 

@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-09-06
+
+### Changed
+- **Python 3.11+**: Raised `requires-python` to `>=3.11` and replaced `tomli` fallbacks with stdlib `tomllib`.
+- **Centralized TOML handling**: Added `toml_utils.py` with `load_toml`, `get_project_version` and `set_project_version`, replacing fragile regex version editing.
+- **Version sync**: Added `sync_metadata_version` in `discovery.py`, reused by `bump` and `package`.
+- **Progress bars**: Extracted the duplicated compile progressbar callback into `cli/progress.py`.
+- **RCC detection**: `get_rcc_tool` now uses `shutil.which` instead of running `--version`.
+- **Hooks convention**: Unified hook names to underscore (`pre_deploy`/`post_deploy`).
+
+### Added
+- **Structure validation**: `package --repo-check` now also runs `validate_project_structure`.
+- **pytest**: Added `pytest` to dev dependencies and configured `[tool.pytest.ini_options]`.
+
+### Fixed
+- **Hooks CLI**: `hooks test <hook_name>` now parses correctly via `--path` option.
+
+## [0.7.1] - 2026-09-06
+
+### Fixed
+- **Custom deploy path**: `deploy` now respects the interactive/manual target directory instead of ignoring it.
+- **TOML compatibility**: Dropped Python 3.10 in favor of stdlib `tomllib`.
+
+### Removed
+- Dead code: unreachable `return`, redundant exception clause, misleading `load_config` docstring.
+
 ## [0.7.0] - 2026-05-12
 
 ### Added

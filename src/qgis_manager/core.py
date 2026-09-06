@@ -201,25 +201,25 @@ def deploy_plugin(
 
 
 def compile_docs(project_root: Path, callback: Callable[[str], Any] | None = None):
-    """Compila la documentación Sphinx si el proyecto tiene una carpeta docs/source."""
+    """Compile Sphinx documentation if the project has a docs/source folder."""
     docs_source = project_root / "docs" / "source"
     if not (docs_source / "conf.py").exists():
         return
 
-    # Ruta estándar para la ayuda en plugins de QGIS
+    # Standard path for help in QGIS plugins
     help_target = project_root / "help" / "html"
 
     if callback:
-        callback(f"START:Documentación ({help_target.name})")
-    logger.debug(f"📚 Compilando documentación: {docs_source} -> {help_target}")
+        callback(f"START:Documentation ({help_target.name})")
+    logger.debug(f"📚 Compiling documentation: {docs_source} -> {help_target}")
 
     try:
-        # Limpiar y regenerar carpeta destino
+        # Clean and regenerate the target folder
         if help_target.exists():
             shutil.rmtree(help_target)
         help_target.mkdir(parents=True, exist_ok=True)
 
-        # Intentamos con uv run si detectamos entorno uv, o sphinx-build directamente
+        # Prefer `uv run` when a uv environment is detected, else sphinx-build
         cmd = ["sphinx-build", "-b", "html", str(docs_source), str(help_target)]
         if (project_root / "pyproject.toml").exists():
             # Recommendation to use uv if available for consistency with project rules
@@ -246,15 +246,15 @@ def compile_docs(project_root: Path, callback: Callable[[str], Any] | None = Non
         if process.returncode != 0:
             raise subprocess.CalledProcessError(process.returncode, cmd)
 
-        # Limpieza de archivos innecesarios para el despliegue
+        # Clean up files not needed for deployment
         shutil.rmtree(help_target / "_sources", ignore_errors=True)
         (help_target / ".buildinfo").unlink(missing_ok=True)
 
         if callback:
-            callback("DONE:Documentación")
-        logger.debug("  ✅ Documentación compilada con éxito.")
+            callback("DONE:Documentation")
+        logger.debug("  ✅ Documentation compiled successfully.")
     except Exception as e:
-        logger.error(f"  ❌ Error al compilar documentación: {e}")
+        logger.error(f"  ❌ Error compiling documentation: {e}")
 
 
 def get_rcc_tool() -> str | None:
@@ -365,7 +365,7 @@ def compile_qt_resources(
                 py_file = qrc.with_suffix(".py")
                 rel_qrc = qrc.relative_to(project_root)
                 if callback:
-                    callback(f"START:Recurso {rel_qrc.name}")
+                    callback(f"START:Resource {rel_qrc.name}")
                 logger.debug(
                     f"🔨 Compiling resource: {rel_qrc} -> {py_file.name} "
                     f"using {rcc_tool}"
@@ -382,7 +382,7 @@ def compile_qt_resources(
                     patch_resource_file(py_file)
 
                     if callback:
-                        callback(f"DONE:Recurso {rel_qrc.name}")
+                        callback(f"DONE:Resource {rel_qrc.name}")
                     logger.debug("  ✅ Done.")
                 except subprocess.CalledProcessError as e:
                     logger.error(f"  ❌ Error compiling {qrc.name}: {e.stderr}")
@@ -393,7 +393,7 @@ def compile_qt_resources(
         for ts in ts_files:
             rel_ts = ts.relative_to(project_root)
             if callback:
-                callback(f"START:Trad {rel_ts.name}")
+                callback(f"START:Translation {rel_ts.name}")
             logger.debug(f"🌍 Compiling translation: {rel_ts}")
 
             try:
@@ -401,7 +401,7 @@ def compile_qt_resources(
                     ["lrelease", str(ts)], check=True, capture_output=True, text=True
                 )
                 if callback:
-                    callback(f"DONE:Trad {rel_ts.name}")
+                    callback(f"DONE:Translation {rel_ts.name}")
                 logger.debug("  ✅ Done.")
             except subprocess.CalledProcessError as e:
                 logger.error(f"  ❌ Error compiling {ts.name}: {e.stderr}")

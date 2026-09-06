@@ -36,3 +36,15 @@ env/
 analysis_results/
 *.bak.*
 generator_export/
+
+# AI / agent dev artifacts
+.ai_context_cache.json
+.ai-context/
+AI_CONTEXT.md
+project_context.json
+PROJECT_SUMMARY.md
+RULES.md
+agentic_framework_guide.md
+agentic_framework_skeleton.zip
+bootstrap.py
+metadata.txt

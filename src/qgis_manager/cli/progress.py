@@ -4,9 +4,9 @@ import time
 from collections.abc import Callable
 
 COMPILE_ICONS = {
-    "Recurso": "🔨",
-    "Trad": "🌍",
-    "Documentación": "📚",
+    "Resource": "🔨",
+    "Translation": "🌍",
+    "Documentation": "📚",
 }
 _SPINNER = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
 

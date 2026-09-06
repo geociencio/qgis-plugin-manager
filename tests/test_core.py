@@ -252,8 +252,8 @@ class TestCore(unittest.TestCase):
             # Verify
             self.assertIn("PROGRESS:building documents...", callback_lines)
             self.assertIn("PROGRESS:done", callback_lines)
-            self.assertIn("DONE:Documentación", callback_lines)
-            self.assertIn("START:Documentación (html)", callback_lines)
+            self.assertIn("DONE:Documentation", callback_lines)
+            self.assertIn("START:Documentation (html)", callback_lines)
 
     def test_create_plugin_package(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
