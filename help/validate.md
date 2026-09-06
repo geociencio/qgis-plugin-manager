@@ -1,7 +1,7 @@
 # qgis-manage validate
 
 ```text
-qgis-manage validate v0.7.0
+qgis-manage validate v0.8.0
 Validate metadata.txt compliance and project structure
 
 Usage: qgis-manage validate [-h] [--strict] [--repo] [path]

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.8.0] - 2026-09-06
 
+### Added
+- **Structured help**: Adopted a structured `--help` template (title, usage, subcommands, examples) for the main command and every subcommand.
+- **CLI reference docs**: Generated the full command reference into `help/` (Markdown) with a `make help` target.
+- **Structure validation**: `package --repo-check` now also runs `validate_project_structure`.
+- **pytest**: Added `pytest` to dev dependencies and configured `[tool.pytest.ini_options]`.
+
 ### Changed
 - **Python 3.11+**: Raised `requires-python` to `>=3.11` and replaced `tomli` fallbacks with stdlib `tomllib`.
 - **Centralized TOML handling**: Added `toml_utils.py` with `load_toml`, `get_project_version` and `set_project_version`, replacing fragile regex version editing.
@@ -15,21 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **RCC detection**: `get_rcc_tool` now uses `shutil.which` instead of running `--version`.
 - **Hooks convention**: Unified hook names to underscore (`pre_deploy`/`post_deploy`).
 
-### Added
-- **Structure validation**: `package --repo-check` now also runs `validate_project_structure`.
-- **pytest**: Added `pytest` to dev dependencies and configured `[tool.pytest.ini_options]`.
-
-### Fixed
-- **Hooks CLI**: `hooks test <hook_name>` now parses correctly via `--path` option.
-
-## [0.7.1] - 2026-09-06
-
 ### Fixed
 - **Custom deploy path**: `deploy` now respects the interactive/manual target directory instead of ignoring it.
-- **TOML compatibility**: Dropped Python 3.10 in favor of stdlib `tomllib`.
+- **Hooks CLI**: `hooks test <hook_name>` now parses correctly via `--path` option.
 
 ### Removed
 - Dead code: unreachable `return`, redundant exception clause, misleading `load_config` docstring.
+- AI/agent development artifacts from the repository root.
 
 ## [0.7.0] - 2026-05-12
 

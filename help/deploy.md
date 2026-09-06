@@ -1,7 +1,7 @@
 # qgis-manage deploy
 
 ```text
-qgis-manage deploy v0.7.0
+qgis-manage deploy v0.8.0
 Deploy the plugin to the local QGIS profile
 
 Usage: qgis-manage deploy [-h] [-p PROFILE] [--no-backup] [-i] [--no-compile]

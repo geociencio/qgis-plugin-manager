@@ -1,7 +1,7 @@
 # qgis-manage analyze
 
 ```text
-qgis-manage analyze v0.7.0
+qgis-manage analyze v0.8.0
 Run QGIS Plugin Analyzer on the project
 
 Usage: qgis-manage analyze [-h] [path]
