@@ -41,7 +41,7 @@ import subprocess
 import sys
 import zipfile
 from collections.abc import Callable
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -535,11 +535,116 @@ def clean_artifacts(project_root: Path):
     logger.info("✨ Clean complete.")
 
 
+def is_prerelease(version: str) -> bool:
+    """Return True if the version looks like a pre-release (rc, alpha, beta, dev)."""
+    import re
+
+    return bool(re.search(r"[-.](?:rc|alpha|beta|dev)\d*", version, re.IGNORECASE))
+
+
+def get_git_info(project_root: Path) -> tuple[str | None, int | None]:
+    """Return the (commit SHA, commit count) from git, or (None, None)."""
+    try:
+        sha = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd=project_root,
+        ).stdout.strip()
+        count_raw = subprocess.run(
+            ["git", "rev-list", "--count", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd=project_root,
+        ).stdout.strip()
+        return (sha or None, int(count_raw) if count_raw else None)
+    except (subprocess.CalledProcessError, FileNotFoundError, ValueError):
+        return (None, None)
+
+
+def stamp_metadata_text(
+    text: str,
+    version: str | None = None,
+    commit_sha: str | None = None,
+    commit_number: int | None = None,
+    timestamp: str | None = None,
+    experimental: bool | None = None,
+) -> str:
+    """Patch a metadata.txt string with build metadata, preserving formatting.
+
+    Existing keys in the ``[general]`` section are updated in place; new keys are
+    appended at the end of that section. Comments, blank lines and other sections
+    are left untouched.
+    """
+    import re
+
+    updates: dict[str, str] = {}
+    if version is not None:
+        updates["version"] = version
+    if experimental is not None:
+        updates["experimental"] = "True" if experimental else "False"
+    if commit_sha is not None:
+        updates["commitSha1"] = commit_sha
+    if commit_number is not None:
+        updates["commitNumber"] = str(commit_number)
+    if timestamp is not None:
+        updates["dateTime"] = timestamp
+
+    if not updates:
+        return text
+
+    lines = text.split("\n")
+    out: list[str] = []
+    in_general = False
+    applied: set[str] = set()
+    general_tail = -1  # index in `out` right after the last [general] key
+
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            in_general = stripped == "[general]"
+            out.append(line)
+            continue
+
+        if in_general:
+            match = re.match(
+                r"^(\s*)([A-Za-z][A-Za-z0-9_]*)\s*([=:])\s*(.*)$", line
+            )
+            if match:
+                key = match.group(2)
+                if key in updates:
+                    indent = match.group(1)
+                    sep = match.group(3)
+                    out.append(f"{indent}{key}{sep}{updates[key]}")
+                    applied.add(key)
+                else:
+                    out.append(line)
+                general_tail = len(out)
+                continue
+
+        out.append(line)
+
+    remaining = [k for k in updates if k not in applied]
+    if remaining:
+        if general_tail < 0:
+            if out and out[-1].strip() != "":
+                out.append("")
+            out.append("[general]")
+            general_tail = len(out)
+        out[general_tail:general_tail] = [f"{k}={updates[k]}" for k in remaining]
+
+    return "\n".join(out)
+
+
 def create_plugin_package(
     project_root: Path,
     output_dir: Path | None = None,
     include_dev: bool = False,
     callback: Callable[[int], Any] | None = None,
+    stamp: bool = False,
+    release_version: str | None = None,
 ) -> Path:
     """
     Create a distributable ZIP package for the plugin.
@@ -548,6 +653,9 @@ def create_plugin_package(
         project_root: Root directory of the plugin project
         output_dir: Output directory for the ZIP file (default: project_root/dist)
         include_dev: Include development files in the package
+        stamp: Inject build metadata (version, git SHA, datetime, experimental)
+            into the packaged metadata.txt without modifying the source file
+        release_version: Override the version used for the ZIP name and stamping
 
     Returns:
         Path to the created ZIP file
@@ -556,7 +664,26 @@ def create_plugin_package(
 
     metadata = get_plugin_metadata(project_root)
     slug = metadata["slug"]
-    version = metadata.get("version", "0.0.0")
+    version = release_version or metadata.get("version", "0.0.0")
+
+    # Build the stamped metadata.txt content to write into the ZIP (in memory).
+    metadata_content: str | None = None
+    if stamp:
+        metadata_path = project_root / "metadata.txt"
+        if metadata_path.exists():
+            commit_sha, commit_number = get_git_info(project_root)
+            timestamp = datetime.now(timezone.utc).strftime(  # noqa: UP017
+                "%Y-%m-%dT%H:%M:%SZ"
+            )
+            metadata_content = stamp_metadata_text(
+                metadata_path.read_text(encoding="utf-8"),
+                version=version,
+                commit_sha=commit_sha,
+                commit_number=commit_number,
+                timestamp=timestamp,
+                experimental=is_prerelease(version),
+            )
+            logger.info("  🏷️  Stamped build metadata into metadata.txt")
 
     # Determine output directory
     if output_dir is None:
@@ -590,9 +717,13 @@ def create_plugin_package(
         callback(len(items_to_zip))
 
     # Create ZIP file
+    metadata_path = project_root / "metadata.txt"
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         for item, arcname in items_to_zip:
-            zipf.write(item, arcname)
+            if metadata_content is not None and item == metadata_path:
+                zipf.writestr(arcname, metadata_content)
+            else:
+                zipf.write(item, arcname)
             if callback:
                 callback(1)
             logger.debug(f"  ✅ {arcname}")

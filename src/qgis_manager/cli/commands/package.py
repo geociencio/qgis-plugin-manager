@@ -19,7 +19,9 @@ class PackageCommand(BaseCommand):
         "    # Create a ZIP package\n"
         "    qgis-manage package\n\n"
         "    # Package with strict compliance check and version sync\n"
-        "    qgis-manage package --repo-check --sync-version\n"
+        "    qgis-manage package --repo-check --sync-version\n\n"
+        "    # Stamp git build info into the packaged metadata.txt\n"
+        "    qgis-manage package --stamp\n"
     )
 
     @property
@@ -45,6 +47,16 @@ class PackageCommand(BaseCommand):
             "--sync-version",
             action="store_true",
             help="Sync metadata.txt version from pyproject.toml",
+        )
+        parser.add_argument(
+            "--stamp",
+            action="store_true",
+            help="Inject build metadata (git SHA, datetime, experimental) "
+            "into the packaged metadata.txt",
+        )
+        parser.add_argument(
+            "--release-version",
+            help="Override the version used for the ZIP name and stamping",
         )
 
     def execute(self, args: argparse.Namespace) -> int:
@@ -109,6 +121,8 @@ class PackageCommand(BaseCommand):
                     output_dir=Path(args.output) if args.output else None,
                     include_dev=args.dev,
                     callback=update_bar,
+                    stamp=getattr(args, "stamp", False),
+                    release_version=getattr(args, "release_version", None),
                 )
 
             click.echo(click.style(f"✅ Package created: {zip_path}", fg="green"))
