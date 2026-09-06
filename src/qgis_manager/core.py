@@ -266,6 +266,28 @@ def get_rcc_tool() -> str | None:
     return None
 
 
+def get_uic_tool() -> str | None:
+    """Find the best available UIC tool (pyuic6 preferred over pyuic5)."""
+    tools = ["pyuic6", "pyuic5"]
+    for tool in tools:
+        if shutil.which(tool):
+            return tool
+    return None
+
+
+def _is_stale(source: Path, target: Path) -> bool:
+    """Return True if target is missing or older than source (by mtime).
+
+    Compares only modification time: for compiled outputs (e.g. ``.ui`` ->
+    ``.py``) the file sizes are inherently different, so size is not a
+    meaningful signal.
+    """
+    try:
+        return source.stat().st_mtime > target.stat().st_mtime
+    except OSError:
+        return True
+
+
 def count_compile_steps(project_root: Path, res_type: str) -> int:
     """Count the number of compilation steps for a resource type.
 
@@ -279,6 +301,7 @@ def count_compile_steps(project_root: Path, res_type: str) -> int:
     total = 0
     if res_type in ["resources", "all"]:
         total += len(list(project_root.rglob("*.qrc")))
+        total += len(list(project_root.rglob("*.ui")))
     if res_type in ["translations", "all"]:
         total += len(list(project_root.rglob("*.ts")))
     if res_type in ["docs", "all"]:
@@ -296,8 +319,9 @@ def verify_resource_patch(py_file: Path) -> bool:
             and "from . import resources_rc" not in content
         ):
             return False
-        if "from PyQt5" in content:
-            return False
+        for prefix in ("from PyQt5", "from PySide2", "from PySide6"):
+            if prefix in content:
+                return False
         return True
     except Exception:
         return False
@@ -323,8 +347,9 @@ def patch_resource_file(py_file: Path) -> bool:
                 r"^import (\w+_rc)", r"from . import \1", content, flags=re.MULTILINE
             )
 
-        # Fix 'from PyQt5' to 'from qgis.PyQt' for QGIS compatibility
-        content = content.replace("from PyQt5", "from qgis.PyQt")
+        # Fix Qt imports to the QGIS-compatible namespace
+        for prefix in ("from PyQt5", "from PySide2", "from PySide6"):
+            content = content.replace(prefix, "from qgis.PyQt")
 
         if content != original_content:
             py_file.write_text(content, encoding="utf-8")
@@ -344,6 +369,79 @@ def patch_resource_file(py_file: Path) -> bool:
     return False
 
 
+def patch_ui_file(py_file: Path) -> bool:
+    """Patch a pyuic-generated .py file to use the QGIS ``qgis.PyQt`` namespace.
+
+    pyuic emits ``from PyQt5``/``from PySide2``/``from PySide6`` imports, which
+    fail inside a QGIS plugin. Replace them with ``from qgis.PyQt``.
+    """
+    if not py_file.exists():
+        return False
+
+    try:
+        content = py_file.read_text(encoding="utf-8")
+        original_content = content
+
+        for prefix in ("from PyQt5", "from PySide2", "from PySide6"):
+            content = content.replace(prefix, "from qgis.PyQt")
+
+        if content != original_content:
+            py_file.write_text(content, encoding="utf-8")
+            logger.debug(f"  ✅ Patched UI imports in {py_file.name}")
+            return True
+    except Exception as e:
+        logger.warning(f"  ⚠️  Failed to patch {py_file.name}: {e}")
+
+    return False
+
+
+def compile_ui_files(
+    project_root: Path,
+    callback: Callable[[str], Any] | None = None,
+):
+    """Compile .ui files to Python using pyuic (PyQt5/PySide6).
+
+    Only files whose source changed (mtime/size) since the last compilation
+    are recompiled.
+    """
+    ui_files = list(project_root.rglob("*.ui"))
+    if not ui_files:
+        return
+
+    uic_tool = get_uic_tool()
+    if not uic_tool:
+        logger.warning(
+            "  ⚠️  No UIC tool found (pyuic6, pyuic5). Skipping UI compilation."
+        )
+        return
+
+    for ui in ui_files:
+        py_file = ui.with_suffix(".py")
+        rel_ui = ui.relative_to(project_root)
+        if callback:
+            callback(f"START:UI {rel_ui.name}")
+
+        if not _is_stale(ui, py_file):
+            logger.debug(f"  ⏭️  {rel_ui.name} up to date")
+        else:
+            logger.debug(
+                f"🎨 Compiling UI: {rel_ui} -> {py_file.name} using {uic_tool}"
+            )
+            try:
+                subprocess.run(
+                    [uic_tool, "-o", str(py_file), str(ui)],
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+                patch_ui_file(py_file)
+            except subprocess.CalledProcessError as e:
+                logger.error(f"  ❌ Error compiling {ui.name}: {e.stderr}")
+
+        if callback:
+            callback(f"DONE:UI {rel_ui.name}")
+
+
 def compile_qt_resources(
     project_root: Path,
     res_type: str = "all",
@@ -351,6 +449,9 @@ def compile_qt_resources(
 ):
     """Compile Qt resources, translations, and documentation."""
     if res_type in ["resources", "all"]:
+        # Compile .ui files to Python (pyuic)
+        compile_ui_files(project_root, callback=callback)
+
         # Look for .qrc files
         qrc_files = list(project_root.rglob("*.qrc"))
         if qrc_files:
@@ -359,33 +460,32 @@ def compile_qt_resources(
                 logger.error(
                     "  ❌ No RCC tool found (pyside6-rcc, pyside2-rcc, pyrcc5)."
                 )
-                return
-
-            for qrc in qrc_files:
-                py_file = qrc.with_suffix(".py")
-                rel_qrc = qrc.relative_to(project_root)
-                if callback:
-                    callback(f"START:Resource {rel_qrc.name}")
-                logger.debug(
-                    f"🔨 Compiling resource: {rel_qrc} -> {py_file.name} "
-                    f"using {rcc_tool}"
-                )
-
-                try:
-                    subprocess.run(
-                        [rcc_tool, "-o", str(py_file), str(qrc)],
-                        check=True,
-                        capture_output=True,
-                        text=True,
-                    )
-                    # Apply patching
-                    patch_resource_file(py_file)
-
+            else:
+                for qrc in qrc_files:
+                    py_file = qrc.with_suffix(".py")
+                    rel_qrc = qrc.relative_to(project_root)
                     if callback:
-                        callback(f"DONE:Resource {rel_qrc.name}")
-                    logger.debug("  ✅ Done.")
-                except subprocess.CalledProcessError as e:
-                    logger.error(f"  ❌ Error compiling {qrc.name}: {e.stderr}")
+                        callback(f"START:Resource {rel_qrc.name}")
+                    logger.debug(
+                        f"🔨 Compiling resource: {rel_qrc} -> {py_file.name} "
+                        f"using {rcc_tool}"
+                    )
+
+                    try:
+                        subprocess.run(
+                            [rcc_tool, "-o", str(py_file), str(qrc)],
+                            check=True,
+                            capture_output=True,
+                            text=True,
+                        )
+                        # Apply patching
+                        patch_resource_file(py_file)
+
+                        if callback:
+                            callback(f"DONE:Resource {rel_qrc.name}")
+                        logger.debug("  ✅ Done.")
+                    except subprocess.CalledProcessError as e:
+                        logger.error(f"  ❌ Error compiling {qrc.name}: {e.stderr}")
 
     if res_type in ["translations", "all"]:
         # Look for .ts files

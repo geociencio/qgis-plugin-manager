@@ -8,11 +8,14 @@ from qgis_manager.core import (
     clean_artifacts,
     compile_docs,
     compile_qt_resources,
+    compile_ui_files,
     count_compile_steps,
     create_plugin_package,
     deploy_plugin,
     get_qgis_plugin_dir,
+    get_uic_tool,
     init_plugin_project,
+    patch_ui_file,
     rotate_backups,
     sync_directory,
 )
@@ -302,13 +305,14 @@ class TestCore(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
             (root / "resources.qrc").touch()
+            (root / "dialog.ui").touch()
             (root / "translations.ts").touch()
             (root / "docs").mkdir()
             (root / "docs" / "source").mkdir()
             (root / "docs" / "source" / "conf.py").touch()
 
-            self.assertEqual(count_compile_steps(root, "all"), 3)
-            self.assertEqual(count_compile_steps(root, "resources"), 1)
+            self.assertEqual(count_compile_steps(root, "all"), 4)
+            self.assertEqual(count_compile_steps(root, "resources"), 2)
             self.assertEqual(count_compile_steps(root, "translations"), 1)
             self.assertEqual(count_compile_steps(root, "docs"), 1)
 
@@ -383,6 +387,79 @@ class TestCore(unittest.TestCase):
             result = patch_resource_file(py_file)
 
             self.assertTrue(result)
+
+    @patch("shutil.which")
+    def test_get_uic_tool(self, mock_which):
+        mock_which.side_effect = lambda t: t if t == "pyuic5" else None
+        self.assertEqual(get_uic_tool(), "pyuic5")
+
+    @patch("shutil.which")
+    def test_get_uic_tool_prefers_pyuic6(self, mock_which):
+        mock_which.side_effect = lambda t: t if t in ("pyuic6", "pyuic5") else None
+        self.assertEqual(get_uic_tool(), "pyuic6")
+
+    def test_patch_ui_file(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            py_file = Path(tmp_dir) / "ui_dialog.py"
+            py_file.write_text(
+                "from PySide6 import QtCore, QtWidgets\n", encoding="utf-8"
+            )
+            self.assertTrue(patch_ui_file(py_file))
+            self.assertIn(
+                "from qgis.PyQt import QtCore, QtWidgets", py_file.read_text()
+            )
+
+    def test_patch_ui_file_no_change(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            py_file = Path(tmp_dir) / "ui_dialog.py"
+            content = "from qgis.PyQt import QtCore\n"
+            py_file.write_text(content, encoding="utf-8")
+            self.assertFalse(patch_ui_file(py_file))
+            self.assertEqual(py_file.read_text(), content)
+
+    @patch("qgis_manager.core.patch_ui_file")
+    @patch("qgis_manager.core.get_uic_tool", return_value="pyuic5")
+    @patch("subprocess.run")
+    def test_compile_ui_files(self, mock_run, _mock_get_tool, mock_patch):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "dialog.ui").touch()
+
+            compile_ui_files(root)
+
+            mock_run.assert_called_once()
+            args = mock_run.call_args[0][0]
+            self.assertEqual(args[0], "pyuic5")
+            self.assertEqual(args[1], "-o")
+            self.assertEqual(args[-1], str(root / "dialog.ui"))
+            mock_patch.assert_called_once()
+
+    @patch("qgis_manager.core.get_uic_tool", return_value="pyuic5")
+    @patch("subprocess.run")
+    def test_compile_ui_files_up_to_date(self, mock_run, _mock_get_tool):
+        import os
+        import time
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            ui = root / "dialog.ui"
+            ui.touch()
+            py = root / "dialog.py"
+            py.write_text("compiled", encoding="utf-8")
+            future = time.time() + 100
+            os.utime(py, (future, future))
+
+            compile_ui_files(root)
+
+            mock_run.assert_not_called()
+
+    @patch("qgis_manager.core.get_uic_tool", return_value=None)
+    def test_compile_ui_files_no_tool(self, _mock_get_tool):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "dialog.ui").touch()
+
+            compile_ui_files(root)
 
 
 if __name__ == "__main__":
