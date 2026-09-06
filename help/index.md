@@ -9,6 +9,7 @@ Usage: qgis-manage [-h] [-v] [--verbose] [--log-file LOG_FILE] SUBCOMMAND ...
 Subcommands:
   SUBCOMMAND
     deploy             Deploy the plugin to the local QGIS profile
+    dclean             Remove the deployed plugin from the QGIS profile
     compile            Compile resources, UI files and translations
     package            Create distributable ZIP package
     init               Initialize a new QGIS plugin project scaffolding

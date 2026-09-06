@@ -29,6 +29,7 @@ class CLIApp:
         from .commands.bump import BumpCommand
         from .commands.clean import CleanCommand
         from .commands.compile import CompileCommand
+        from .commands.dclean import DCleanCommand
         from .commands.deploy import DeployCommand
         from .commands.hooks import HooksCommand
         from .commands.init import InitCommand
@@ -38,6 +39,7 @@ class CLIApp:
 
         command_classes: list[type[BaseCommand]] = [
             DeployCommand,
+            DCleanCommand,
             CompileCommand,
             PackageCommand,
             InitCommand,

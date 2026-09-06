@@ -16,33 +16,74 @@
 
 ---
 
-## 🥇 The "Manager" Difference
+## ✨ Features
 
-`qgis-plugin-manager` is the modern successor to traditional QGIS development workflows.
+### ⚡ Smart Synchronization
+Deploy with idempotent, rsync-like sync: only changed files are copied (compared by size + mtime), and files removed from the source are cleaned up in the target. No more slow "delete and copy".
 
-### 📊 Ecosystem Comparison
+```bash
+qgis-manage deploy
+```
 
-| Feature | pb_tool | qgis-plugin-ci | qgis-plugin-dev-tools | qgis-plugin-manager |
-| :--- | :--- | :--- | :--- | :--- |
-| **Configuration** | `pb_tool.cfg` (INI) | `.qgis-plugin-ci` (YAML) or `setup.cfg`/`pyproject.toml` | `pyproject.toml` | **`pyproject.toml` (PEP 621)** |
-| **Scaffolding** | `create` (templates) | — | — | `init` (templates) |
-| **Local deploy** | Delete & copy | — | — | **Smart sync (rsync-like)** |
-| **Backups** | None | None | None | **Rotation & multi-profile** |
-| **Hooks** | None | None | None | **Native Python + Shell** |
-| **Validation** | Config/environment | `metadata.txt` (schema) | — | **Deep structure & compliance** |
-| **Packaging** | `zip` + version stamp | `package`/`release` | `package` | `package` + `--repo-check` |
-| **Translations** | `lrelease` | **Transifex (full)** | — | `compile` (ts→qm) |
-| **RCC / UI** | auto pyuic + rcc | `.qrc` only | — | **Dynamic tooling + patching** |
-| **Runtime deps** | — | — | **vendoring** | `install-deps` |
+### 🗄️ Backup Rotation & Multi-profile
+Every deploy creates a timestamped backup of the previous installation, with automatic rotation to keep only the N most recent. Target specific profiles or QGIS versions.
 
-Related tools in the ecosystem: **QGIS Plugin Builder** (official GUI scaffolding inside QGIS), **qgis-plugin-repo** ([3liz](https://github.com/3liz/qgis-plugin-repo), merges `plugins.xml` for custom repositories), and **qgis_devtools** ([nextgis](https://github.com/nextgis/qgis_devtools), an in-QGIS debugging plugin).
+```bash
+qgis-manage deploy --profile production --qgis-version 4
+qgis-manage deploy --purge-backups
+```
 
-### 🚀 Key Differentiators (USPs)
+### 🪝 Native Python Hooks
+Automate your workflow in pure Python via `plugin_hooks.py` — or shell commands. Hooks receive full project context (metadata, paths, profiles).
 
-- **Smart Synchronization (Sync v2.0)**: We use idempotent sync logic. Instead of slow "delete and copy", we only update modified files.
-- **Native Python Hooks Architecture**: Write your automation in pure Python via `plugin_hooks.py`. Hooks receive full project context (metadata, paths, profiles).
-- **Official Repository "First-Time-Right"**: Built-in `--repo-check` and structural validation catch errors *before* you upload to QGIS.
-- **Automation-Friendly**: Structured `--help` output and a modular command system make it easy to script and integrate into CI pipelines.
+```python
+# plugin_hooks.py
+def pre_deploy(context):
+    print("Deploying to", context["target_path"])
+
+def post_deploy(context):
+    print("Deployed", context["metadata"]["name"])
+```
+
+```bash
+qgis-manage hooks list
+qgis-manage hooks test pre_deploy
+```
+
+### 🎨 Resource & UI Compilation
+Compile `.ui` (pyuic), `.qrc` (rcc), and `.ts` (lrelease) files — with dynamic tool detection and QGIS-compatible import patching — plus Sphinx documentation.
+
+```bash
+qgis-manage compile
+```
+
+### 🔢 Automated Versioning
+Bump versions across `pyproject.toml` and `metadata.txt` with a single command.
+
+```bash
+qgis-manage bump patch
+qgis-manage bump sync
+```
+
+### 📦 Packaging, Stamping & Compliance
+Build repo-ready ZIPs, run compliance checks before upload, and stamp build metadata (git SHA, commit number, datetime, experimental) into `metadata.txt`.
+
+```bash
+qgis-manage package --repo-check --sync-version --stamp
+```
+
+### ✅ Deep Validation
+Validate metadata and project structure against the official QGIS repository rules — catch errors *before* you upload.
+
+```bash
+qgis-manage validate --strict --repo
+```
+
+### 🌍 Smart Path Detection
+Automatically detects the QGIS plugins directory across Linux, macOS and Windows for QGIS 3 and 4, with an interactive fallback when the profile does not exist.
+
+### 📖 Structured Help
+Every command ships a structured `--help` (usage, options, examples), and the full reference is generated into the [`help/`](help/) directory.
 
 ---
 
@@ -81,7 +122,7 @@ Usage: qgis-manage [-h] ... SUBCOMMAND ...
 
 Subcommands:
   deploy      Deploy the plugin to the local QGIS profile
-  compile     Compile resources and translations
+  compile     Compile resources, UI files and translations
   package     Create distributable ZIP package
   ...
 
@@ -103,10 +144,13 @@ The full command reference is also available as static Markdown files in the [`h
 ## 🛠️ Command Reference
 
 ### 1. Project Initialization
-Scaffold a professional plugin project.
+Scaffold a professional plugin project from a template: `default`, `processing`, or `dockwidget`.
 ```bash
 # Create a processing plugin
 qgis-manage init "My Plugin" --author "Tester" --email "test@test.com" --template processing
+
+# Create a dockwidget plugin
+qgis-manage init "My Plugin" --template dockwidget
 ```
 
 ### 2. Development & Deployment
@@ -185,8 +229,11 @@ qgis-manage analyze
 # Install plugin dependencies into a local folder
 qgis-manage install-deps --target libs
 
-# Clean Python artifacts (__pycache__) and build files
+# Clean caches, compiled UI/resources and docs output
 qgis-manage clean
+
+# Remove the deployed plugin from the QGIS profile
+qgis-manage dclean
 ```
 
 ---

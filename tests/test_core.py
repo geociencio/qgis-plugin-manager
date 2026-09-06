@@ -21,6 +21,7 @@ from qgis_manager.core import (
     rotate_backups,
     stamp_metadata_text,
     sync_directory,
+    uninstall_plugin,
 )
 from qgis_manager.ignore import IgnoreMatcher
 
@@ -178,6 +179,85 @@ class TestCore(unittest.TestCase):
             self.assertIn("author=John Doe", content)
             self.assertIn("email=john@example.com", content)
             self.assertIn("description=Cool description", content)
+
+    def test_init_plugin_project_processing(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            init_plugin_project(
+                Path(tmp_dir), "My Plugin", "A", "a@b.c", template="processing"
+            )
+            plugin_dir = Path(tmp_dir) / "my_plugin"
+            self.assertTrue((plugin_dir / "my_plugin.py").exists())
+            self.assertTrue((plugin_dir / "my_plugin_provider.py").exists())
+            self.assertTrue((plugin_dir / "my_plugin_algorithm.py").exists())
+            self.assertTrue((plugin_dir / "__init__.py").exists())
+            self.assertTrue((plugin_dir / "metadata.txt").exists())
+            provider = (plugin_dir / "my_plugin_provider.py").read_text()
+            self.assertIn("MyPluginAlgorithm", provider)
+
+    def test_init_plugin_project_dockwidget(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            init_plugin_project(
+                Path(tmp_dir), "My Plugin", "A", "a@b.c", template="dockwidget"
+            )
+            plugin_dir = Path(tmp_dir) / "my_plugin"
+            self.assertTrue((plugin_dir / "my_plugin.py").exists())
+            self.assertTrue((plugin_dir / "my_plugin_dockwidget.py").exists())
+            self.assertTrue((plugin_dir / "my_plugin_dockwidget_base.ui").exists())
+            self.assertTrue((plugin_dir / "metadata.txt").exists())
+
+    def test_init_plugin_project_unknown_template(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with self.assertRaises(ValueError):
+                init_plugin_project(
+                    Path(tmp_dir), "X", "A", "a@b.c", template="nope"
+                )
+
+    def test_clean_artifacts_compiled(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / "dialog.ui").touch()
+            (tmp_path / "dialog.py").write_text("compiled", encoding="utf-8")
+            (tmp_path / "resources.qrc").touch()
+            (tmp_path / "resources.py").write_text("compiled", encoding="utf-8")
+            help_html = tmp_path / "help" / "html"
+            help_html.mkdir(parents=True)
+            (help_html / "index.html").write_text("docs", encoding="utf-8")
+
+            clean_artifacts(tmp_path)
+
+            self.assertFalse((tmp_path / "dialog.py").exists())
+            self.assertFalse((tmp_path / "resources.py").exists())
+            self.assertFalse((tmp_path / "help" / "html").exists())
+            # Sources are preserved
+            self.assertTrue((tmp_path / "dialog.ui").exists())
+            self.assertTrue((tmp_path / "resources.qrc").exists())
+
+    @patch(
+        "qgis_manager.core.get_plugin_metadata",
+        return_value={"slug": "test_plugin"},
+    )
+    @patch("qgis_manager.core.get_qgis_plugin_dir")
+    def test_uninstall_plugin(self, mock_dir, _mock_meta):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            plugin_dir = Path(tmp_dir) / "test_plugin"
+            plugin_dir.mkdir()
+            (plugin_dir / "file.txt").write_text("x", encoding="utf-8")
+            mock_dir.return_value = Path(tmp_dir)
+
+            removed = uninstall_plugin(Path("."))
+
+            self.assertEqual(removed, plugin_dir)
+            self.assertFalse(plugin_dir.exists())
+
+    @patch(
+        "qgis_manager.core.get_plugin_metadata",
+        return_value={"slug": "test_plugin"},
+    )
+    @patch("qgis_manager.core.get_qgis_plugin_dir")
+    def test_uninstall_plugin_not_deployed(self, mock_dir, _mock_meta):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            mock_dir.return_value = Path(tmp_dir)
+            self.assertIsNone(uninstall_plugin(Path(".")))
 
     @patch("qgis_manager.core.get_plugin_metadata")
     @patch("qgis_manager.core.sync_directory")

@@ -1,0 +1,29 @@
+"""
+Main plugin class for {{ name }} (Processing provider).
+"""
+
+from qgis.core import QgsApplication
+
+from .{{ slug }}_provider import {{ class_name }}Provider
+
+
+class {{ class_name }}:
+    """QGIS Plugin Implementation."""
+
+    def __init__(self, iface):
+        """Initialize the plugin."""
+        self.iface = iface
+        self.provider = None
+
+    def initProcessing(self):
+        self.provider = {{ class_name }}Provider()
+        QgsApplication.processingRegistry().addProvider(self.provider)
+
+    def initGui(self):
+        """Initialize the GUI."""
+        self.initProcessing()
+
+    def unload(self):
+        """Unload the plugin."""
+        if self.provider:
+            QgsApplication.processingRegistry().removeProvider(self.provider)

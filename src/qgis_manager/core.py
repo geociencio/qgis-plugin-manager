@@ -74,6 +74,29 @@ def get_qgis_plugin_dir(profile: str = "default", version: int = 3) -> Path:
         raise OSError(f"Unsupported platform: {sys.platform}")
 
 
+def uninstall_plugin(
+    project_root: Path,
+    profile: str = "default",
+    qgis_version: int = 3,
+) -> Path | None:
+    """Remove the deployed plugin from the QGIS plugins directory.
+
+    Args:
+        project_root: Root directory of the plugin project.
+        profile: QGIS profile name.
+        qgis_version: Major QGIS version (3 or 4).
+
+    Returns:
+        The removed directory, or None if the plugin was not deployed.
+    """
+    slug = str(get_plugin_metadata(project_root)["slug"])
+    plugin_dir = get_qgis_plugin_dir(profile, version=qgis_version) / slug
+    if plugin_dir.exists():
+        shutil.rmtree(plugin_dir)
+        return plugin_dir
+    return None
+
+
 def rotate_backups(parent_dir: Path, slug: str, limit: int):
     """Keep only the N most recent backups for a plugin."""
     if limit <= 0:
@@ -513,10 +536,10 @@ def compile_qt_resources(
 
 
 def clean_artifacts(project_root: Path):
-    """Clean build artifacts."""
+    """Clean build artifacts: caches, compiled UI/resources and docs output."""
     logger.info("Cleaning artifacts...")
 
-    # Directorios a eliminar
+    # Cache directories
     cache_dirs = ["__pycache__", ".pytest_cache", ".ruff_cache"]
     for dir_name in cache_dirs:
         for item in project_root.rglob(dir_name):
@@ -524,13 +547,28 @@ def clean_artifacts(project_root: Path):
                 shutil.rmtree(item)
                 logger.debug(f"  🗑️ {item.relative_to(project_root)}")
 
-    # Archivos a eliminar
+    # Cache files
     cache_files = ["*.pyc", "*.qpj", "*.cpg"]
     for file_pattern in cache_files:
         for item in project_root.rglob(file_pattern):
             if item.is_file():
                 item.unlink()
                 logger.debug(f"  🗑️ {item.relative_to(project_root)}")
+
+    # Compiled UI and resource outputs (<base>.py for each .ui/.qrc)
+    for pattern in ("*.ui", "*.qrc"):
+        for source in project_root.rglob(pattern):
+            compiled = source.with_suffix(".py")
+            if compiled.is_file():
+                compiled.unlink()
+                logger.debug(f"  🗑️ {compiled.relative_to(project_root)}")
+
+    # Sphinx documentation output
+    for docs_dir in ("help/html", "help/build"):
+        target = project_root / docs_dir
+        if target.is_dir():
+            shutil.rmtree(target)
+            logger.debug(f"  🗑️ {docs_dir}")
 
     logger.info("✨ Clean complete.")
 
@@ -755,15 +793,19 @@ def init_plugin_project(
     description: str = "A QGIS plugin.",
     template: str = "default",
 ) -> None:
-    """
-    Initialize a new QGIS plugin project with scaffolding.
-    """
+    """Initialize a new QGIS plugin project from a bundled template."""
     from .discovery import slugify
+    from .templating import render_template
 
     slug = slugify(name)
+    class_name = name.replace(" ", "")
     project_dir = path / slug
     if project_dir.exists():
         raise FileExistsError(f"Directory {project_dir} already exists.")
+
+    template_dir = Path(__file__).resolve().parent / "templates" / template
+    if not template_dir.is_dir():
+        raise ValueError(f"Unknown template: {template}")
 
     project_dir.mkdir(parents=True)
 
@@ -772,73 +814,29 @@ def init_plugin_project(
         f"(Template: {template})"
     )
 
-    class_name = name.replace(" ", "")
+    context = {
+        "name": name,
+        "slug": slug,
+        "class_name": class_name,
+        "description": description,
+        "author": author,
+        "email": email,
+    }
 
-    # 1. metadata.txt
-    metadata_content = f"""; QGIS Plugin Metadata
-[general]
-name={name}
-description={description}
-about={description}
-version=0.1
-qgisMinimumVersion=3.0
-author={author}
-email={email}
-repository=
-tracker=
-homepage=
-category=Plugins
-tags=
-icon=icon.png
-experimental=False
-deprecated=False
-"""
-    with open(project_dir / "metadata.txt", "w") as f:
-        f.write(metadata_content)
+    # Template filenames whose output name depends on the plugin slug.
+    name_overrides = {
+        "plugin.py": f"{slug}.py",
+        "provider.py": f"{slug}_provider.py",
+        "algorithm.py": f"{slug}_algorithm.py",
+        "dockwidget.py": f"{slug}_dockwidget.py",
+        "dockwidget_base.ui": f"{slug}_dockwidget_base.ui",
+    }
 
-    # 2. __init__.py
-    init_py_content = f"""\"\"\"
-{name} initialization.
-\"\"\"
-
-def classFactory(iface):
-    \"\"\"Load the plugin class.\"\"\"
-    from .{slug} import {class_name}
-    return {class_name}(iface)
-"""
-    with open(project_dir / "__init__.py", "w") as f:
-        f.write(init_py_content)
-
-    # 3. Main plugin file
-    main_py_content = f"""\"\"\"
-Main plugin class for {name}.
-\"\"\"
-
-class {class_name}:
-    \"\"\"QGIS Plugin Implementation.\"\"\"
-
-    def __init__(self, iface):
-        \"\"\"Initialize the plugin.\"\"\"
-        self.iface = iface
-
-    def initGui(self):
-        \"\"\"Initialize the GUI.\"\"\"
-        pass
-
-    def unload(self):
-        \"\"\"Unload the plugin.\"\"\"
-        pass
-"""
-    with open(project_dir / f"{slug}.py", "w") as f:
-        f.write(main_py_content)
-
-    # 4. Create empty resources.qrc
-    qrc_content = f"""<RCC>
-    <qresource prefix="/plugins/{slug}">
-    </qresource>
-</RCC>
-"""
-    with open(project_dir / "resources.qrc", "w") as f:
-        f.write(qrc_content)
+    for tmpl in sorted(template_dir.glob("*.tmpl")):
+        base_name = tmpl.name[: -len(".tmpl")]
+        output_name = name_overrides.get(base_name, base_name)
+        output_path = project_dir / output_name
+        output_path.write_text(render_template(tmpl, **context), encoding="utf-8")
+        logger.debug(f"  ✅ {output_name}")
 
     logger.info(f"✨ Project {name} initialized successfully.")

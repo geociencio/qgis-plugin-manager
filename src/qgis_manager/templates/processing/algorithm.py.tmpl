@@ -1,0 +1,33 @@
+from qgis.core import (
+    QgsProcessingAlgorithm,
+    QgsProcessingParameterFeatureSource,
+)
+
+
+class {{ class_name }}Algorithm(QgsProcessingAlgorithm):
+    """Example processing algorithm for {{ name }}."""
+
+    INPUT = "INPUT"
+
+    def createInstance(self):
+        return {{ class_name }}Algorithm()
+
+    def name(self):
+        return "{{ slug }}"
+
+    def displayName(self):
+        return "{{ name }}"
+
+    def group(self):
+        return "{{ slug }}"
+
+    def groupId(self):
+        return "{{ slug }}"
+
+    def initAlgorithm(self, config=None):
+        self.addParameter(
+            QgsProcessingParameterFeatureSource(self.INPUT, "Input layer")
+        )
+
+    def processAlgorithm(self, parameters, context, feedback):
+        return {}

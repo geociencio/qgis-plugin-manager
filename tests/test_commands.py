@@ -581,5 +581,44 @@ class TestDeployCommand(_CommandTestBase):
         mock_deploy.assert_not_called()
 
 
+class TestDCleanCommand(_CommandTestBase):
+    @patch("qgis_manager.cli.commands.dclean.uninstall_plugin")
+    @patch("qgis_manager.cli.commands.dclean.load_project_config")
+    @patch("qgis_manager.cli.commands.dclean.load_config")
+    @patch("qgis_manager.cli.commands.dclean.find_project_root")
+    def test_dclean_success(
+        self, mock_find, mock_load_config, mock_load_project, mock_uninstall
+    ):
+        root = Path(tempfile.mkdtemp())
+        mock_find.return_value = root
+        mock_load_config.return_value = Settings()
+        mock_load_project.side_effect = lambda _r, s: s
+        mock_uninstall.return_value = root / "removed"
+
+        exit_code, output, _ = self._invoke(["dclean", "--yes"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Removed", output)
+        mock_uninstall.assert_called_once()
+
+    @patch("qgis_manager.cli.commands.dclean.uninstall_plugin")
+    @patch("qgis_manager.cli.commands.dclean.load_project_config")
+    @patch("qgis_manager.cli.commands.dclean.load_config")
+    @patch("qgis_manager.cli.commands.dclean.find_project_root")
+    def test_dclean_not_deployed(
+        self, mock_find, mock_load_config, mock_load_project, mock_uninstall
+    ):
+        root = Path(tempfile.mkdtemp())
+        mock_find.return_value = root
+        mock_load_config.return_value = Settings()
+        mock_load_project.side_effect = lambda _r, s: s
+        mock_uninstall.return_value = None
+
+        exit_code, output, _ = self._invoke(["dclean", "--yes"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Nothing to remove", output)
+
+
 if __name__ == "__main__":
     unittest.main()
