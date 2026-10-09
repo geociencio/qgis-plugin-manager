@@ -10,27 +10,27 @@ trigger: when starting new tasks, requesting summaries, or explaining the projec
 
 ## When to use this skill
 - At the start of a session to refresh the architecture of this CLI.
-- When modifying or adding subcommands to the CLI using Typer.
+- When modifying or adding subcommands to the CLI using click.
 - When the user requests a current status of the QGIS framework.
 
 ## Degree of Freedom
-- **Strictly guided**: It must be considered that the current development focuses purely on modern Python (Typer and uv), NOT on internal QGIS logic.
+- **Strictly guided**: It must be considered that the current development focuses purely on modern Python (click and uv), NOT on internal QGIS logic.
 
 ## Instructions and Rules
 
 ### Core Architecture
-- CLI built on **Typer**.
+- CLI built on **click**.
 - Packaging and environment execution managed 100% by **uv**.
 - Mandatory and strict static validations using **ruff** (linting) and **mypy** (typing).
-- Follows the Antigravity Gen 5 agent standard: custom agent logic is isolated in `.agent`, while blueprints for creating QGIS plugins are injected from `scaffold/`.
+- Follows the **agentic-forge** standard: the framework lives in the `.agent/` submodule, project state in `.agent-state/`, while blueprints for creating QGIS plugins are injected from `scaffold/`.
 
 ### Main Folder Structure
 - `src/qgis_manager/`: The main source code of the CLI application.
-- `scripts/`: Base MCP tools and skill synchronization tools for the Gen 5 ecosystem.
+- `scripts/`: CLI helper tools (e.g. `generate_help.py`).
 - `scaffold/`: Base templates and blueprints (QGIS, Mining) that the CLI uses to inject configuration into target systems.
 - `docs/`: Documentation, guides, and release notes mapped from `pyproject.toml`.
 
 ## Quality Checklist
-- [ ] Do changes to the CLI maintain command compatibility (properly added to Typer)?
+- [ ] Do changes to the CLI maintain command compatibility (properly added to click)?
 - [ ] Did local tests pass using `pytest`, `ruff`, and `mypy` via `uv run`?
 - [ ] Does the change respect the separation between the manager tool (CLI) and the target templates/plugins?

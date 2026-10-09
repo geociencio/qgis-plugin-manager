@@ -83,7 +83,7 @@ package = true
 [tool.ruff]
 line-length = 88
 target-version = "py311"
-exclude = ["scripts/"]
+exclude = ["scripts/", ".agent", ".agent-state"]
 
 [tool.ruff.lint]
 select = ["E", "F", "B", "I", "W", "UP", "N"]

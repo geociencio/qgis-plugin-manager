@@ -1,5 +1,13 @@
 # Development Log: qgis-manage
 
+## [2026-10-08] Agentic Forge Adoption (F1–F5)
+Adopted the `agentic-forge` framework `v1.2.0` (Codeberg, MIT) as a git submodule at `.agent/`.
+- Moved project state to `.agent-state/` (memory, history, task, next_steps) and the 2 project skills (`domain-logic`, `project-context`) to the overlay.
+- Added `forge.toml` and `opencode.json`; created the canonical root `AGENTS.md`.
+- Removed `scripts/{skill_sync,mcp_server,security_scan}.py`; kept `generate_help.py`.
+- CI uses `submodules: recursive`; ruff excludes `.agent`/`.agent-state`.
+- Maintenance: [session_2026-10-08_agentic_forge_adoption.md](maintenance/session_2026-10-08_agentic_forge_adoption.md).
+
 ## [2026-05-12] Summary: QGIS 4 Support and Release v0.7.0
 Implemented full support for QGIS 4 deployment and released version 0.7.0. This session focused on removing hardcoded paths and improving the interactive CLI experience.
 
