@@ -33,9 +33,20 @@ jobs:
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
         run: uv run ruff check .
 
+      - name: Format check with Ruff
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        run: uv run ruff format --check .
+
       - name: Type check with Mypy
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
         run: uv run mypy src
 
+      - name: Self-analysis (informational)
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        continue-on-error: true
+        run: uv run qgis-analyzer analyze .
+
       - name: Test with pytest
-        run: uv run pytest -q
+        run: >
+          uv run pytest -q
+          --cov=qgis_manager --cov-report=term-missing --cov-fail-under=80

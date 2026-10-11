@@ -1,5 +1,14 @@
 # Development Log: qgis-manage
 
+## [2026-10-10] Automated Release Pipeline & Release-Docs Migration
+Adopted the analyzer-style two-stage release pipeline and aligned the release documentation.
+- Added `.github/workflows/release.yml` (`draft-release` on tag push + `publish-pypi` on release published, via the `PYPI_TOKEN` secret).
+- CI (`main.yml`): added `ruff format --check`, a coverage gate (`--cov=qgis_manager --cov-fail-under=80`) and an informational self-analysis step (`qgis-analyzer analyze .`).
+- `pyproject.toml`: added `pytest-cov` and `[tool.coverage]` (`source`/`fail_under = 80`); regenerated `uv.lock`; ran `ruff format .`.
+- Migrated release docs: notes → `docs/releases/notes/`, GitHub bodies → `docs/releases/github/`; rewrote the release guide at `docs/releases/RELEASE_PROCESS.md` for `qgis-manage`.
+- Synced `docs/CHANGELOG.md` with the canonical root `CHANGELOG.md`.
+- Maintenance: [session_2026-10-10_release_pipeline.md](maintenance/session_2026-10-10_release_pipeline.md).
+
 ## [2026-10-08] Agentic Forge Adoption (F1–F5)
 Adopted the `agentic-forge` framework `v1.2.0` (Codeberg, MIT) as a git submodule at `.agent/`.
 - Moved project state to `.agent-state/` (memory, history, task, next_steps) and the 2 project skills (`domain-logic`, `project-context`) to the overlay.

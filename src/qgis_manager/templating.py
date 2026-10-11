@@ -11,6 +11,7 @@ def render(text: str, **context: str) -> str:
 
     Unknown placeholders are left untouched.
     """
+
     def _replace(match: re.Match) -> str:
         key = match.group(1)
         return str(context[key]) if key in context else match.group(0)

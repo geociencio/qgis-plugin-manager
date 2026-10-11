@@ -49,12 +49,12 @@ class TestTomlUtils(unittest.TestCase):
                 Path(tmp_dir),
                 '[build-system]\nrequires = ["hatchling"]\n\n'
                 '[project]\nname = "demo"\nversion = "0.1.0"  # comment\n\n'
-                '[tool.qgis-manager]\nqgis_version = 4\n',
+                "[tool.qgis-manager]\nqgis_version = 4\n",
             )
             self.assertTrue(set_project_version(pyproject, "0.2.0"))
             content = pyproject.read_text(encoding="utf-8")
             self.assertIn('version = "0.2.0"  # comment', content)
-            self.assertIn('[build-system]', content)
+            self.assertIn("[build-system]", content)
             self.assertIn("qgis_version = 4", content)
 
     def test_set_project_version_missing_file(self):
@@ -65,7 +65,7 @@ class TestTomlUtils(unittest.TestCase):
     def test_set_project_version_no_project_section(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             pyproject = self._write(
-                Path(tmp_dir), '[tool.qgis-manager]\nqgis_version = 3\n'
+                Path(tmp_dir), "[tool.qgis-manager]\nqgis_version = 3\n"
             )
             self.assertFalse(set_project_version(pyproject, "1.0.0"))
 

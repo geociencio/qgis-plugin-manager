@@ -105,7 +105,7 @@ class CLIApp:
 
         parser.epilog = (
             "Examples:\n"
-            '    # Initialize a new processing plugin\n'
+            "    # Initialize a new processing plugin\n"
             '    qgis-manage init "My Plugin" --author "Tester" '
             '--email "test@test.com" --template processing\n'
             "\n"

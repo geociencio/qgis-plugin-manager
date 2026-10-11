@@ -4,6 +4,7 @@
 [![PyPI Downloads](https://img.shields.io/pypi/dm/qgis-manage.svg)](https://pypi.org/project/qgis-manage/)
 [![Python versions](https://img.shields.io/pypi/pyversions/qgis-manage.svg)](https://pypi.org/project/qgis-manage/)
 [![CI](https://github.com/geociencio/qgis-plugin-manager/actions/workflows/main.yml/badge.svg)](https://github.com/geociencio/qgis-plugin-manager/actions/workflows/main.yml)
+[![Release](https://github.com/geociencio/qgis-plugin-manager/actions/workflows/release.yml/badge.svg)](https://github.com/geociencio/qgis-plugin-manager/actions/workflows/release.yml)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://img.shields.io/badge/mypy-checked-blue)](http://mypy-lang.org/)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/geociencio/qgis-plugin-manager/graphs/commit-activity)

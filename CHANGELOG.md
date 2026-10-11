@@ -75,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **CI Verification Step**: Added `uv run qgis-manage --version` step to GitHub Actions workflow to verify CLI installation on every CI run.
-- **Release Notes**: Added `docs/releases/v0.6.3.md` with detailed release notes.
+- **Release Notes**: Added `docs/releases/notes/v0.6.3.md` with detailed release notes.
 - **Maintenance Report**: Added `docs/maintenance/infrastructure_upgrade_20260218.md` documenting the validation hardening work.
 
 ## [0.6.2] - 2026-02-18

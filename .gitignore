@@ -37,6 +37,11 @@ analysis_results/
 *.bak.*
 generator_export/
 
+# Coverage
+.coverage
+.coverage.*
+htmlcov/
+
 # AI / agent dev artifacts
 .ai_context_cache.json
 .ai-context/

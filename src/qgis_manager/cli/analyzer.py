@@ -16,9 +16,7 @@ def run_qgis_analyzer(root: Path, subcommand: str, *args: str) -> int:
         The qgis-analyzer exit code.
     """
     try:
-        subprocess.run(
-            ["qgis-analyzer", "--version"], capture_output=True, check=True
-        )
+        subprocess.run(["qgis-analyzer", "--version"], capture_output=True, check=True)
         cmd = ["qgis-analyzer", subcommand, *args, str(root)]
     except (subprocess.CalledProcessError, FileNotFoundError):
         cmd = ["uv", "run", "qgis-analyzer", subcommand, *args, str(root)]
