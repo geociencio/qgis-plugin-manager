@@ -6,6 +6,39 @@ This file records technical lessons, user preferences, and solutions to complex 
 
 ## 🧠 Critical Lessons
 
+### Session 2026-10-10 — Release Pipeline & core.py Refactor
+```yaml
+lessons:
+  - date: 2026-10-10
+    category: TOOLING
+    topic: Mock patch targets after a package split
+    lesson: >-
+      Splitting a module into a package keeps `from pkg.mod import x` working via
+      re-exports, but `unittest.mock.patch("pkg.x")` no longer intercepts calls made from
+      inside the new submodules (they read their own module globals).
+    action: >-
+      After splitting a module, retarget every `@patch` to the submodule that looks up the
+      symbol (e.g. `pkg.deploy.x`), not the package root.
+  - date: 2026-10-10
+    category: TESTING
+    topic: Cross-platform file and path assertions
+    lesson: >-
+      `tempfile` returns unresolved paths while `Path.resolve()` follows symlinks and 8.3
+      short names, so equality checks and default-encoding reads fail on macOS/Windows CI.
+    action: >-
+      Compare against `tmp_path.resolve()` and always pass `encoding="utf-8"` when reading
+      files that were written as UTF-8.
+  - date: 2026-10-10
+    category: TOOLING
+    topic: Release-event workflows use the tag's commit
+    lesson: >-
+      A `release: published` event evaluates the workflow from the tagged commit, and a
+      publish job must not declare `needs:` on a job that is skipped on that event.
+    action: >-
+      Keep `publish-pypi` on its own `release` condition and apply release-event fixes in
+      the commit the tag points to.
+```
+
 ### QGIS 4 and Multi-version Path Detection
 - **Lesson [2026-05-12]**: When supporting multiple software versions, use dynamic path templates (e.g., `QGIS{version}`) instead of hardcoded strings. This allows for easy extension to future versions (e.g., QGIS 5) with minimal code changes.
 - **Lesson [2026-05-12]**: Interactive CLI validation is a powerful fallback. If a detected path doesn't exist, asking the user to create it or provide a manual path prevents the "unsupported environment" dead-end and makes the tool more flexible.
