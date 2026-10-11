@@ -8,6 +8,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.2] - 2026-10-10
+
+### Fixed
+- **CI**: made the project discovery and hooks tests cross-platform so the suite passes on macOS and Windows (resolved path comparisons and UTF-8 file reads). No runtime changes.
+
 ## [0.9.1] - 2026-10-10
 
 ### Changed
