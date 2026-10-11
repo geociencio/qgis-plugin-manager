@@ -304,7 +304,9 @@ class TestHooksCommand(_CommandTestBase):
         exit_code, _, _ = self._invoke(["hooks", "init"])
 
         self.assertEqual(exit_code, 0)
-        self.assertNotIn("original", (root / "plugin_hooks.py").read_text())
+        self.assertNotIn(
+            "original", (root / "plugin_hooks.py").read_text(encoding="utf-8")
+        )
 
     @patch("qgis_manager.cli.commands.hooks.click.confirm")
     @patch("qgis_manager.cli.commands.hooks.find_project_root")
@@ -317,7 +319,9 @@ class TestHooksCommand(_CommandTestBase):
         exit_code, _, _ = self._invoke(["hooks", "init"])
 
         self.assertEqual(exit_code, 0)
-        self.assertIn("original", (root / "plugin_hooks.py").read_text())
+        self.assertIn(
+            "original", (root / "plugin_hooks.py").read_text(encoding="utf-8")
+        )
 
 
 class TestDeployCommand(_CommandTestBase):

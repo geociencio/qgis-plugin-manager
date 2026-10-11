@@ -24,7 +24,7 @@ class TestDiscovery(unittest.TestCase):
             tmp_path = Path(tmp_dir)
             (tmp_path / "metadata.txt").touch()
             root = find_project_root(tmp_path)
-            self.assertEqual(root, tmp_path)
+            self.assertEqual(root, tmp_path.resolve())
 
     def test_find_project_root_nested(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -33,7 +33,7 @@ class TestDiscovery(unittest.TestCase):
             nested = tmp_path / "src" / "subfolder"
             nested.mkdir(parents=True)
             root = find_project_root(nested)
-            self.assertEqual(root, tmp_path)
+            self.assertEqual(root, tmp_path.resolve())
 
     def test_find_project_root_failure(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
