@@ -1,5 +1,11 @@
 # Development Log: qgis-manage
 
+## [2026-10-10] Release v0.9.1 (preparation)
+Maintenance release (no user-facing changes).
+- Bumped `pyproject.toml` / `metadata.txt` to 0.9.1; regenerated `uv.lock`.
+- Added the `[0.9.1]` section to `CHANGELOG.md` and `docs/CHANGELOG.md`; created `docs/releases/notes/v0.9.1.md`.
+- Pending: push `main`, tag `v0.9.1` (triggers the draft release), then publish it to upload to PyPI.
+
 ## [2026-10-10] Refactor: split `core.py` into a package + complexity reduction
 Behaviour-preserving refactor of the 840-line `core.py` monolith into `qgis_manager.core` (plan: `docs/plans/core_refactoring_plan.md`).
 - Split into `core/{platform,deploy,compile,package,cleanup,scaffold}.py` + `core/__init__.py` re-exporting the public API (20 symbols). All modules ≤ 352 lines (limit 400).

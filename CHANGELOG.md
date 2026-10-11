@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.1] - 2026-10-10
+
+### Changed
+- **Maintainability**: split the 840-line `core.py` into a cohesive `qgis_manager.core` package and lowered cyclomatic complexity; behaviour is unchanged.
+- **Release process**: added an automated GitHub/PyPI release pipeline (`.github/workflows/release.yml`) and an 80% coverage gate in CI.
+
+### Improved
+- **Documentation**: reorganized release docs under `docs/releases/` (`notes/`, `github/`) and synced `docs/CHANGELOG.md` with the canonical changelog.
+- **Agent tooling**: adopted the `agentic-forge` framework (`.agent/` submodule, project state in `.agent-state/`).
+
 ## [0.9.0] - 2026-09-06
 
 ### Added
