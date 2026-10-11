@@ -75,8 +75,8 @@ class TestCore(unittest.TestCase):
         with self.assertRaisesRegex(OSError, "Unsupported platform"):
             get_qgis_plugin_dir()
 
-    @patch("qgis_manager.core.get_plugin_metadata")
-    @patch("qgis_manager.core.sync_directory")
+    @patch("qgis_manager.core.deploy.get_plugin_metadata")
+    @patch("qgis_manager.core.deploy.sync_directory")
     def test_deploy_plugin(self, mock_sync, mock_get_meta):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
@@ -95,10 +95,10 @@ class TestCore(unittest.TestCase):
             self.assertTrue(target_path.exists())
             mock_sync.assert_called_once()
 
-    @patch("qgis_manager.core.get_plugin_metadata")
+    @patch("qgis_manager.core.deploy.get_plugin_metadata")
     @patch("shutil.copytree")
-    @patch("qgis_manager.core.datetime")
-    @patch("qgis_manager.core.sync_directory")
+    @patch("qgis_manager.core.deploy.datetime")
+    @patch("qgis_manager.core.deploy.sync_directory")
     def test_deploy_plugin_with_backup(
         self, mock_sync, mock_datetime, mock_copytree, mock_get_meta
     ):
@@ -121,7 +121,7 @@ class TestCore(unittest.TestCase):
             mock_copytree.assert_called()
 
     @patch("subprocess.run")
-    @patch("qgis_manager.core.get_rcc_tool", return_value="pyside6-rcc")
+    @patch("qgis_manager.core.compile.get_rcc_tool", return_value="pyside6-rcc")
     def test_compile_qt_resources(self, mock_get_tool, mock_run):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
@@ -208,9 +208,7 @@ class TestCore(unittest.TestCase):
     def test_init_plugin_project_unknown_template(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             with self.assertRaises(ValueError):
-                init_plugin_project(
-                    Path(tmp_dir), "X", "A", "a@b.c", template="nope"
-                )
+                init_plugin_project(Path(tmp_dir), "X", "A", "a@b.c", template="nope")
 
     def test_clean_artifacts_compiled(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -233,10 +231,10 @@ class TestCore(unittest.TestCase):
             self.assertTrue((tmp_path / "resources.qrc").exists())
 
     @patch(
-        "qgis_manager.core.get_plugin_metadata",
+        "qgis_manager.core.deploy.get_plugin_metadata",
         return_value={"slug": "test_plugin"},
     )
-    @patch("qgis_manager.core.get_qgis_plugin_dir")
+    @patch("qgis_manager.core.deploy.get_qgis_plugin_dir")
     def test_uninstall_plugin(self, mock_dir, _mock_meta):
         with tempfile.TemporaryDirectory() as tmp_dir:
             plugin_dir = Path(tmp_dir) / "test_plugin"
@@ -250,17 +248,17 @@ class TestCore(unittest.TestCase):
             self.assertFalse(plugin_dir.exists())
 
     @patch(
-        "qgis_manager.core.get_plugin_metadata",
+        "qgis_manager.core.deploy.get_plugin_metadata",
         return_value={"slug": "test_plugin"},
     )
-    @patch("qgis_manager.core.get_qgis_plugin_dir")
+    @patch("qgis_manager.core.deploy.get_qgis_plugin_dir")
     def test_uninstall_plugin_not_deployed(self, mock_dir, _mock_meta):
         with tempfile.TemporaryDirectory() as tmp_dir:
             mock_dir.return_value = Path(tmp_dir)
             self.assertIsNone(uninstall_plugin(Path(".")))
 
-    @patch("qgis_manager.core.get_plugin_metadata")
-    @patch("qgis_manager.core.sync_directory")
+    @patch("qgis_manager.core.deploy.get_plugin_metadata")
+    @patch("qgis_manager.core.deploy.sync_directory")
     def test_deploy_plugin_with_callback(self, mock_sync, mock_get_meta):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
@@ -429,7 +427,7 @@ class TestCore(unittest.TestCase):
                 names = zf.namelist()
             self.assertTrue(any("docs" in n for n in names))
 
-    @patch("qgis_manager.core.get_rcc_tool", return_value=None)
+    @patch("qgis_manager.core.compile.get_rcc_tool", return_value=None)
     @patch("subprocess.run")
     def test_compile_qt_resources_no_rcc_tool(self, mock_run, _mock_get_tool):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -500,8 +498,8 @@ class TestCore(unittest.TestCase):
             self.assertFalse(patch_ui_file(py_file))
             self.assertEqual(py_file.read_text(), content)
 
-    @patch("qgis_manager.core.patch_ui_file")
-    @patch("qgis_manager.core.get_uic_tool", return_value="pyuic5")
+    @patch("qgis_manager.core.compile.patch_ui_file")
+    @patch("qgis_manager.core.compile.get_uic_tool", return_value="pyuic5")
     @patch("subprocess.run")
     def test_compile_ui_files(self, mock_run, _mock_get_tool, mock_patch):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -517,7 +515,7 @@ class TestCore(unittest.TestCase):
             self.assertEqual(args[-1], str(root / "dialog.ui"))
             mock_patch.assert_called_once()
 
-    @patch("qgis_manager.core.get_uic_tool", return_value="pyuic5")
+    @patch("qgis_manager.core.compile.get_uic_tool", return_value="pyuic5")
     @patch("subprocess.run")
     def test_compile_ui_files_up_to_date(self, mock_run, _mock_get_tool):
         import os
@@ -536,7 +534,7 @@ class TestCore(unittest.TestCase):
 
             mock_run.assert_not_called()
 
-    @patch("qgis_manager.core.get_uic_tool", return_value=None)
+    @patch("qgis_manager.core.compile.get_uic_tool", return_value=None)
     def test_compile_ui_files_no_tool(self, _mock_get_tool):
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
@@ -580,16 +578,16 @@ class TestCore(unittest.TestCase):
         text = "[general]\nname=X\n"
         self.assertEqual(stamp_metadata_text(text), text)
 
-    @patch("qgis_manager.core.subprocess.run")
+    @patch("qgis_manager.core.package.subprocess.run")
     def test_get_git_info(self, mock_run):
         mock_run.side_effect = [Mock(stdout="abc123\n"), Mock(stdout="42\n")]
         self.assertEqual(get_git_info(Path(".")), ("abc123", 42))
 
-    @patch("qgis_manager.core.subprocess.run", side_effect=FileNotFoundError)
+    @patch("qgis_manager.core.package.subprocess.run", side_effect=FileNotFoundError)
     def test_get_git_info_not_a_repo(self, _mock_run):
         self.assertEqual(get_git_info(Path(".")), (None, None))
 
-    @patch("qgis_manager.core.get_git_info", return_value=("abc123", 10))
+    @patch("qgis_manager.core.package.get_git_info", return_value=("abc123", 10))
     def test_create_plugin_package_stamp(self, _mock_git):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
@@ -613,9 +611,7 @@ class TestCore(unittest.TestCase):
             self.assertIn("experimental=False", content)
             self.assertIn("version=1.0.0", content)
             # Source metadata.txt must not be modified
-            self.assertNotIn(
-                "commitSha1", (tmp_path / "metadata.txt").read_text()
-            )
+            self.assertNotIn("commitSha1", (tmp_path / "metadata.txt").read_text())
 
 
 if __name__ == "__main__":

@@ -129,3 +129,24 @@ lines 49-50 / 107-111). `ai-context-core` is not used by the manager at runtime.
 ---
 
 *Generated as an ad-hoc deep analysis; no source or configuration was modified.*
+
+---
+
+## Update — 2026-10-10 (core.py refactor)
+
+The `core.py` items below were addressed (plan: `docs/plans/core_refactoring_plan.md`):
+
+- **P1 — Split `core.py`** ✅ Done. The 840-line module is now a package:
+  `core/{platform,deploy,compile,package,cleanup,scaffold}.py` + `core/__init__.py`
+  re-exporting the public API. Every module is ≤ 352 lines (limit 400).
+- **P2 — Complexity of `stamp_metadata_text`** ✅ Done (D21 → B7). The other
+  `core.py` hotspots were also extracted: `create_plugin_package` C18→A5,
+  `sync_directory` C15→B7, `compile_qt_resources` C15→A4, `compile_docs` C12→B7,
+  `clean_artifacts` C12→A1. No function in `core/` exceeds CC 8 (limit 10);
+  average dropped from **B (7.67)** to **A (4.44)** and MI from **A 23.75** to
+  **A 42–63** across modules. Coverage 89.78 % → 89.93 %; 190 tests still pass.
+
+Still open (out of this refactor's scope): `validation.validate_metadata` (D28),
+`cli/commands/deploy.py::execute` (D27), the `IgnoreMatcher`/compliance/metadata
+SSoT overlap (§2/§4), the dead `ignore.get_ignore_func` (P0) and the stale
+`ai-context-core` dev dependency (P0).

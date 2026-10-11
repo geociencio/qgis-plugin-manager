@@ -1,5 +1,13 @@
 # Development Log: qgis-manage
 
+## [2026-10-10] Refactor: split `core.py` into a package + complexity reduction
+Behaviour-preserving refactor of the 840-line `core.py` monolith into `qgis_manager.core` (plan: `docs/plans/core_refactoring_plan.md`).
+- Split into `core/{platform,deploy,compile,package,cleanup,scaffold}.py` + `core/__init__.py` re-exporting the public API (20 symbols). All modules ≤ 352 lines (limit 400).
+- Lowered complexity of the 6 functions above `max_cc = 10`: `stamp_metadata_text` D21→B7, `create_plugin_package` C18→A5, `sync_directory` C15→B7, `compile_qt_resources` C15→A4, `compile_docs` C12→B7, `clean_artifacts` C12→A1. Average CC B(7.67)→A(4.44); MI A(23.75)→A(42–63).
+- Updated `@patch` targets in `tests/test_core.py` / `tests/test_commands.py` to the new submodules.
+- Coverage 89.78 %→89.93 %; 190 tests pass; `ruff`/`ruff format --check`/`mypy` clean.
+- Maintenance: [session_2026-10-10_core_refactor.md](maintenance/session_2026-10-10_core_refactor.md).
+
 ## [2026-10-10] Automated Release Pipeline & Release-Docs Migration
 Adopted the analyzer-style two-stage release pipeline and aligned the release documentation.
 - Added `.github/workflows/release.yml` (`draft-release` on tag push + `publish-pypi` on release published, via the `PYPI_TOKEN` secret).
