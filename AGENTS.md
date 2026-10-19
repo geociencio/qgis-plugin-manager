@@ -190,13 +190,13 @@ This project enforces:
 - **Ruff**: `ruff check .` and `ruff format .` pass with zero errors.
 - **Mypy**: `mypy src` passes.
 - **Pytest**: full suite passes (including `.agent/tests/`).
-- **Agent tooling**: framework lint/format/mypy (with the v1.4.1 `misc` workaround),
-  33 tests and validators pass in CI (`.github/workflows/main.yml`).
+- **Agent tooling**: `uv run bash .agent/scripts/ci.sh` passes (framework lint,
+  format, mypy, 37 tests and validators).
 - **Conventional Commits**: `type(scope): description` in English.
 
 ### Agent system validation
 ```bash
-# Framework checks run in CI; see .github/workflows/main.yml
+uv run bash .agent/scripts/ci.sh                 # framework lint/type/tests/validators
 uv run python scripts/sync_metrics.py            # refresh agent_metrics.json
 uv run python .agent/tools/forge.py validate    # skills/workflows/links/state
 uv run python .agent/tools/forge.py validate --graph   # dependency graph

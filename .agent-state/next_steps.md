@@ -7,14 +7,14 @@ the earlier CLI P0 hardening (217 tests, 90.48 % line coverage).
 
 **Completed (this cycle):**
 - [x] Adopted Agentic Forge **v1.4.1** (upstream P0).
-- [ ] Upstream v1.4.2: fix `forge_paths` TOML decode mypy false positive and
-      `should_skip_file` self/cache scan; remove the CI `misc` workaround after.
+- [x] Adopted **v1.4.2** (TOML mypy + metrics/cache scan fixes); framework CI
+      passes without workarounds.
 - [x] `.agent-state/memory/agent_metrics.json` + `scripts/sync_metrics.py`
 - [x] `memory_policy.md`, `AI_CONTEXT.md`, refreshed task/next_steps/lessons
 - [x] `memory prune` dry-run by default; `--apply` for mutations
 - [x] Validator covers scaffolds, links, canonical agent IDs, state, trigger conflicts
 - [x] `.agent/tools` split and cleaned (ruff/format/mypy/C90/module size)
-- [x] `.agent/tests` (33 tests) and CI steps for lint/type/test/validate/metrics
+- [x] `.agent/tests` (37 tests) and CI steps for lint/type/test/validate/metrics
 - [x] Workflows adapted to real repo commands (start/close/tests/release)
 - [x] Sibling compatibility: overlay workflows, custom agents from `opencode.json`,
       project commands in `forge.toml`, domain-pack metrics skipped, strict mode opt-in

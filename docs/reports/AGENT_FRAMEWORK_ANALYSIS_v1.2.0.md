@@ -1,14 +1,13 @@
 # Agent Framework Analysis — Agentic Forge
 
-> **Audit snapshot**: v1.2.0 (commit `2de22cf`). **Current framework**: v1.4.1
-> (`537f9fd`), adopted after this audit; see the update at the end.
+> **Audit snapshot**: v1.2.0 (commit `2de22cf`). **Current framework**: v1.4.2
+> (`b264e35`), adopted after this audit; see the update at the end.
 
 **Scope**: `.agent` git submodule (Agentic Forge), its integration with `.agent-state/`,
 the root `AGENTS.md`, `forge.toml`, `opencode.json`, and the QGIS domain packs.
 
 **Source (audit)**: submodule commit `2de22cf`, tag `v1.2.0`.
-**Current**: submodule tag `v1.4.1`, commit `537f9fd` (clean; two upstream issues
-worked around in CI).
+**Current**: submodule tag `v1.4.2`, commit `b264e35` (clean; quality-gate fixes included).
 
 **Method** (read-only): full inventory and review, structural validation
 (`forge.py validate`, `--graph`, `--conflicts`), metrics/lesson commands, frontmatter
@@ -295,50 +294,40 @@ is a dry-run.
 
 ---
 
-## Update — upstream v1.4.1 adopted
+## Update — upstream v1.4.2 adopted
 
-The local P0 implementation was built on `v1.2.0` because the checkout was stale. The
-remote `agentic-forge` already published **v1.4.1** (`537f9fd`), which is a superset of
-that work: tests, `forge.py project`, strict mode, `max_lesson_lines`, overlay workflows,
-domain-pack templates, `qa-docker` compatibility alias, CHANGELOG/VERSION and framework
-CI.
+The remote `agentic-forge` published **v1.4.2** (`b264e35`), which includes the two
+quality-gate fixes found during this integration:
 
-**Decision:** discard the local fork and move the submodule to upstream **v1.4.1**.
+1. `forge_paths` catches `ValueError` when decoding TOML, fixing the modern-mypy false
+   positive.
+2. `should_skip_file` skips the metrics file and tool caches, avoiding self-validation
+   and inflated scans. `.gitignore` now covers `.mypy_cache/` and `.pytest_cache/`.
+
+The `.agent` submodule is now clean at **v1.4.2**; no local framework patches or CI
+workarounds are needed.
 
 Retained project-owned changes:
 
-- `forge.toml`: strict mode, `max_lesson_lines`, project commands (`test`,
-  `test-full`, `lint`, `format`, `type`, `bump`).
+- `forge.toml`: strict mode, `max_lesson_lines`, project commands.
 - `scripts/sync_metrics.py` + `.agent-state/memory/agent_metrics.json`.
-- `memory_policy.md`, `AI_CONTEXT.md`, refreshed `task.md`/`next_steps.md`/lessons.
+- `memory_policy.md`, `AI_CONTEXT.md`, refreshed task/next_steps/lessons.
 - Project CI runs `.agent/scripts/ci.sh` plus metric consistency.
-- Informe y estado del proyecto.
+- Analysis report and project state.
 
-**Upstream issues in v1.4.1 (no local patches; CI works around them):**
+**Verification (v1.4.2):**
 
-1. `forge_paths.py`: `getattr(tomllib, "TOMLDecodeError", ValueError)` is a mypy
-   `misc` false positive under current mypy; the project CI disables that error code
-   until v1.4.2 catches `ValueError` directly.
-2. `forge_metrics_checks.py`: `should_skip_file` returns the equality result, so the
-   metrics file and generated caches can be scanned. The project scans 34 files when
-   caches are absent; keep `mypy` caches out of `.agent` or wait for v1.4.2.
-3. `scripts/ci.sh` therefore fails on the first issue; project CI runs the equivalent
-   targeted steps instead.
-
-**Verification (clean v1.4.1):**
-
-- Framework checks in project CI: **33 tests**, ruff/format/mypy (with the `misc`
-  workaround), validate/graph/conflicts/memory check pass.
-- `forge.py validate`: **19 skills, 14 workflows, 6 templates**, no issues (strict mode).
+- Framework CI (`uv run bash .agent/scripts/ci.sh`): **37 tests**, ruff/format/mypy
+  clean, validate/graph/conflicts/memory check pass.
+- `forge.py validate`: **19 skills, 14 workflows, 6 templates**, no issues (strict).
 - `forge.py metrics validate` / `report`: pass (217 tests, 90.48 %).
 - Project gates: **217 tests**, **90.48 %** line coverage, ruff/format/mypy clean.
-- Sibling compatibility (temporary copies):
-  - `sec_interp`: validate, metrics, memory, graph, conflicts → all pass.
-  - `qgis-plugin-analyzer`: validate, metrics, memory, graph, conflicts → all pass.
-  - `ai-context-core`: metrics/memory/graph/conflicts pass; `validate` reports one
-    **pre-existing** strict-mode broken link in its own `.agent-state`
-    (`../docs/implementation_plan_improvements.md`), not a framework regression.
 
-**Still open:** upstream v1.4.2 for the two issues above, commit the `v1.4.1`
-submodule pointer + project state/CI, and continue the P1 backlog (scaffold dedupe,
-end-to-end CLI tests, trust model, `py.typed`, etc.).
+**Sibling compatibility (v1.4.2):** `sec_interp`, `qgis-plugin-analyzer` and
+`ai-context-core` pass validate/metrics/memory/graph/conflicts in temporary copies,
+except `ai-context-core`'s pre-existing strict-mode broken link in its own
+`.agent-state` (`../docs/implementation_plan_improvements.md`), which is a project-content
+issue, not a framework regression.
+
+**Still open:** commit the v1.4.2 submodule pointer + project state/CI, and continue the
+P1 backlog (scaffold dedupe, end-to-end CLI tests, trust model, `py.typed`, etc.).

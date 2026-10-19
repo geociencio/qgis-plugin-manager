@@ -26,11 +26,10 @@
 - [x] Workflow and documentation refresh.
 
 ## Context
-- Framework: **agentic-forge** `.agent/` submodule **v1.4.1** (clean upstream
-  release); two upstream issues (mypy TOML decode, metrics self/cache scan) are
-  documented and worked around in CI until v1.4.2.
+- Framework: **agentic-forge** `.agent/` submodule **v1.4.2** (upstream release
+  with the TOML mypy and metrics/cache scan fixes); state in `.agent-state/`.
 - Quality: **217 project tests**, **90.48 %** line coverage, ruff/format/mypy clean;
-  **33 framework tooling tests**; CI green across Ubuntu/Windows/macOS × Python 3.11–3.13.
+  **37 framework tooling tests**; CI green across Ubuntu/Windows/macOS × Python 3.11–3.13.
 - Metrics: `agent_metrics.json` refreshed with `uv run python scripts/sync_metrics.py`.
 - Compatibility: validated against temporary copies of `sec_interp`,
   `qgis-plugin-analyzer` and `ai-context-core` (validate, graph, conflicts, metrics,
