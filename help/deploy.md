@@ -1,7 +1,7 @@
 # qgis-manage deploy
 
 ```text
-qgis-manage deploy v0.9.0
+qgis-manage deploy v0.9.2
 Deploy the plugin to the local QGIS profile
 
 Usage: qgis-manage deploy [-h] [-p PROFILE] [--no-backup] [-i] [--no-compile]
@@ -14,7 +14,8 @@ Arguments:
 Options:
   -h, --help            show this help message and exit
   -p PROFILE, --profile PROFILE
-                        QGIS profile name (default: default)
+                        QGIS profile name or absolute plugins directory
+                        (default: configured profile, else 'default')
   --no-backup           Skip backup of existing installation
   -i, --interactive     Ask for confirmation before each step
   --no-compile          Skip automatic resource compilation

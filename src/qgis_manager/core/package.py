@@ -10,12 +10,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from ..discovery import get_plugin_metadata, get_source_files
+from ..discovery import get_plugin_metadata, get_source_files, validate_slug
 from ..ignore import IgnoreMatcher
+from ..metadata import update_general_keys
 
 logger = logging.getLogger(__name__)
-
-_METADATA_KEY_RE = re.compile(r"^(\s*)([A-Za-z][A-Za-z0-9_]*)\s*([=:])\s*(.*)$")
 
 
 def is_prerelease(version: str) -> bool:
@@ -67,33 +66,6 @@ def _build_metadata_updates(
     return updates
 
 
-def _render_general_key(line: str, updates: dict[str, str], applied: set[str]) -> str:
-    """Return the line with its value replaced when it is a tracked key."""
-    match = _METADATA_KEY_RE.match(line)
-    if not match:
-        return line
-    key = match.group(2)
-    if key not in updates:
-        return line
-    applied.add(key)
-    return f"{match.group(1)}{key}{match.group(3)}{updates[key]}"
-
-
-def _insert_missing_keys(
-    out: list[str], general_tail: int, updates: dict[str, str], applied: set[str]
-) -> None:
-    """Insert keys not found in ``[general]`` at the end of that section."""
-    remaining = [k for k in updates if k not in applied]
-    if not remaining:
-        return
-    if general_tail < 0:
-        if out and out[-1].strip() != "":
-            out.append("")
-        out.append("[general]")
-        general_tail = len(out)
-    out[general_tail:general_tail] = [f"{k}={updates[k]}" for k in remaining]
-
-
 def stamp_metadata_text(
     text: str,
     version: str | None = None,
@@ -111,30 +83,7 @@ def stamp_metadata_text(
     updates = _build_metadata_updates(
         version, commit_sha, commit_number, timestamp, experimental
     )
-    if not updates:
-        return text
-
-    out: list[str] = []
-    in_general = False
-    applied: set[str] = set()
-    general_tail = -1  # index in `out` right after the last [general] key
-
-    for line in text.split("\n"):
-        stripped = line.strip()
-        if stripped.startswith("[") and stripped.endswith("]"):
-            in_general = stripped == "[general]"
-            out.append(line)
-            continue
-
-        if in_general and _METADATA_KEY_RE.match(line):
-            out.append(_render_general_key(line, updates, applied))
-            general_tail = len(out)
-            continue
-
-        out.append(line)
-
-    _insert_missing_keys(out, general_tail, updates, applied)
-    return "\n".join(out)
+    return update_general_keys(text, updates)
 
 
 def _build_stamped_metadata(project_root: Path, version: str) -> str | None:
@@ -234,7 +183,7 @@ def create_plugin_package(
         Path to the created ZIP file
     """
     metadata = get_plugin_metadata(project_root)
-    slug = metadata["slug"]
+    slug = validate_slug(str(metadata["slug"]), source="plugin metadata")
     version = release_version or metadata.get("version", "0.0.0")
 
     metadata_content = _build_stamped_metadata(project_root, version) if stamp else None

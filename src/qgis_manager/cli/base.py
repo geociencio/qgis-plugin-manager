@@ -49,6 +49,9 @@ class BaseCommand(ABC):
             parser.add_argument(
                 "-p",
                 "--profile",
-                help="QGIS profile name (default: default)",
-                default="default",
+                help=(
+                    "QGIS profile name or absolute plugins directory "
+                    "(default: configured profile, else 'default')"
+                ),
+                default=None,
             )

@@ -6,6 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from qgis_manager.cli.app import CLIApp
+from qgis_manager.discovery import get_plugin_metadata
 
 
 class TestBumpCommand(unittest.TestCase):
@@ -41,7 +42,7 @@ class TestBumpCommand(unittest.TestCase):
 
         self.assertEqual(exit_code, 0)
         self.assertIn('version = "1.2.4"', (root / "pyproject.toml").read_text())
-        self.assertIn("version=1.2.4", (root / "metadata.txt").read_text())
+        self.assertEqual(get_plugin_metadata(root)["version"], "1.2.4")
         self.assertIn("1.2.3 -> 1.2.4", output)
 
     @patch("qgis_manager.cli.commands.bump.find_project_root")
@@ -75,7 +76,33 @@ class TestBumpCommand(unittest.TestCase):
         exit_code, _, _ = self._invoke(["bump", "sync"])
 
         self.assertEqual(exit_code, 0)
-        self.assertIn("version=1.2.3", (root / "metadata.txt").read_text())
+        self.assertEqual(get_plugin_metadata(root)["version"], "1.2.3")
+
+    @patch("qgis_manager.cli.commands.bump.find_project_root")
+    def test_bump_preserves_comments_and_custom_sections(self, mock_find):
+        root = self._make_project("1.2.3")
+        mock_find.return_value = root
+        (root / "metadata.txt").write_text(
+            "[general]\n"
+            "# keep this comment\n"
+            "name = demo\n"
+            "version = 1.2.3\n"
+            "description = Line one\n"
+            "    line two\n"
+            "\n"
+            "[custom]\n"
+            "keep = me\n",
+            encoding="utf-8",
+        )
+
+        exit_code, _, _ = self._invoke(["bump", "patch"])
+
+        content = (root / "metadata.txt").read_text()
+        self.assertEqual(exit_code, 0)
+        self.assertIn("# keep this comment", content)
+        self.assertIn("description = Line one\n    line two", content)
+        self.assertIn("[custom]\nkeep = me", content)
+        self.assertIn("version = 1.2.4", content)
 
     @patch("qgis_manager.cli.commands.bump.find_project_root")
     def test_bump_no_subcommand(self, mock_find):

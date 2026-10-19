@@ -4,7 +4,7 @@ import time
 import unittest
 from pathlib import Path
 
-from qgis_manager.core import rotate_backups, sync_directory
+from qgis_manager.core import purge_backups, rotate_backups, sync_directory
 from qgis_manager.ignore import IgnoreMatcher
 
 
@@ -40,6 +40,23 @@ class TestDeploymentOptimization(unittest.TestCase):
         self.assertIn(f"{slug}.bak.20260105000000", names)
         self.assertIn(f"{slug}.bak.20260104000000", names)
         self.assertIn(f"{slug}.bak.20260103000000", names)
+
+    def test_purge_backups_removes_all(self):
+        slug = "myplugin"
+        for i in range(1, 4):
+            (self.dst / f"{slug}.bak.2026010{i}000000").mkdir()
+        (self.dst / "other.bak.20260101000000").mkdir()
+        (self.dst / slug).mkdir()
+
+        removed = purge_backups(self.dst, slug)
+
+        self.assertEqual(removed, 3)
+        self.assertEqual(list(self.dst.glob(f"{slug}.bak.*")), [])
+        self.assertTrue((self.dst / "other.bak.20260101000000").exists())
+        self.assertTrue((self.dst / slug).exists())
+
+    def test_purge_backups_missing_parent_is_noop(self):
+        self.assertEqual(purge_backups(self.dst / "missing", "myplugin"), 0)
 
     def test_sync_directory_initial(self):
         (self.src / "file1.txt").write_text("content1")

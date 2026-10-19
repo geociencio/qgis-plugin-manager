@@ -1,3 +1,4 @@
+import subprocess
 import tempfile
 import unittest
 import zipfile
@@ -130,13 +131,25 @@ class TestCore(unittest.TestCase):
             qrc_file.touch()
 
             # Execute
-            compile_qt_resources(tmp_path, res_type="resources")
+            self.assertTrue(compile_qt_resources(tmp_path, res_type="resources"))
 
             # Verify
             self.assertEqual(mock_run.call_count, 1)
             args = mock_run.call_args[0][0]
             self.assertEqual(args[0], "pyside6-rcc")
             self.assertEqual(args[-1], str(qrc_file))
+
+    @patch(
+        "subprocess.run",
+        side_effect=subprocess.CalledProcessError(1, "rcc"),
+    )
+    @patch("qgis_manager.core.compile.get_rcc_tool", return_value="pyside6-rcc")
+    def test_compile_qt_resources_reports_failure(self, _mock_get_tool, _mock_run):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / "resources.qrc").touch()
+
+            self.assertFalse(compile_qt_resources(tmp_path, res_type="resources"))
 
     def test_clean_artifacts(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -210,6 +223,42 @@ class TestCore(unittest.TestCase):
             with self.assertRaises(ValueError):
                 init_plugin_project(Path(tmp_dir), "X", "A", "a@b.c", template="nope")
 
+    def test_init_plugin_project_rejects_empty_slug(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with self.assertRaisesRegex(ValueError, "Invalid plugin name slug"):
+                init_plugin_project(Path(tmp_dir), "!!!", "A", "a@b.c")
+
+    def test_init_plugin_project_metadata_is_valid(self):
+        from qgis_manager.discovery import get_plugin_metadata
+        from qgis_manager.validation import validate_metadata
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            init_plugin_project(Path(tmp_dir), "Valid Plugin", "A", "a@b.co")
+            project = Path(tmp_dir) / "valid_plugin"
+            result = validate_metadata(get_plugin_metadata(project))
+            self.assertTrue(result.is_valid, result.errors)
+
+    def test_init_plugin_project_generates_valid_python_for_unusual_names(self):
+        import ast
+
+        names = ["My-Weird Plugin (Ñ)", "123 Plugin", "None"]
+        for template in ("default", "processing", "dockwidget"):
+            for name in names:
+                with self.subTest(template=template, name=name):
+                    with tempfile.TemporaryDirectory() as tmp_dir:
+                        init_plugin_project(
+                            Path(tmp_dir), name, "A", "a@b.c", template=template
+                        )
+                        projects = [p for p in Path(tmp_dir).iterdir() if p.is_dir()]
+                        self.assertEqual(len(projects), 1)
+                        project = projects[0]
+                        self.assertNotIn("-", project.name)
+                        self.assertNotIn("(", project.name)
+                        py_files = list(project.glob("*.py"))
+                        self.assertTrue(py_files)
+                        for py_file in py_files:
+                            ast.parse(py_file.read_text(encoding="utf-8"))
+
     def test_clean_artifacts_compiled(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
@@ -257,6 +306,36 @@ class TestCore(unittest.TestCase):
             mock_dir.return_value = Path(tmp_dir)
             self.assertIsNone(uninstall_plugin(Path(".")))
 
+    @patch("qgis_manager.core.deploy.get_plugin_metadata", return_value={"slug": ""})
+    @patch("qgis_manager.core.deploy.get_qgis_plugin_dir")
+    def test_uninstall_plugin_rejects_empty_slug(self, mock_dir, _mock_meta):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            plugins_dir = Path(tmp_dir)
+            other = plugins_dir / "other_plugin"
+            other.mkdir()
+            (other / "keep.py").write_text("x", encoding="utf-8")
+            mock_dir.return_value = plugins_dir
+
+            with self.assertRaises(ValueError):
+                uninstall_plugin(Path("."))
+
+            self.assertTrue(other.exists())
+            self.assertTrue(plugins_dir.exists())
+
+    @patch("qgis_manager.core.deploy.get_plugin_metadata", return_value={"slug": ""})
+    def test_deploy_plugin_rejects_empty_slug(self, _mock_meta):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            dest_dir = Path(tmp_dir) / "plugins"
+            dest_dir.mkdir()
+            other = dest_dir / "other_plugin"
+            other.mkdir()
+
+            with self.assertRaises(ValueError):
+                deploy_plugin(Path("."), dest_dir=dest_dir)
+
+            self.assertTrue(other.exists())
+            self.assertEqual(list(dest_dir.iterdir()), [other])
+
     @patch("qgis_manager.core.deploy.get_plugin_metadata")
     @patch("qgis_manager.core.deploy.sync_directory")
     def test_deploy_plugin_with_callback(self, mock_sync, mock_get_meta):
@@ -280,8 +359,11 @@ class TestCore(unittest.TestCase):
             # Verify
             self.assertEqual(callback_calls, [100])
 
+    @patch(
+        "qgis_manager.core.compile.shutil.which", return_value="/usr/bin/sphinx-build"
+    )
     @patch("subprocess.Popen")
-    def test_compile_docs(self, mock_popen):
+    def test_compile_docs(self, mock_popen, _mock_which):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
             # Setup
@@ -295,24 +377,28 @@ class TestCore(unittest.TestCase):
             mock_popen.return_value = mock_process
 
             # Execute
-            compile_docs(tmp_path)
+            self.assertTrue(compile_docs(tmp_path))
 
             # Verify
             mock_popen.assert_called_once()
             args = mock_popen.call_args[1].get("args") or mock_popen.call_args[0][0]
-            self.assertIn("sphinx-build", args)
+            self.assertEqual(args[0], "/usr/bin/sphinx-build")
+            self.assertIn("-b", args)
+            self.assertTrue((tmp_path / "help" / "html").is_dir())
 
-            # Test with uv run
+            # A pyproject.toml must not force `uv run`
             (tmp_path / "pyproject.toml").touch()
-            compile_docs(tmp_path)
+            self.assertTrue(compile_docs(tmp_path))
             self.assertEqual(mock_popen.call_count, 2)
             args = mock_popen.call_args[1].get("args") or mock_popen.call_args[0][0]
-            self.assertEqual(args[0], "uv")
-            self.assertEqual(args[1], "run")
-            self.assertEqual(args[2], "sphinx-build")
+            self.assertEqual(args[0], "/usr/bin/sphinx-build")
+            self.assertNotIn("uv", args)
 
+    @patch(
+        "qgis_manager.core.compile.shutil.which", return_value="/usr/bin/sphinx-build"
+    )
     @patch("subprocess.Popen")
-    def test_compile_docs_with_callback(self, mock_popen):
+    def test_compile_docs_with_callback(self, mock_popen, _mock_which):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
             # Setup
@@ -331,7 +417,7 @@ class TestCore(unittest.TestCase):
                 callback_lines.append(line)
 
             # Execute
-            compile_docs(tmp_path, callback=callback)
+            self.assertTrue(compile_docs(tmp_path, callback=callback))
 
             # Verify
             self.assertIn("PROGRESS:building documents...", callback_lines)
@@ -434,26 +520,48 @@ class TestCore(unittest.TestCase):
             tmp_path = Path(tmp_dir)
             (tmp_path / "resources.qrc").touch()
 
-            compile_qt_resources(tmp_path, res_type="resources")
-
+            self.assertFalse(compile_qt_resources(tmp_path, res_type="resources"))
             mock_run.assert_not_called()
 
+    @patch(
+        "qgis_manager.core.compile.shutil.which", return_value="/usr/bin/sphinx-build"
+    )
     @patch("subprocess.Popen")
-    def test_compile_docs_failure(self, mock_popen):
+    def test_compile_docs_failure_preserves_previous_output(
+        self, mock_popen, _mock_which
+    ):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
             docs_source = tmp_path / "docs" / "source"
             docs_source.mkdir(parents=True)
             (docs_source / "conf.py").touch()
+            previous = tmp_path / "help" / "html" / "index.html"
+            previous.parent.mkdir(parents=True)
+            previous.write_text("previous docs", encoding="utf-8")
 
             mock_process = MagicMock()
             mock_process.stdout = []
             mock_process.returncode = 1
             mock_popen.return_value = mock_process
 
-            compile_docs(tmp_path)
+            self.assertFalse(compile_docs(tmp_path))
 
             mock_popen.assert_called_once()
+            self.assertTrue(previous.exists())
+            self.assertEqual(previous.read_text(encoding="utf-8"), "previous docs")
+
+    @patch("qgis_manager.core.compile.importlib.util.find_spec", return_value=None)
+    @patch("qgis_manager.core.compile.shutil.which", return_value=None)
+    def test_compile_docs_without_sphinx_returns_false(
+        self, _mock_which, _mock_find_spec
+    ):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            docs_source = tmp_path / "docs" / "source"
+            docs_source.mkdir(parents=True)
+            (docs_source / "conf.py").touch()
+
+            self.assertFalse(compile_docs(tmp_path))
 
     def test_patch_resource_file_verification_failure(self):
         from qgis_manager.core import patch_resource_file
@@ -489,6 +597,17 @@ class TestCore(unittest.TestCase):
             self.assertIn(
                 "from qgis.PyQt import QtCore, QtWidgets", py_file.read_text()
             )
+
+    def test_patch_ui_file_pyqt6(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            py_file = Path(tmp_dir) / "ui_dialog.py"
+            py_file.write_text(
+                "from PyQt6 import QtCore, QtWidgets\n", encoding="utf-8"
+            )
+            self.assertTrue(patch_ui_file(py_file))
+            content = py_file.read_text(encoding="utf-8")
+            self.assertIn("from qgis.PyQt import QtCore, QtWidgets", content)
+            self.assertNotIn("PyQt6", content)
 
     def test_patch_ui_file_no_change(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -540,7 +659,7 @@ class TestCore(unittest.TestCase):
             root = Path(tmp_dir)
             (root / "dialog.ui").touch()
 
-            compile_ui_files(root)
+            self.assertFalse(compile_ui_files(root))
 
     def test_is_prerelease(self):
         self.assertTrue(is_prerelease("1.0.0-rc1"))

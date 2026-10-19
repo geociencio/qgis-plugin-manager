@@ -1,7 +1,7 @@
 # qgis-manage security
 
 ```text
-qgis-manage security v0.9.0
+qgis-manage security v0.9.2
 Run a security audit (secrets and PyQGIS rules)
 
 Usage: qgis-manage security [-h] [--strict] [-o OUTPUT] [path]

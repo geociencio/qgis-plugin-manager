@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from ..discovery import get_plugin_metadata
+from ..discovery import get_plugin_metadata, validate_slug
 from ..ignore import IgnoreMatcher
 from .platform import get_qgis_plugin_dir
 
@@ -28,16 +28,23 @@ def uninstall_plugin(
 
     Returns:
         The removed directory, or None if the plugin was not deployed.
+
+    Raises:
+        ValueError: If the plugin metadata produces an unsafe/empty slug.
     """
-    slug = str(get_plugin_metadata(project_root)["slug"])
-    plugin_dir = get_qgis_plugin_dir(profile, version=qgis_version) / slug
+    metadata = get_plugin_metadata(project_root)
+    slug = validate_slug(str(metadata["slug"]), source="plugin metadata")
+    plugins_dir = get_qgis_plugin_dir(profile, version=qgis_version)
+    plugin_dir = plugins_dir / slug
+    if plugin_dir.parent != plugins_dir:
+        raise ValueError(f"Refusing to remove unsafe path: {plugin_dir}")
     if plugin_dir.exists():
         shutil.rmtree(plugin_dir)
         return plugin_dir
     return None
 
 
-def rotate_backups(parent_dir: Path, slug: str, limit: int):
+def rotate_backups(parent_dir: Path, slug: str, limit: int) -> None:
     """Keep only the N most recent backups for a plugin."""
     if limit <= 0:
         return
@@ -57,6 +64,33 @@ def rotate_backups(parent_dir: Path, slug: str, limit: int):
         for old_bak in cols:
             logger.debug(f"🧹 Removing old backup: {old_bak.name}")
             shutil.rmtree(old_bak)
+
+
+def purge_backups(parent_dir: Path, slug: str) -> int:
+    """Remove every backup directory for ``slug``.
+
+    Args:
+        parent_dir: Directory containing the plugin and its backups.
+        slug: Plugin slug whose backups should be removed.
+
+    Returns:
+        Number of backup directories removed.
+    """
+    validate_slug(slug, source="backup")
+    if not parent_dir.exists():
+        return 0
+
+    removed = 0
+    for item in parent_dir.iterdir():
+        if (
+            item.is_dir()
+            and not item.is_symlink()
+            and item.name.startswith(f"{slug}.bak.")
+        ):
+            logger.debug(f"🧹 Purging backup: {item.name}")
+            shutil.rmtree(item)
+            removed += 1
+    return removed
 
 
 def _is_same_or_nested(item: Path, dst: Path) -> bool:
@@ -131,15 +165,24 @@ def deploy_plugin(
     qgis_version: int = 3,
     callback: Callable[[int], Any] | None = None,
     max_backups: int = 3,
-):
-    """Deploy the plugin to the QGIS directory."""
+) -> None:
+    """Deploy the plugin to the QGIS directory.
+
+    Raises:
+        ValueError: If the plugin metadata produces an unsafe/empty slug or the
+            resolved target is not a direct child of ``dest_dir``.
+    """
     metadata = get_plugin_metadata(project_root)
-    slug = metadata["slug"]
+    slug = validate_slug(str(metadata["slug"]), source="plugin metadata")
 
     if dest_dir is None:
         dest_dir = get_qgis_plugin_dir(profile, version=qgis_version)
 
     target_path = dest_dir / slug
+    if target_path == dest_dir or target_path.parent != dest_dir:
+        raise ValueError(
+            f"Refusing to deploy outside the plugin directory: {target_path}"
+        )
 
     # Pre-deployment backup
     if target_path.exists() and not no_backup:

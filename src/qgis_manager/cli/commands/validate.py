@@ -74,7 +74,7 @@ class ValidateCommand(BaseCommand):
             if getattr(args, "repo", False):
                 from ...validation import validate_official_compliance
 
-                repo_res = validate_official_compliance(root)
+                repo_res = validate_official_compliance(root, metadata)
                 repo_errors = repo_res.errors
                 repo_warnings = repo_res.warnings
 

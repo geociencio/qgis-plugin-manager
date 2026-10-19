@@ -70,7 +70,20 @@ class PackageCommand(BaseCommand):
                     click.echo(f"🔄 Syncing version to {py_version}...")
                     sync_metadata_version(root)
 
-            # 2. Compliance Check (Optional)
+            # 2. Install dependencies before validating so the packaged file set
+            #    is the one that compliance rules inspect.
+            if not install_external_libs(root):
+                click.echo(
+                    click.style(
+                        "❌ Dependency installation failed; aborting package.",
+                        fg="red",
+                        bold=True,
+                    ),
+                    err=True,
+                )
+                return 1
+
+            # 3. Compliance Check (Optional)
             if getattr(args, "repo_check", False):
                 from ...discovery import get_plugin_metadata as fetch_metadata
                 from ...validation import (
@@ -82,7 +95,7 @@ class PackageCommand(BaseCommand):
                 click.echo("🔍 Running official repository compliance check...")
                 metadata = fetch_metadata(root)
                 meta_res = validate_metadata(metadata)
-                repo_res = validate_official_compliance(root)
+                repo_res = validate_official_compliance(root, metadata)
                 struct_res = validate_project_structure(root, metadata)
 
                 if not (
@@ -97,9 +110,6 @@ class PackageCommand(BaseCommand):
                         click.echo(f"  • {err}")
                     return 1
                 click.echo(click.style("✅ Compliance check passed!", fg="green"))
-
-            # Auto-install deps if any are defined
-            install_external_libs(root)
 
             with click.progressbar(
                 length=100,

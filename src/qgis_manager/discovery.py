@@ -28,29 +28,83 @@ read metadata.txt files, and identify source files for deployment.
 import configparser
 import logging
 import re
+import unicodedata
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
 from .ignore import IgnoreMatcher, load_ignore_patterns
+from .metadata import (
+    format_general_entries,
+    update_general_keys,
+    write_text_atomic,
+)
 from .toml_utils import get_project_version
 
 logger = logging.getLogger(__name__)
 
+#: A slug that is safe to use as a directory/module name inside a QGIS profile.
+_SLUG_RE = re.compile(r"^[a-z_][a-z0-9_]*$")
+
+#: Names that cannot be used as a directory on Windows.
+_RESERVED_SLUGS = {
+    "con",
+    "prn",
+    "aux",
+    "nul",
+    *(f"com{index}" for index in range(1, 10)),
+    *(f"lpt{index}" for index in range(1, 10)),
+}
+
 
 def slugify(text: str) -> str:
-    """Convert text to a valid directory name slug.
+    """Convert text to a safe ASCII directory/module name slug.
+
+    Non-ASCII characters are transliterated or dropped (``Café`` -> ``cafe``),
+    spaces and separators collapse to underscores, and a leading underscore is
+    added when the result would start with a digit so it remains a valid Python
+    identifier.  An empty string is returned when no ASCII alphanumeric
+    character is left; callers must reject that result.
 
     Args:
         text: Input string to be converted into a slug.
 
     Returns:
-        A clean, lowercase slug with underscores instead of spaces.
+        A lowercase ASCII slug using only letters, digits and underscores.
     """
-    text = text.lower()
-    text = re.sub(r"[^\w\s-]", "", text)
-    text = re.sub(r"[\s-]+", "_", text).strip("_")
-    return text
+    normalized = unicodedata.normalize("NFKD", text)
+    ascii_text = normalized.encode("ascii", "ignore").decode("ascii").lower()
+    ascii_text = re.sub(r"[^a-z0-9]+", "_", ascii_text).strip("_")
+    if ascii_text and ascii_text[0].isdigit():
+        return f"_{ascii_text}"
+    return ascii_text
+
+
+def validate_slug(slug: str, *, source: str = "plugin") -> str:
+    """Validate a plugin slug before using it in a filesystem operation.
+
+    Empty slugs are the dangerous case: joining them with a plugins directory
+    yields the directory itself, so a recursive delete/sync could affect every
+    installed plugin.  Only ASCII lowercase letters, digits and underscores are
+    accepted (the first character may be an underscore).
+
+    Args:
+        slug: Slug to validate.
+        source: Human-readable origin of the slug, used in the error message.
+
+    Returns:
+        The validated slug.
+
+    Raises:
+        ValueError: If the slug is empty or contains unsafe characters.
+    """
+    if not slug or not _SLUG_RE.fullmatch(slug) or slug in _RESERVED_SLUGS:
+        raise ValueError(
+            f"Invalid {source} slug {slug!r}. The name must contain at least "
+            "one ASCII letter or digit and may only use letters, digits and "
+            "underscores after normalization."
+        )
+    return slug
 
 
 def find_project_root(start_path: Path) -> Path:
@@ -124,26 +178,40 @@ def get_plugin_metadata(project_root: Path) -> dict[str, Any]:
 
 
 def save_plugin_metadata(project_root: Path, metadata: dict[str, Any]) -> None:
-    """Save metadata dictionary back to metadata.txt.
+    """Save metadata back to metadata.txt preserving comments and other sections.
+
+    Only changed keys are rewritten; untouched lines, comments, blank lines and
+    custom sections keep their original formatting.  The write is atomic.
 
     Args:
         project_root: Root directory of the QGIS plugin project.
         metadata: Dictionary with project metadata to persist.
 
     Raises:
-        Exception: If saving the file fails.
+        OSError: If the file cannot be written.
     """
-    config = configparser.ConfigParser(interpolation=None)
-    config.optionxform = str  # type: ignore[method-assign, assignment] # Preserve case
-    # Ensure we only save relevant fields to [general]
-    general_data = {k: v for k, v in metadata.items() if k != "slug"}
-    config["general"] = general_data
+    metadata_path = project_root / "metadata.txt"
+    updates = {str(key): str(value) for key, value in metadata.items() if key != "slug"}
+
+    if metadata_path.exists():
+        current = get_plugin_metadata(project_root)
+        current.pop("slug", None)
+        updates = {
+            key: value for key, value in updates.items() if current.get(key) != value
+        }
+        if not updates:
+            return
+
+        text = metadata_path.read_text(encoding="utf-8")
+        new_text = update_general_keys(text, updates)
+    else:
+        lines = ["[general]", *format_general_entries(updates)]
+        new_text = "\n".join(lines) + "\n"
 
     try:
-        with open(project_root / "metadata.txt", "w", encoding="utf-8") as f:
-            config.write(f, space_around_delimiters=False)
-    except Exception as e:
-        logger.error(f"Error saving metadata.txt: {e}")
+        write_text_atomic(metadata_path, new_text)
+    except OSError as exc:
+        logger.error(f"Error saving metadata.txt: {exc}")
         raise
 
 

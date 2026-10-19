@@ -49,11 +49,22 @@ class CompileCommand(BaseCommand):
                 with click.progressbar(
                     length=total_steps, label="📚 Compilando", show_pos=True
                 ) as bar:
-                    compile_qt_resources(
+                    compiled = compile_qt_resources(
                         root, args.res_type, callback=make_compile_callback(bar)
                     )
             else:
-                compile_qt_resources(root, args.res_type)
+                compiled = compile_qt_resources(root, args.res_type)
+
+            if not compiled:
+                click.echo(
+                    click.style(
+                        "❌ Compilation failed. Check the errors above.",
+                        fg="red",
+                        bold=True,
+                    ),
+                    err=True,
+                )
+                return 1
 
             click.echo(click.style("✨ Compilation complete!", fg="green", bold=True))
             return 0

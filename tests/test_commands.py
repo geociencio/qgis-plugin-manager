@@ -109,6 +109,7 @@ class TestValidateCommand(_CommandTestBase):
             "[general]",
             "name=Test Plugin",
             "description=Test description",
+            "about=Longer test description",
             "version=1.0.0",
             "qgisMinimumVersion=3.0",
             "author=Tester",
@@ -160,6 +161,18 @@ class TestValidateCommand(_CommandTestBase):
 
         exit_code, _, _ = self._invoke(["validate", "--repo"])
         self.assertEqual(exit_code, 1)  # no LICENSE file in temp project
+
+
+class TestCompileCommand(_CommandTestBase):
+    @patch("qgis_manager.cli.commands.compile.compile_qt_resources", return_value=False)
+    @patch("qgis_manager.cli.commands.compile.find_project_root")
+    def test_compile_failure_returns_nonzero(self, mock_find, _mock_compile):
+        mock_find.return_value = Path(tempfile.mkdtemp())
+
+        exit_code, _, stderr = self._invoke(["compile", "--type", "resources"])
+
+        self.assertEqual(exit_code, 1)
+        self.assertIn("Compilation failed", stderr)
 
 
 class TestPackageCommand(_CommandTestBase):
@@ -232,6 +245,45 @@ class TestPackageCommand(_CommandTestBase):
 
         exit_code, _, _ = self._invoke(["package", "--repo-check"])
         self.assertEqual(exit_code, 0)
+
+    @patch(
+        "qgis_manager.cli.commands.package.install_external_libs", return_value=False
+    )
+    @patch("qgis_manager.cli.commands.package.find_project_root")
+    def test_package_fails_when_dependency_install_fails(
+        self, mock_find, _mock_install
+    ):
+        mock_find.return_value = Path(tempfile.mkdtemp())
+
+        exit_code, _, stderr = self._invoke(["package"])
+
+        self.assertEqual(exit_code, 1)
+        self.assertIn("Dependency installation failed", stderr)
+
+    @patch("qgis_manager.validation.validate_project_structure")
+    @patch("qgis_manager.validation.validate_official_compliance")
+    @patch("qgis_manager.validation.validate_metadata")
+    @patch("qgis_manager.cli.commands.package.install_external_libs")
+    @patch("qgis_manager.cli.commands.package.create_plugin_package")
+    @patch("qgis_manager.cli.commands.package.find_project_root")
+    def test_package_installs_before_compliance(
+        self, mock_find, mock_package, mock_install, mock_meta, mock_repo, mock_struct
+    ):
+        root = Path(tempfile.mkdtemp())
+        mock_find.return_value = root
+        calls: list[str] = []
+        mock_install.side_effect = lambda _root: calls.append("install") or True
+        mock_repo.side_effect = lambda *_args: (
+            calls.append("compliance") or ValidationResult(True, [], [])
+        )
+        mock_meta.return_value = ValidationResult(True, [], [])
+        mock_struct.return_value = ValidationResult(True, [], [])
+        mock_package.return_value = root / "dist" / "demo.zip"
+
+        exit_code, _, _ = self._invoke(["package", "--repo-check"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(calls[:2], ["install", "compliance"])
 
 
 class TestHooksCommand(_CommandTestBase):
@@ -367,6 +419,62 @@ class TestDeployCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.deploy.load_project_config")
     @patch("qgis_manager.cli.commands.deploy.load_config")
     @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    def test_deploy_uses_configured_profile(
+        self,
+        mock_find,
+        mock_load_config,
+        mock_load_project,
+        mock_meta,
+        mock_dir,
+        mock_deploy,
+    ):
+        self._patch_common(mock_find, mock_load_config, mock_load_project)
+        settings = Settings(profile="production")
+        settings.auto_compile = False
+        mock_load_config.return_value = settings
+        mock_load_project.side_effect = lambda _root, value: value
+        mock_meta.return_value = {"name": "Test", "slug": "test"}
+        mock_dir.return_value = Path(tempfile.mkdtemp())
+
+        exit_code, _, _ = self._invoke(["deploy"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(mock_dir.call_args.args[0], "production")
+
+    @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
+    @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
+    @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
+    @patch("qgis_manager.cli.commands.deploy.load_project_config")
+    @patch("qgis_manager.cli.commands.deploy.load_config")
+    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    def test_deploy_cli_profile_overrides_config(
+        self,
+        mock_find,
+        mock_load_config,
+        mock_load_project,
+        mock_meta,
+        mock_dir,
+        mock_deploy,
+    ):
+        self._patch_common(mock_find, mock_load_config, mock_load_project)
+        settings = Settings(profile="production")
+        settings.auto_compile = False
+        mock_load_config.return_value = settings
+        mock_load_project.side_effect = lambda _root, value: value
+        mock_meta.return_value = {"name": "Test", "slug": "test"}
+        mock_dir.return_value = Path(tempfile.mkdtemp())
+
+        exit_code, _, _ = self._invoke(["deploy", "--profile", "staging"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(mock_dir.call_args.args[0], "staging")
+
+    @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
+    @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
+    @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
+    @patch("qgis_manager.cli.commands.deploy.load_project_config")
+    @patch("qgis_manager.cli.commands.deploy.load_config")
+    @patch("qgis_manager.cli.commands.deploy.find_project_root")
     def test_deploy_no_backup(
         self,
         mock_find,
@@ -391,7 +499,37 @@ class TestDeployCommand(_CommandTestBase):
         exit_code, _, _ = self._invoke(["deploy"])
         self.assertEqual(exit_code, 1)
 
-    @patch("qgis_manager.core.rotate_backups")
+    @patch("qgis_manager.cli.commands.deploy.compile_qt_resources", return_value=False)
+    @patch("qgis_manager.cli.commands.deploy.count_compile_steps", return_value=1)
+    @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
+    @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
+    @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
+    @patch("qgis_manager.cli.commands.deploy.load_project_config")
+    @patch("qgis_manager.cli.commands.deploy.load_config")
+    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    def test_deploy_aborts_when_compile_fails(
+        self,
+        mock_find,
+        mock_load_config,
+        mock_load_project,
+        mock_meta,
+        mock_dir,
+        mock_deploy,
+        _mock_count,
+        _mock_compile,
+    ):
+        self._patch_common(mock_find, mock_load_config, mock_load_project)
+        mock_load_config.return_value.auto_compile = True
+        mock_meta.return_value = {"name": "Test", "slug": "test"}
+        mock_dir.return_value = Path(tempfile.mkdtemp())
+
+        exit_code, _, stderr = self._invoke(["deploy"])
+
+        self.assertEqual(exit_code, 1)
+        mock_deploy.assert_not_called()
+        self.assertIn("Compilation failed", stderr)
+
+    @patch("qgis_manager.core.purge_backups", return_value=2)
     @patch("qgis_manager.cli.commands.deploy.click.confirm")
     @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
     @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
@@ -408,7 +546,7 @@ class TestDeployCommand(_CommandTestBase):
         mock_dir,
         mock_deploy,
         mock_confirm,
-        mock_rotate,
+        mock_purge,
     ):
         self._patch_common(mock_find, mock_load_config, mock_load_project)
         mock_meta.return_value = {"name": "Test", "slug": "test"}
@@ -418,9 +556,10 @@ class TestDeployCommand(_CommandTestBase):
         exit_code, output, _ = self._invoke(["deploy", "--purge-backups"])
 
         self.assertEqual(exit_code, 0)
-        mock_rotate.assert_called_once()
+        mock_purge.assert_called_once()
         mock_deploy.assert_called_once()
         self.assertIn("Backups purged", output)
+        self.assertIn("2", output)
 
     @patch("qgis_manager.cli.commands.deploy.click.confirm")
     @patch("qgis_manager.cli.commands.deploy.deploy_plugin")

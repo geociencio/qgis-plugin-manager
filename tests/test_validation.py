@@ -21,10 +21,12 @@ class TestValidation(unittest.TestCase):
         required = get_required_fields()
         self.assertIn("name", required)
         self.assertIn("description", required)
+        self.assertIn("about", required)
         self.assertIn("version", required)
         self.assertIn("qgisMinimumVersion", required)
         self.assertIn("author", required)
         self.assertIn("email", required)
+        self.assertNotIn("repository", required)
 
     def test_get_optional_fields(self):
         optional = get_optional_fields()
@@ -38,6 +40,11 @@ class TestValidation(unittest.TestCase):
         self.assertTrue(validate_version("0.1"))
         self.assertTrue(validate_version("10.20.30"))
         self.assertTrue(validate_version("1.0.0-beta"))
+
+    def test_validate_version_short_form_only_when_allowed(self):
+        self.assertTrue(validate_version("3.0", allow_short=True))
+        self.assertFalse(validate_version("3.0", allow_short=False))
+        self.assertTrue(validate_version("3.0.0", allow_short=False))
 
     def test_validate_version_invalid(self):
         self.assertFalse(validate_version("1"))
@@ -70,6 +77,7 @@ class TestValidation(unittest.TestCase):
         metadata = {
             "name": "Test Plugin",
             "description": "A test plugin",
+            "about": "A longer description of the test plugin",
             "version": "1.0.0",
             "qgisMinimumVersion": "3.0",
             "author": "Test Author",
@@ -82,6 +90,73 @@ class TestValidation(unittest.TestCase):
         self.assertTrue(result.is_valid)
         self.assertEqual(len(result.errors), 0)
         self.assertEqual(len(result.warnings), 0)
+
+    def test_validate_metadata_requires_about(self):
+        metadata = {
+            "name": "Test Plugin",
+            "description": "A test plugin",
+            "version": "1.0.0",
+            "qgisMinimumVersion": "3.0",
+            "author": "Test Author",
+            "email": "test@example.com",
+        }
+        result = validate_metadata(metadata)
+        self.assertFalse(result.is_valid)
+        self.assertTrue(any("'about'" in error for error in result.errors))
+
+    def test_validate_metadata_missing_repository_is_warning(self):
+        metadata = {
+            "name": "Test Plugin",
+            "description": "A test plugin",
+            "about": "About",
+            "version": "1.0.0",
+            "qgisMinimumVersion": "3.0",
+            "author": "Test Author",
+            "email": "test@example.com",
+        }
+        result = validate_metadata(metadata)
+        self.assertTrue(result.is_valid)
+        self.assertTrue(any("'repository'" in w for w in result.warnings))
+
+    def test_validate_metadata_rejects_short_plugin_version(self):
+        metadata = {
+            "name": "Test Plugin",
+            "description": "A test plugin",
+            "about": "About",
+            "version": "1.0",
+            "qgisMinimumVersion": "3.0",
+            "author": "Test Author",
+            "email": "test@example.com",
+            "repository": "https://example.com/repo",
+        }
+        result = validate_metadata(metadata)
+        self.assertFalse(result.is_valid)
+        self.assertTrue(any("Invalid version format" in e for e in result.errors))
+
+    def test_validate_metadata_boolean_values(self):
+        metadata = {
+            "name": "Test Plugin",
+            "description": "A test plugin",
+            "about": "About",
+            "version": "1.0.0",
+            "qgisMinimumVersion": "3.0",
+            "author": "Test Author",
+            "email": "test@example.com",
+            "repository": "https://example.com/repo",
+            "experimental": "False",
+            "deprecated": "False",
+            "hasProcessingProvider": "False",
+        }
+        result = validate_metadata(metadata)
+        self.assertFalse(
+            any("should be 'True' or 'False'" in w for w in result.warnings)
+        )
+
+        metadata["experimental"] = "yes"
+        result = validate_metadata(metadata)
+        self.assertTrue(
+            any("'experimental'" in w and "should be" in w for w in result.warnings)
+        )
 
     def test_validate_metadata_missing_required(self):
         metadata = {
@@ -123,11 +198,13 @@ class TestValidation(unittest.TestCase):
         metadata = {
             "name": "Test Plugin",
             "description": "A test plugin",
+            "about": "About",
             "version": "1.0.0",
             "qgisMinimumVersion": "3.0",
             "author": "Test Author",
             "email": "test@example.com",
-            # Missing recommended fields
+            "repository": "https://example.com/repo",
+            # Missing recommended fields: homepage and tags
         }
         result = validate_metadata(metadata)
         self.assertTrue(result.is_valid)
@@ -178,13 +255,43 @@ class TestValidation(unittest.TestCase):
             self.assertFalse(result.is_valid)
             self.assertTrue(any("LICENSE" in e for e in result.errors))
 
+    def test_validate_official_compliance_ignores_venv_binaries(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "LICENSE").write_text("GPL", encoding="utf-8")
+            (root / "metadata.txt").write_text(
+                "[general]\nname=Demo\n", encoding="utf-8"
+            )
+            venv_lib = root / ".venv" / "lib"
+            venv_lib.mkdir(parents=True)
+            (venv_lib / "native.so").touch()
+
+            result = validate_official_compliance(root)
+            self.assertTrue(result.is_valid, result.errors)
+
+    def test_validate_official_compliance_requires_repo_metadata(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "LICENSE").write_text("GPL", encoding="utf-8")
+            (root / "metadata.txt").write_text(
+                "[general]\nname=Demo\n", encoding="utf-8"
+            )
+
+            result = validate_official_compliance(root, {"name": "Demo"})
+            self.assertFalse(result.is_valid)
+            self.assertTrue(any("'about'" in e for e in result.errors))
+            self.assertTrue(any("'repository'" in e for e in result.errors))
+
     def test_validate_official_compliance_valid(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
             (root / "LICENSE").write_text("GPL", encoding="utf-8")
+            (root / "metadata.txt").write_text(
+                "[general]\nname=Demo\n", encoding="utf-8"
+            )
 
             result = validate_official_compliance(root)
-            self.assertTrue(result.is_valid)
+            self.assertTrue(result.is_valid, result.errors)
 
 
 if __name__ == "__main__":

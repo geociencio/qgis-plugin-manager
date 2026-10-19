@@ -47,6 +47,7 @@ from .compile import (
 )
 from .deploy import (
     deploy_plugin,
+    purge_backups,
     rotate_backups,
     sync_directory,
     uninstall_plugin,
@@ -76,6 +77,7 @@ __all__ = [
     "is_prerelease",
     "patch_resource_file",
     "patch_ui_file",
+    "purge_backups",
     "rotate_backups",
     "stamp_metadata_text",
     "sync_directory",

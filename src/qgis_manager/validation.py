@@ -30,6 +30,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .discovery import slugify
+from .ignore import IgnoreMatcher
+
 
 @dataclass
 class ValidationResult:
@@ -55,6 +58,7 @@ def get_required_fields() -> list[str]:
     return [
         "name",
         "description",
+        "about",
         "version",
         "qgisMinimumVersion",
         "author",
@@ -79,23 +83,25 @@ def get_optional_fields() -> list[str]:
         "deprecated",
         "qgisMaximumVersion",
         "changelog",
-        "about",
     ]
 
 
-def validate_version(version_str: str) -> bool:
+def validate_version(version_str: str, allow_short: bool = True) -> bool:
     """Validate version format using semantic versioning.
 
     Args:
         version_str: Version string to validate.
+        allow_short: Accept the ``X.Y`` form used by ``qgisMinimumVersion``.
+            Plugin versions should pass ``False`` because the QGIS repository
+            expects ``X.Y.Z``.
 
     Returns:
         True if version matches SemVer format (including pre-releases).
     """
-    pattern = r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-zA-Z0-9-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][a-zA-Z0-9-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$"  # noqa: E501
+    pattern = r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$"  # noqa: E501
 
-    # QGIS minimum version is often only X.Y (e.g. "3.0"). Fall back if it fails.  # noqa: E501
-    if re.match(r"^\d+\.\d+$", version_str):
+    # QGIS minimum version is often only X.Y (e.g. "3.0").
+    if allow_short and re.match(r"^\d+\.\d+$", version_str):
         return True
 
     return bool(re.match(pattern, version_str))
@@ -168,11 +174,16 @@ def validate_tags(tags: str) -> bool:
     return len(parts) > 0 and all(parts)
 
 
-def validate_official_compliance(project_root: Path) -> ValidationResult:
+def validate_official_compliance(
+    project_root: Path, metadata: dict[str, Any] | None = None
+) -> ValidationResult:
     """Check if the project complies with official QGIS repository rules.
 
     Args:
         project_root: Root directory of the project.
+        metadata: Optional parsed metadata. When provided, fields that the
+            official repository requires (``about`` and ``repository``) are
+            enforced as errors.
 
     Returns:
         ValidationResult containing errors and warnings.
@@ -180,11 +191,18 @@ def validate_official_compliance(project_root: Path) -> ValidationResult:
     errors: list[str] = []
     warnings: list[str] = []
 
-    # 1. Prohibited binary extensions
+    # 1. metadata.txt is mandatory for the official repository
+    if not (project_root / "metadata.txt").exists():
+        errors.append("Critical file missing for official repository: 'metadata.txt'")
+
+    # 2. Prohibited binary extensions (ignored/dev directories are excluded)
     prohibited = [".so", ".dll", ".exe", ".dylib", ".pyd", ".pyc", ".pyo"]
+    matcher = IgnoreMatcher(project_root, include_dev=False)
     found_binaries = []
     for ext in prohibited:
         for p in project_root.rglob(f"*{ext}"):
+            if p.is_symlink() or not p.is_file() or matcher.should_exclude(p):
+                continue
             found_binaries.append(str(p.relative_to(project_root)))
 
     if found_binaries:
@@ -193,7 +211,7 @@ def validate_official_compliance(project_root: Path) -> ValidationResult:
             f"Found: {', '.join(found_binaries)}"
         )
 
-    # 2. License file check (Must be named LICENSE)
+    # 3. License file check (Must be named LICENSE)
     license_file = project_root / "LICENSE"
     if not license_file.exists():
         # Check for common variants to give better advice
@@ -206,6 +224,14 @@ def validate_official_compliance(project_root: Path) -> ValidationResult:
             )
         else:
             errors.append("Critical file missing for official repository: 'LICENSE'")
+
+    # 4. Metadata fields required by the official repository
+    if metadata is not None:
+        for field in ("about", "repository"):
+            if not metadata.get(field):
+                errors.append(
+                    f"Missing required field for official repository: '{field}'"
+                )
 
     is_valid = len(errors) == 0
     return ValidationResult(is_valid=is_valid, errors=errors, warnings=warnings)
@@ -288,10 +314,15 @@ def validate_metadata(metadata: dict[str, Any]) -> ValidationResult:
             errors.append(
                 f"Plugin name contains illegal characters (newlines/tabs): '{name}'"
             )
+        if not slugify(str(name)):
+            errors.append(
+                "Plugin name must contain at least one ASCII letter or digit "
+                "to produce a valid plugin directory name"
+            )
 
-    # Validate version format
+    # Validate version format (the QGIS repository expects X.Y.Z)
     if "version" in metadata:
-        if not validate_version(metadata["version"]):
+        if not validate_version(metadata["version"], allow_short=False):
             errors.append(
                 f"Invalid version format: '{metadata['version']}'. "
                 "Expected X.Y.Z (e.g., 1.0.0)"
@@ -340,10 +371,10 @@ def validate_metadata(metadata: dict[str, Any]) -> ValidationResult:
     # Validate boolean fields
     bool_fields = ["experimental", "deprecated", "hasProcessingProvider"]
     for field in bool_fields:
-        if field in metadata and metadata[field]:
+        value = metadata.get(field)
+        if value and not validate_boolean_field(str(value)):
             warnings.append(
-                f"Field '{field}' should be 'True' or 'False'. "
-                f"Found: '{metadata[field]}'"
+                f"Field '{field}' should be 'True' or 'False'. Found: '{value}'"
             )
 
     is_valid = len(errors) == 0

@@ -1,7 +1,7 @@
 # qgis-manage dclean
 
 ```text
-qgis-manage dclean v0.9.0
+qgis-manage dclean v0.9.2
 Remove the deployed plugin from the QGIS profile
 
 Usage: qgis-manage dclean [-h] [-p PROFILE] [--qgis-version QGIS_VERSION]
@@ -14,7 +14,8 @@ Arguments:
 Options:
   -h, --help            show this help message and exit
   -p PROFILE, --profile PROFILE
-                        QGIS profile name (default: default)
+                        QGIS profile name or absolute plugins directory
+                        (default: configured profile, else 'default')
   --qgis-version QGIS_VERSION
                         Major QGIS version (3 or 4)
   --yes, -y             Remove without asking for confirmation

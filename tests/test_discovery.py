@@ -17,7 +17,19 @@ class TestDiscovery(unittest.TestCase):
         self.assertEqual(slugify("My Plugin"), "my_plugin")
         self.assertEqual(slugify("Plugin  With   Spaces"), "plugin_with_spaces")
         self.assertEqual(slugify("Plugin@#$"), "plugin")
-        self.assertEqual(slugify("Café Plugin"), "café_plugin")
+        self.assertEqual(slugify("Café Plugin"), "cafe_plugin")
+        self.assertEqual(slugify("Ñandú Plugin"), "nandu_plugin")
+        self.assertEqual(slugify("123 Plugin"), "_123_plugin")
+        self.assertEqual(slugify("!!!"), "")
+
+    def test_validate_slug_rejects_empty_and_unsafe(self):
+        from qgis_manager.discovery import validate_slug
+
+        self.assertEqual(validate_slug("my_plugin"), "my_plugin")
+        self.assertEqual(validate_slug("_123_plugin"), "_123_plugin")
+        for unsafe in ("", "../evil", "My-Plugin", "con"):
+            with self.subTest(slug=unsafe), self.assertRaises(ValueError):
+                validate_slug(unsafe)
 
     def test_find_project_root_success(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -138,7 +150,50 @@ class TestDiscovery(unittest.TestCase):
             metadata = get_plugin_metadata(tmp_path)
             self.assertEqual(metadata["version"], "unknown")
 
-    @patch("configparser.ConfigParser.write", side_effect=OSError("boom"))
+    def test_save_plugin_metadata_preserves_comments_and_sections(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            original = (
+                "[general]\n"
+                "# keep this comment\n"
+                "name=Demo\n"
+                "description=Line one\n"
+                "    line two\n"
+                "version=1.0.0\n"
+                "\n"
+                "[custom]\n"
+                "keep=this\n"
+            )
+            (tmp_path / "metadata.txt").write_text(original, encoding="utf-8")
+
+            metadata = get_plugin_metadata(tmp_path)
+            metadata["version"] = "1.0.1"
+            save_plugin_metadata(tmp_path, metadata)
+
+            content = (tmp_path / "metadata.txt").read_text(encoding="utf-8")
+            self.assertIn("# keep this comment", content)
+            self.assertIn("description=Line one\n    line two", content)
+            self.assertIn("version=1.0.1", content)
+            self.assertIn("[custom]\nkeep=this", content)
+
+    def test_save_plugin_metadata_inserts_multiline_key(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / "metadata.txt").write_text(
+                "[general]\nname=Demo\n", encoding="utf-8"
+            )
+
+            metadata = get_plugin_metadata(tmp_path)
+            metadata["about"] = "Line one\nLine two"
+            save_plugin_metadata(tmp_path, metadata)
+
+            content = (tmp_path / "metadata.txt").read_text(encoding="utf-8")
+            self.assertIn("about=Line one\n    Line two", content)
+            self.assertEqual(
+                get_plugin_metadata(tmp_path)["about"], "Line one\nLine two"
+            )
+
+    @patch("qgis_manager.discovery.write_text_atomic", side_effect=OSError("boom"))
     def test_save_plugin_metadata_write_error(self, _mock_write):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
@@ -146,7 +201,7 @@ class TestDiscovery(unittest.TestCase):
                 "[general]\nname = demo\n", encoding="utf-8"
             )
             with self.assertRaises(OSError):
-                save_plugin_metadata(tmp_path, {"name": "demo"})
+                save_plugin_metadata(tmp_path, {"name": "changed"})
 
 
 if __name__ == "__main__":

@@ -12,7 +12,7 @@ from ...core import (
     deploy_plugin,
     get_qgis_plugin_dir,
 )
-from ...discovery import find_project_root, get_plugin_metadata
+from ...discovery import find_project_root, get_plugin_metadata, validate_slug
 from ...hooks import run_hook
 from ..base import BaseCommand
 from ..progress import make_compile_callback
@@ -82,7 +82,7 @@ class DeployCommand(BaseCommand):
 
             # Pre-info
             metadata = get_plugin_metadata(root)
-            slug = metadata["slug"]
+            slug = validate_slug(str(metadata["slug"]), source="plugin metadata")
 
             # Handle --purge-backups
             if args.purge_backups:
@@ -91,10 +91,10 @@ class DeployCommand(BaseCommand):
                     f"🗑️  Purge all backups for '{slug}' in profile '{target_profile}'?"
                 )
                 if click.confirm(msg):
-                    from ...core import rotate_backups
+                    from ...core import purge_backups
 
-                    rotate_backups(target_dir, slug, limit=0)
-                    click.echo("✨ Backups purged.")
+                    removed = purge_backups(target_dir, slug)
+                    click.echo(f"✨ Backups purged ({removed}).")
 
                 if not click.confirm("Proceed with deployment?"):
                     return 0
@@ -165,9 +165,19 @@ class DeployCommand(BaseCommand):
                         label="📚 Compiling resources and docs",
                         show_pos=True,
                     ) as bar:
-                        compile_qt_resources(
+                        compiled = compile_qt_resources(
                             root, "all", callback=make_compile_callback(bar)
                         )
+                    if not compiled:
+                        click.echo(
+                            click.style(
+                                "❌ Compilation failed; aborting deployment.",
+                                fg="red",
+                                bold=True,
+                            ),
+                            err=True,
+                        )
+                        return 1
 
             click.echo(f"🚀 Deploying '{metadata['name']}' ({slug}) to {target_path}")
 

@@ -1,13 +1,25 @@
 """Compilation of Qt resources, UI files, translations and documentation."""
 
+import importlib.util
 import logging
 import shutil
 import subprocess
+import sys
+import tempfile
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+#: Qt binding import prefixes emitted by uic/rcc that must be redirected to
+#: the binding shipped with QGIS (PyQt5, PyQt6, PySide2 or PySide6).
+_QT_IMPORT_PREFIXES = (
+    "from PyQt5",
+    "from PyQt6",
+    "from PySide2",
+    "from PySide6",
+)
 
 
 def _run_sphinx(cmd: list[str], callback: Callable[[str], Any] | None) -> None:
@@ -34,42 +46,86 @@ def _run_sphinx(cmd: list[str], callback: Callable[[str], Any] | None) -> None:
         raise subprocess.CalledProcessError(process.returncode, cmd)
 
 
-def compile_docs(project_root: Path, callback: Callable[[str], Any] | None = None):
-    """Compile Sphinx documentation if the project has a docs/source folder."""
+def _sphinx_command() -> list[str] | None:
+    """Return the command prefix used to run Sphinx, or None if unavailable.
+
+    A ``sphinx-build`` executable on ``PATH`` is preferred.  Otherwise the
+    Sphinx module installed in the current interpreter is used.  The project's
+    ``pyproject.toml`` is deliberately not consulted: forcing ``uv run`` made
+    documentation compilation fail on machines without ``uv`` or without
+    Sphinx in the project environment.
+    """
+    sphinx_build = shutil.which("sphinx-build")
+    if sphinx_build:
+        return [sphinx_build]
+
+    try:
+        if importlib.util.find_spec("sphinx") is not None:
+            return [sys.executable, "-m", "sphinx"]
+    except (ImportError, ValueError):
+        pass
+    return None
+
+
+def compile_docs(
+    project_root: Path, callback: Callable[[str], Any] | None = None
+) -> bool:
+    """Compile Sphinx documentation into ``help/html`` if configured.
+
+    The build happens in a temporary directory that only replaces the existing
+    ``help/html`` after a successful Sphinx run, so a failure never deletes the
+    previous documentation.
+
+    Args:
+        project_root: Root directory of the plugin project.
+        callback: Optional progress callback receiving ``START:``/``PROGRESS:``/
+            ``DONE:`` lines.
+
+    Returns:
+        True when there is nothing to compile or compilation succeeded, False
+        when Sphinx is unavailable or the build failed.
+    """
     docs_source = project_root / "docs" / "source"
     if not (docs_source / "conf.py").exists():
-        return
+        return True
 
     # Standard path for help in QGIS plugins
     help_target = project_root / "help" / "html"
+    command = _sphinx_command()
+    if command is None:
+        logger.error(
+            "  ❌ Sphinx not found. Install sphinx or add sphinx-build to PATH."
+        )
+        return False
 
     if callback:
         callback(f"START:Documentation ({help_target.name})")
     logger.debug(f"📚 Compiling documentation: {docs_source} -> {help_target}")
 
+    help_parent = help_target.parent
+    help_parent.mkdir(parents=True, exist_ok=True)
+    build_dir = Path(tempfile.mkdtemp(prefix="html-", dir=help_parent))
+
     try:
-        # Clean and regenerate the target folder
-        if help_target.exists():
-            shutil.rmtree(help_target)
-        help_target.mkdir(parents=True, exist_ok=True)
-
-        # Prefer `uv run` when a uv environment is detected, else sphinx-build
-        cmd = ["sphinx-build", "-b", "html", str(docs_source), str(help_target)]
-        if (project_root / "pyproject.toml").exists():
-            # Recommendation to use uv if available for consistency with project rules
-            cmd = ["uv", "run"] + cmd
-
+        cmd = [*command, "-b", "html", str(docs_source), str(build_dir)]
         _run_sphinx(cmd, callback)
 
         # Clean up files not needed for deployment
-        shutil.rmtree(help_target / "_sources", ignore_errors=True)
-        (help_target / ".buildinfo").unlink(missing_ok=True)
+        shutil.rmtree(build_dir / "_sources", ignore_errors=True)
+        (build_dir / ".buildinfo").unlink(missing_ok=True)
+
+        if help_target.exists():
+            shutil.rmtree(help_target)
+        shutil.move(str(build_dir), str(help_target))
 
         if callback:
             callback("DONE:Documentation")
         logger.debug("  ✅ Documentation compiled successfully.")
+        return True
     except Exception as e:
         logger.error(f"  ❌ Error compiling documentation: {e}")
+        shutil.rmtree(build_dir, ignore_errors=True)
+        return False
 
 
 def get_rcc_tool() -> str | None:
@@ -134,7 +190,7 @@ def verify_resource_patch(py_file: Path) -> bool:
             and "from . import resources_rc" not in content
         ):
             return False
-        for prefix in ("from PyQt5", "from PySide2", "from PySide6"):
+        for prefix in _QT_IMPORT_PREFIXES:
             if prefix in content:
                 return False
         return True
@@ -163,7 +219,7 @@ def patch_resource_file(py_file: Path) -> bool:
             )
 
         # Fix Qt imports to the QGIS-compatible namespace
-        for prefix in ("from PyQt5", "from PySide2", "from PySide6"):
+        for prefix in _QT_IMPORT_PREFIXES:
             content = content.replace(prefix, "from qgis.PyQt")
 
         if content != original_content:
@@ -187,8 +243,9 @@ def patch_resource_file(py_file: Path) -> bool:
 def patch_ui_file(py_file: Path) -> bool:
     """Patch a pyuic-generated .py file to use the QGIS ``qgis.PyQt`` namespace.
 
-    pyuic emits ``from PyQt5``/``from PySide2``/``from PySide6`` imports, which
-    fail inside a QGIS plugin. Replace them with ``from qgis.PyQt``.
+    pyuic emits ``from PyQt5``/``from PyQt6``/``from PySide2``/``from PySide6``
+    imports, which fail inside a QGIS plugin. Replace them with
+    ``from qgis.PyQt``.
     """
     if not py_file.exists():
         return False
@@ -197,7 +254,7 @@ def patch_ui_file(py_file: Path) -> bool:
         content = py_file.read_text(encoding="utf-8")
         original_content = content
 
-        for prefix in ("from PyQt5", "from PySide2", "from PySide6"):
+        for prefix in _QT_IMPORT_PREFIXES:
             content = content.replace(prefix, "from qgis.PyQt")
 
         if content != original_content:
@@ -213,23 +270,32 @@ def patch_ui_file(py_file: Path) -> bool:
 def compile_ui_files(
     project_root: Path,
     callback: Callable[[str], Any] | None = None,
-):
-    """Compile .ui files to Python using pyuic (PyQt5/PySide6).
+) -> bool:
+    """Compile .ui files to Python using pyuic (PyQt5/PyQt6/PySide).
 
     Only files whose source changed (mtime/size) since the last compilation
     are recompiled.
+
+    Args:
+        project_root: Root directory of the plugin project.
+        callback: Optional progress callback.
+
+    Returns:
+        True if there was nothing to compile or every file compiled, False when
+        a tool is missing or a compilation failed.
     """
     ui_files = list(project_root.rglob("*.ui"))
     if not ui_files:
-        return
+        return True
 
     uic_tool = get_uic_tool()
     if not uic_tool:
         logger.warning(
-            "  ⚠️  No UIC tool found (pyuic6, pyuic5). Skipping UI compilation."
+            "  ⚠️  No UIC tool found (pyuic6, pyuic5). Cannot compile UI files."
         )
-        return
+        return False
 
+    success = True
     for ui in ui_files:
         py_file = ui.with_suffix(".py")
         rel_ui = ui.relative_to(project_root)
@@ -250,11 +316,14 @@ def compile_ui_files(
                     text=True,
                 )
                 patch_ui_file(py_file)
-            except subprocess.CalledProcessError as e:
-                logger.error(f"  ❌ Error compiling {ui.name}: {e.stderr}")
+            except (subprocess.CalledProcessError, OSError) as e:
+                logger.error(f"  ❌ Error compiling {ui.name}: {e}")
+                success = False
 
         if callback:
             callback(f"DONE:UI {rel_ui.name}")
+
+    return success
 
 
 def _compile_single_qrc(
@@ -262,7 +331,7 @@ def _compile_single_qrc(
     project_root: Path,
     rcc_tool: str,
     callback: Callable[[str], Any] | None,
-) -> None:
+) -> bool:
     """Compile a single .qrc file and patch the generated module."""
     py_file = qrc.with_suffix(".py")
     rel_qrc = qrc.relative_to(project_root)
@@ -281,32 +350,37 @@ def _compile_single_qrc(
         if callback:
             callback(f"DONE:Resource {rel_qrc.name}")
         logger.debug("  ✅ Done.")
-    except subprocess.CalledProcessError as e:
-        logger.error(f"  ❌ Error compiling {qrc.name}: {e.stderr}")
+        return True
+    except (subprocess.CalledProcessError, OSError) as e:
+        logger.error(f"  ❌ Error compiling {qrc.name}: {e}")
+        return False
 
 
 def _compile_qrc_files(
     project_root: Path, callback: Callable[[str], Any] | None
-) -> None:
+) -> bool:
     """Compile every .qrc file in the project using the detected RCC tool."""
     qrc_files = list(project_root.rglob("*.qrc"))
     if not qrc_files:
-        return
+        return True
 
     rcc_tool = get_rcc_tool()
     if not rcc_tool:
         logger.error("  ❌ No RCC tool found (pyside6-rcc, pyside2-rcc, pyrcc5).")
-        return
+        return False
 
+    success = True
     for qrc in qrc_files:
-        _compile_single_qrc(qrc, project_root, rcc_tool, callback)
+        if not _compile_single_qrc(qrc, project_root, rcc_tool, callback):
+            success = False
+    return success
 
 
 def _compile_single_ts(
     ts: Path,
     project_root: Path,
     callback: Callable[[str], Any] | None,
-) -> None:
+) -> bool:
     """Compile a single .ts translation file with lrelease."""
     rel_ts = ts.relative_to(project_root)
     if callback:
@@ -320,33 +394,53 @@ def _compile_single_ts(
         if callback:
             callback(f"DONE:Translation {rel_ts.name}")
         logger.debug("  ✅ Done.")
+        return True
     except subprocess.CalledProcessError as e:
-        logger.error(f"  ❌ Error compiling {ts.name}: {e.stderr}")
+        logger.error(f"  ❌ Error compiling {ts.name}: {e}")
+        return False
     except FileNotFoundError:
         logger.error("  ❌ lrelease not found. Is it installed?")
+        return False
 
 
 def _compile_ts_files(
     project_root: Path, callback: Callable[[str], Any] | None
-) -> None:
+) -> bool:
     """Compile every .ts translation file in the project."""
+    success = True
     for ts in project_root.rglob("*.ts"):
-        _compile_single_ts(ts, project_root, callback)
+        if not _compile_single_ts(ts, project_root, callback):
+            success = False
+    return success
 
 
 def compile_qt_resources(
     project_root: Path,
     res_type: str = "all",
     callback: Callable[[str], Any] | None = None,
-):
-    """Compile Qt resources, UI files, translations, and documentation."""
+) -> bool:
+    """Compile Qt resources, UI files, translations, and documentation.
+
+    Args:
+        project_root: Root directory of the plugin project.
+        res_type: One of ``resources``, ``translations``, ``docs`` or ``all``.
+        callback: Optional progress callback.
+
+    Returns:
+        True when every requested step succeeded (or there was nothing to do),
+        False if any step failed.
+    """
+    success = True
+
     if res_type in ["resources", "all"]:
         # Compile .ui files to Python (pyuic) and .qrc resources to Python (rcc)
-        compile_ui_files(project_root, callback=callback)
-        _compile_qrc_files(project_root, callback)
+        success = compile_ui_files(project_root, callback=callback) and success
+        success = _compile_qrc_files(project_root, callback) and success
 
     if res_type in ["translations", "all"]:
-        _compile_ts_files(project_root, callback)
+        success = _compile_ts_files(project_root, callback) and success
 
     if res_type in ["docs", "all"]:
-        compile_docs(project_root, callback=callback)
+        success = compile_docs(project_root, callback=callback) and success
+
+    return success
