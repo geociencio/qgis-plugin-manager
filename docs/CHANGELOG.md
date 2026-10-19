@@ -8,6 +8,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Safe lifecycle operations**: plugin names produce validated ASCII slugs; empty or unsafe names are rejected before deploy/dclean/init/package.
+- **Compilation failures**: `compile` and automatic deploy compilation now exit non-zero and preserve previous documentation on failure.
+- **Repository validation**: official-repository checks now require `about`/`repository`, inspect the final packaged file set and ignore dev directories.
+
+### Fixed
+- **Metadata preservation**: `bump`, `sync` and build stamping no longer destroy comments, custom sections or multiline values in `metadata.txt`.
+- **Backups**: `deploy --purge-backups` now removes all matching backups instead of being a no-op.
+- **Scaffolding**: generated class/module names are valid Python identifiers; template metadata uses a valid `0.1.0` version.
+- **UI compilation**: `pyuic6`/PyQt6 imports are patched to `qgis.PyQt`.
+- **Configuration**: the configured `profile` is honored and CLI flags still override it.
+- **Validation**: valid `True`/`False` values no longer warn; plugin versions require `X.Y.Z`.
+
+### Changed
+- **Packaging**: dependencies are installed before the compliance check and install failures abort the package.
+
 ## [0.9.2] - 2026-10-10
 
 ### Fixed

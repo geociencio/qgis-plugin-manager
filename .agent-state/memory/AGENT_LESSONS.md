@@ -12,6 +12,34 @@ system; see `memory_policy.md` for retention and promotion rules.
 lessons:
   - date: 2026-10-19
     category: AGENTIC_SYSTEM
+    topic: Check upstream framework tags before implementing features
+    lesson: >-
+      A stale submodule checkout made a P0 implementation look necessary when the
+      upstream framework had already released the same capabilities in v1.4.1.
+    action: >-
+      Run `git fetch --tags` and review the remote release notes before building a
+      framework feature or forking local tooling.
+  - date: 2026-10-19
+    category: AGENTIC_SYSTEM
+    topic: Shared framework changes must stay generic
+    lesson: >-
+      Agentic Forge is used by sibling repositories, so project-specific commands,
+      thresholds and paths belong in forge.toml or .agent-state, not in the shared
+      workflows or tooling.
+    action: >-
+      Validate framework changes against temporary copies of sibling projects and keep
+      project commands in `[project]` configuration.
+  - date: 2026-10-19
+    category: TOOLING
+    topic: Never round-trip metadata.txt through configparser
+    lesson: >-
+      Rewriting metadata.txt with configparser drops comments, custom sections and
+      formatting, which silently loses user content during version bumps.
+    action: >-
+      Use a line-oriented updater that changes only the affected keys and writes the
+      file atomically; add a preservation test with comments and custom sections.
+  - date: 2026-10-19
+    category: AGENTIC_SYSTEM
     topic: Framework tooling needs its own quality gate
     lesson: >-
       A tooling directory excluded from the project's lint/type/coverage paths drifts

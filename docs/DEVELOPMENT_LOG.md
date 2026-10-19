@@ -1,5 +1,15 @@
 # Development Log: qgis-manage
 
+## [2026-10-19] P0 Hardening & Agentic Forge v1.4.2
+- **Achievement**: Hardened the CLI against destructive operations and adopted the released Agentic Forge v1.4.2 with framework validation in CI.
+- **Changes**:
+    - Added safe slug validation, destination guards, line-oriented `metadata.txt` updates, real backup purging and identifier-safe scaffolding.
+    - Fixed PyQt6 patching, compile failure propagation, profile precedence, boolean/version validation and repository compliance ordering.
+    - Moved `.agent` from v1.2.0 to v1.4.2; added `scripts/sync_metrics.py`, memory policy, agent metrics and framework CI.
+    - Added the deep CLI analysis and Agentic Forge audit reports.
+- **Quality**: 217 tests (+13 subtests), 90.48 % line coverage, ruff/format/mypy clean; framework 37 tests and validators clean.
+- **Maintenance**: [session_2026-10-19_p0_and_forge_v1_4_2.md](maintenance/session_2026-10-19_p0_and_forge_v1_4_2.md).
+
 ## [2026-10-10] Release v0.9.2 (preparation)
 Patch release: cross-platform CI fix (tests only, no runtime changes).
 - Fixed `test_discovery` (compare against `tmp_path.resolve()`) and `test_commands` hooks test (read with `encoding="utf-8"`) so the suite passes on macOS/Windows.

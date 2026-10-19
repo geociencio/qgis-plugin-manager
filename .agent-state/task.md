@@ -3,7 +3,8 @@
 ## Status
 - **Phase**: Closed
 - **Progress**: 100%
-- **Status**: ✅ P0 implemented and verified (2026-10-19)
+- **Status**: ✅ P0 implemented and verified (2026-10-19); session closed
+  (`p0_and_forge_v1_4_2`).
 
 ## Objectives
 1. [x] Bootstrap `.agent-state/memory/agent_metrics.json` with a real collector

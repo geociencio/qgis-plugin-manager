@@ -1,6 +1,7 @@
 # Next Steps
 
 **Date**: 2026-10-19
+**Last session**: `p0_and_forge_v1_4_2` (closed; CLI P0 + Agentic Forge v1.4.2)
 **Context**: Agent Framework P0 is complete: metrics bootstrap, safe pruning, extended
 validator, CI gate, workflow adaptation and tooling dogfooding. The repository also has
 the earlier CLI P0 hardening (217 tests, 90.48 % line coverage).
