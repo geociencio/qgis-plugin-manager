@@ -41,6 +41,40 @@ jobs:
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
         run: uv run mypy src
 
+      - name: Install framework dev dependencies
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        run: uv pip install -r .agent/requirements-dev.txt
+
+      - name: Framework lint and format
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        run: |
+          uv run ruff check .agent/tools .agent/tests
+          uv run ruff format --check .agent/tools .agent/tests
+
+      # v1.4.1 has one mypy false positive in forge_paths (getattr on
+      # TOMLDecodeError). Remove --disable-error-code=misc once v1.4.2 lands.
+      - name: Framework types
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        run: >
+          uv run mypy --config-file .agent/mypy.ini --disable-error-code=misc
+          .agent/tools .agent/tests
+
+      - name: Framework tests
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        run: uv run pytest .agent/tests -q
+
+      - name: Agent system validation
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        run: |
+          uv run python .agent/tools/forge.py validate
+          uv run python .agent/tools/forge.py validate --graph
+          uv run python .agent/tools/forge.py validate --conflicts
+          uv run python .agent/tools/forge.py memory check
+
+      - name: Agent metric consistency
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        run: uv run python .agent/tools/forge.py metrics validate
+
       - name: Self-analysis (informational)
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
         continue-on-error: true

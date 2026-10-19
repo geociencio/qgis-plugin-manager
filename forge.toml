@@ -16,3 +16,13 @@ test_dirs = ["tests"]
 analyzer_command = "uv run qgis-analyzer analyze ."
 max_cc = 10
 module_size_limit = 400
+max_lesson_lines = 350
+strict_agent_system = true   # this repo opts into strict links/state/template checks
+
+# Commands consumed by the shared workflows. Other projects may use different runners.
+test_command = "uv run pytest -q"
+test_command_full = "uv run pytest -q --cov=qgis_manager --cov-report=term-missing --cov-fail-under=80"
+lint_command = "uv run ruff check ."
+format_command = "uv run ruff format ."
+type_command = "uv run mypy src"
+version_bump_command = "uv run qgis-manage bump patch"

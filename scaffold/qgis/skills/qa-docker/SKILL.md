@@ -26,7 +26,8 @@ Ensures code stability through a controlled execution environment (Docker) and s
 ## Instructions and Rules
 
 ### Mocking Strategy
-- **Mock-First**: Follow [ADR-0004](file:///home/jmbernales/qgispluginsdev/sec_interp/docs/adr/ADR-0004-Mock-First-Testing-Strategy.md).
+- **Mock-First**: Follow the ADR-0004 Mock-First testing strategy: isolate external
+  services and assert behavior, not implementation details.
 - **Isolation**: Run tests in separate processes to prevent Mock contamination.
 - **Arithmetic Mocks**: When mocking Qt objects (QRectF, QSizeF) used in layouts, ensure numeric return values for dimensional methods (width, height, x, y) to prevent `TypeErrors` during layout calculations or comparisons like `max()`.
 - **FORCE_MOCKS**: Use `FORCE_MOCKS=0` only for real integration tests.

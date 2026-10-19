@@ -1,12 +1,37 @@
 # Next Steps
 
-**Date**: 2026-10-10
-**Context**: Release automation + `core.py` refactor complete; **v0.9.1** and **v0.9.2** released (GitHub + PyPI). CI green across Ubuntu/Windows/macOS × Python 3.11–3.13.
+**Date**: 2026-10-19
+**Context**: Agent Framework P0 is complete: metrics bootstrap, safe pruning, extended
+validator, CI gate, workflow adaptation and tooling dogfooding. The repository also has
+the earlier CLI P0 hardening (217 tests, 90.48 % line coverage).
 
-**Pending (What's missing):**
-- [ ] **Deep-analysis follow-ups (not `core`)**: lower CC of `validation.validate_metadata` (D28) and `cli/commands/deploy.py::execute` (D27); decide the compliance / metadata-validation single source of truth vs `qgis-plugin-analyzer`; remove the dead `ignore.get_ignore_func`; refresh or remove the stale `ai-context-core` dev dependency.
-- [ ] **(Optional) Backfill GitHub Releases** for tags `v0.7.0`–`v0.9.0` (only tags exist; the last GitHub Release is `v0.6.4`).
-- [ ] **(Optional) Prune stale Gen 5 knowledge** in `.agent-state/memory/AGENT_LESSONS.md` (references to `skill_sync.py` / `antigravity-framerepo` are obsolete).
+**Completed (this cycle):**
+- [x] Adopted Agentic Forge **v1.4.1** (upstream P0).
+- [ ] Upstream v1.4.2: fix `forge_paths` TOML decode mypy false positive and
+      `should_skip_file` self/cache scan; remove the CI `misc` workaround after.
+- [x] `.agent-state/memory/agent_metrics.json` + `scripts/sync_metrics.py`
+- [x] `memory_policy.md`, `AI_CONTEXT.md`, refreshed task/next_steps/lessons
+- [x] `memory prune` dry-run by default; `--apply` for mutations
+- [x] Validator covers scaffolds, links, canonical agent IDs, state, trigger conflicts
+- [x] `.agent/tools` split and cleaned (ruff/format/mypy/C90/module size)
+- [x] `.agent/tests` (33 tests) and CI steps for lint/type/test/validate/metrics
+- [x] Workflows adapted to real repo commands (start/close/tests/release)
+- [x] Sibling compatibility: overlay workflows, custom agents from `opencode.json`,
+      project commands in `forge.toml`, domain-pack metrics skipped, strict mode opt-in
+
+**Pending (P1/P2):**
+- [ ] Consolidate root `AGENTS.md`, `.agent/AGENTS.md` and `QUICK_REFERENCE.md` into one
+      source of truth (Gen 8 item still open).
+- [ ] Choose one QGIS domain pack and remove the divergent copy (`scaffold/qgis` vs
+      `.agent/scaffold/qgis`).
+- [ ] Remove the remaining `// turbo` runtime hints or document them as opencode-only.
+- [ ] Decide whether the `qa-docker` skill should remain active (the repository has no
+      Docker setup; workflows now use local commands).
+- [ ] Add end-to-end tests for deploy/package (CLI P1 backlog).
+- [ ] Address CLI P1 items: symlink traversal, Windows ZIP separators, trust model for
+      hooks/dependencies, `py.typed`/strict mypy, dead `cli.py`, README ignore syntax,
+      docs/Makefile drift, release-note filenames.
+- [ ] Archive/annotate the Gen 7/8 architecture plans.
 
 **Command to resume:**
-`/start-session`
+`/start-session` (it now refreshes metrics and runs the validators).

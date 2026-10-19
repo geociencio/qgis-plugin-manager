@@ -1,26 +1,38 @@
-# Active Task: Release Automation & core.py Refactor
+# Active Task: Agent Framework P0 Hardening
 
 ## Status
 - **Phase**: Closed
 - **Progress**: 100%
-- **Status**: ✅ Released (v0.9.1, v0.9.2)
+- **Status**: ✅ P0 implemented and verified (2026-10-19)
 
 ## Objectives
-1. [x] Adopt the analyzer-style automated release pipeline (GitHub draft + PyPI) and migrate the release docs.
-2. [x] Add a coverage gate (80%) and `ruff format --check` to CI.
-3. [x] Split `core.py` into a cohesive package and lower cyclomatic complexity.
-4. [x] Fix the cross-platform CI failures (macOS/Windows).
-5. [x] Release v0.9.1 and v0.9.2.
+1. [x] Bootstrap `.agent-state/memory/agent_metrics.json` with a real collector
+   (`scripts/sync_metrics.py`).
+2. [x] Make `forge.py memory prune` a dry-run by default (`--apply` to mutate).
+3. [x] Extend the validator to scaffolds, links, canonical agent IDs, state files
+   and trigger conflicts.
+4. [x] Adapt start/close/test/release workflows to commands that exist in the repository.
+5. [x] Dogfood the framework gates: ruff, formatting, mypy, complexity, module size and
+   tooling tests.
+6. [x] Add agent-system validation and tooling checks to CI.
 
 ## Todo
-- [x] `.github/workflows/release.yml` + `main.yml` coverage/format gates; `pytest-cov`.
-- [x] Migrate release docs to `docs/releases/{notes,github}`; rewrite `RELEASE_PROCESS.md`.
-- [x] `core/` package split + complexity reduction; updated `@patch` targets.
-- [x] Cross-platform test fixes (path resolution + UTF-8 reads).
-- [x] Releases v0.9.1, v0.9.2 (tag → draft → publish → PyPI).
+- [x] Metrics collector + metrics/policy/AI context files.
+- [x] Safe pruning + tests.
+- [x] Validator split (`agent_links`, `workflow_graph`, `skill_conflicts`,
+  `frontmatter`) + tooling tests.
+- [x] Framework lint/type/complexity/module-size cleanup.
+- [x] CI job for `.agent` validation, lint, types and tests.
+- [x] Workflow and documentation refresh.
 
 ## Context
-- Framework: **agentic-forge** (`.agent/` submodule v1.2.0, project state in `.agent-state/`).
-- Quality: 190 tests, 89.93% coverage, `ruff`/`ruff format --check`/`mypy` clean;
-  CI green across Ubuntu/Windows/macOS × Python 3.11–3.13.
-- Release path: push tag `vX.Y.Z` → draft GitHub Release → publish → `publish-pypi` → PyPI.
+- Framework: **agentic-forge** `.agent/` submodule **v1.4.1** (clean upstream
+  release); two upstream issues (mypy TOML decode, metrics self/cache scan) are
+  documented and worked around in CI until v1.4.2.
+- Quality: **217 project tests**, **90.48 %** line coverage, ruff/format/mypy clean;
+  **33 framework tooling tests**; CI green across Ubuntu/Windows/macOS × Python 3.11–3.13.
+- Metrics: `agent_metrics.json` refreshed with `uv run python scripts/sync_metrics.py`.
+- Compatibility: validated against temporary copies of `sec_interp`,
+  `qgis-plugin-analyzer` and `ai-context-core` (validate, graph, conflicts, metrics,
+  memory check).
+- Next: see `.agent-state/next_steps.md` for the P1 backlog.

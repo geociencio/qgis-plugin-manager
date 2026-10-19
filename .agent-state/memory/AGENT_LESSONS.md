@@ -1,33 +1,62 @@
 # Agent Learning Memory
 
-This file records technical lessons, user preferences, and solutions to complex issues encountered during development. It serves as semantic memory to avoid repeating mistakes and optimize future AI decisions across sessions.
+This file records technical lessons, user preferences, and solutions to complex issues
+encountered during development. It is the semantic-memory layer of the Agentic Forge
+system; see `memory_policy.md` for retention and promotion rules.
 
 ---
 
 ## 🧠 Critical Lessons
 
-### Session 2026-10-10 — Release Pipeline & core.py Refactor
 ```yaml
 lessons:
+  - date: 2026-10-19
+    category: AGENTIC_SYSTEM
+    topic: Framework tooling needs its own quality gate
+    lesson: >-
+      A tooling directory excluded from the project's lint/type/coverage paths drifts
+      silently even when the framework preaches zero-regression gates.
+    action: >-
+      Lint, type-check and test .agent/tools in CI, and run forge.py validate as a
+      required job.
+  - date: 2026-10-19
+    category: AGENTIC_SYSTEM
+    topic: Session workflows depend on a metrics bootstrap
+    lesson: >-
+      The session lifecycle fails if agent_metrics.json does not exist, so a fresh
+      clone cannot start or close a session until a collector runs.
+    action: >-
+      Run `uv run python scripts/sync_metrics.py` before metrics validation, and keep
+      a committed metrics baseline in .agent-state/memory/.
+  - date: 2026-10-19
+    category: TOOLING
+    topic: Destructive maintenance commands must be opt-in
+    lesson: >-
+      Documentation that labels a pruning command as a dry-run is dangerous when the
+      implementation mutates files by default.
+    action: >-
+      Default to a dry-run, require --apply, print the exact candidates, and back up
+      before deleting history.
   - date: 2026-10-10
     category: TOOLING
     topic: Mock patch targets after a package split
     lesson: >-
       Splitting a module into a package keeps `from pkg.mod import x` working via
-      re-exports, but `unittest.mock.patch("pkg.x")` no longer intercepts calls made from
-      inside the new submodules (they read their own module globals).
+      re-exports, but `unittest.mock.patch("pkg.x")` no longer intercepts calls made
+      from inside the new submodules (they read their own module globals).
     action: >-
-      After splitting a module, retarget every `@patch` to the submodule that looks up the
-      symbol (e.g. `pkg.deploy.x`), not the package root.
+      After splitting a module, retarget every `@patch` to the submodule that looks up
+      the symbol (e.g. `pkg.deploy.x`), not the package root.
   - date: 2026-10-10
     category: TESTING
     topic: Cross-platform file and path assertions
     lesson: >-
-      `tempfile` returns unresolved paths while `Path.resolve()` follows symlinks and 8.3
-      short names, so equality checks and default-encoding reads fail on macOS/Windows CI.
+      `tempfile` returns unresolved paths while `Path.resolve()` follows symlinks and
+      8.3 short names, so equality checks and default-encoding reads fail on
+      macOS/Windows CI.
     action: >-
-      Compare against `tmp_path.resolve()` and always pass `encoding="utf-8"` when reading
-      files that were written as UTF-8.
+      Compare against `tmp_path.resolve()` and always pass `encoding="utf-8"` when
+      reading files written as UTF-8.
   - date: 2026-10-10
     category: TOOLING
     topic: Release-event workflows use the tag's commit
@@ -35,39 +64,39 @@ lessons:
       A `release: published` event evaluates the workflow from the tagged commit, and a
       publish job must not declare `needs:` on a job that is skipped on that event.
     action: >-
-      Keep `publish-pypi` on its own `release` condition and apply release-event fixes in
-      the commit the tag points to.
+      Keep `publish-pypi` on its own `release` condition and apply release-event fixes
+      in the commit the tag points to.
 ```
-
-### QGIS 4 and Multi-version Path Detection
-- **Lesson [2026-05-12]**: When supporting multiple software versions, use dynamic path templates (e.g., `QGIS{version}`) instead of hardcoded strings. This allows for easy extension to future versions (e.g., QGIS 5) with minimal code changes.
-- **Lesson [2026-05-12]**: Interactive CLI validation is a powerful fallback. If a detected path doesn't exist, asking the user to create it or provide a manual path prevents the "unsupported environment" dead-end and makes the tool more flexible.
-- **Lesson [2026-05-12]**: In class-based CLI commands (Typer or Argparse), ensure that settings and command-line arguments are merged correctly, giving priority to explicit CLI flags over persistent settings.
-
-### Gen 5 Architecture
-- **Lesson [2026-04-05]**: The Separation of Concerns between `.agent/` (active development env) and `scaffold/` (distribution blueprints) is the core architectural principle of Gen 5. Never mix domain-specific skills (qgis-core, qa-docker) in the agent's active skill set when the primary project is a CLI tool. These belong in `scaffold/qgis/skills/`.
-- **Lesson [2026-04-05]**: When syncing from a master framerepo using `cp -ra` interactively, it may stall waiting for overwrite confirmation. Always use `rsync -av --delete` with explicit source/destination for deterministic results.
-
-### Ruff / Scripts Folder
-- **Lesson [2026-04-05]**: Scripts inherited from `antigravity-framerepo` (mcp_server.py, skill_sync.py, security_scan.py) contain E501/E741/B007/F841 linting debts incompatible with this project's line-length=88. Resolution: add `exclude = ["scripts/"]` to `[tool.ruff]` in pyproject.toml. Do NOT attempt auto-fix – it cannot fix E501 automatically.
-
-### Git Submodule Trap
-- **Lesson [2026-04-05]**: The `antigravity-framerepo` was symlinked as a git submodule (.git folder inside). When `git add .` picks it up, it causes `fatal: not recognized as a git repository`. Always remove the inner `.git` folder or use `rsync` instead of symlinking external repos.
 
 ---
 
 ## ⚙️ User Preferences
-- **Language**: Agent documentation, code and commits in English.
-- **Formatting**: `black` + `ruff` via `uv run`. Always run both consecutively.
-- **Package manager**: `uv` exclusively. Never use `pip` directly.
-- **UI Development**: Programmatic (no Qt Designer / .ui files).
-- **Commits**: Conventional Commits in English. See `docs/COMMIT_GUIDELINES.md`.
-- **Skill sync**: Always run `python scripts/skill_sync.py` after modifying `.agent/` to keep `AGENTS.md` current.
+
+- **Language**: Agent documentation, code, lessons and commits in English.
+- **Formatting**: `uv run ruff check .` + `uv run ruff format .` (ruff is the only
+  formatter; do not introduce black).
+- **Package manager**: `uv` for the project; the CLI keeps a pip fallback for external
+  environments, which is intentional.
+- **Testing**: local `uv run pytest` is the primary path; Docker is optional and the
+  repository does not ship a Docker setup.
+- **UI**: the manager compiles `.ui` files, but new UI work should prefer programmatic
+  Qt unless a `.ui` source is explicitly requested.
+- **Commits**: Conventional Commits in English.
+- **Metrics**: run `uv run python scripts/sync_metrics.py` before closing a session and
+  `uv run python .agent/tools/forge.py metrics validate` before committing metric changes.
+- **Framework state**: never write project state into `.agent/`; use `.agent-state/`.
 
 ---
 
 ## 🛠️ Hotspot Solutions
-- **Pre-commit hook block on ruff E501 in scripts/**: Use `git commit --no-verify` as a tactical bypass when the violations are in non-distributable utility scripts. Document the bypass in the commit body.
+
+- **Pre-commit hook block on ruff E501 in `scripts/`**: `scripts/` is excluded from the
+  project ruff configuration; fix framework/tooling style in `.agent/tools` instead of
+  bypassing hooks.
+- **Stale metric references**: refresh the metrics file, then run
+  `forge.py metrics validate`; do not hand-edit historical numbers in architecture plans.
+- **Long-lived lessons**: set `consolidated_in` once a lesson is reflected in a
+  `SKILL.md`; `memory prune --apply` will move it to the `[PRUNED]` index.
 
 ---
-*Last updated: 2026-04-05*
+*Last updated: 2026-10-19*

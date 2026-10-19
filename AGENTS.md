@@ -88,7 +88,7 @@ uv run qgis-manage bump --help       # Version bumping
 
 ### Release
 ```bash
-uv run python -m build && twine check dist/*
+uv build && uvx twine check dist/*
 ```
 
 ---
@@ -166,7 +166,7 @@ Skills live in `.agent/skills/*/SKILL.md` (framework) and `.agent-state/skills/*
 | [commit-standards](.agent/skills/commit-standards/SKILL.md) | Clean, conventional commits with quality validation. |
 | [documentation-standards](.agent/skills/documentation-standards/SKILL.md) | Standards for technical logs, session records, and project history. |
 | [i18n-standards](.agent/skills/i18n-standards/SKILL.md) | Internationalization standards. |
-| [qa-docker](.agent/skills/qa-docker/SKILL.md) | Dockerized testing and Mock-first testing. |
+| [qa-docker](.agent/skills/qa-docker/SKILL.md) | **Deprecated alias** for `testing-standards` (removed in the next major release). |
 | [release-management](.agent/skills/release-management/SKILL.md) | Python package release process. |
 | [testing-standards](.agent/skills/testing-standards/SKILL.md) | Automated testing, CI/CD, and Mock usage. |
 
@@ -189,14 +189,20 @@ This project enforces:
 
 - **Ruff**: `ruff check .` and `ruff format .` pass with zero errors.
 - **Mypy**: `mypy src` passes.
-- **Pytest**: full suite passes.
+- **Pytest**: full suite passes (including `.agent/tests/`).
+- **Agent tooling**: framework lint/format/mypy (with the v1.4.1 `misc` workaround),
+  33 tests and validators pass in CI (`.github/workflows/main.yml`).
 - **Conventional Commits**: `type(scope): description` in English.
 
 ### Agent system validation
 ```bash
-python .agent/tools/forge.py validate           # skills/workflows consistency
-python .agent/tools/forge.py validate --graph   # dependency graph + broken refs
-python .agent/tools/forge.py memory prune       # prune expired snapshots (dry-run)
+# Framework checks run in CI; see .github/workflows/main.yml
+uv run python scripts/sync_metrics.py            # refresh agent_metrics.json
+uv run python .agent/tools/forge.py validate    # skills/workflows/links/state
+uv run python .agent/tools/forge.py validate --graph   # dependency graph
+uv run python .agent/tools/forge.py metrics validate   # metric consistency
+uv run python .agent/tools/forge.py memory prune       # dry-run; add --apply
+uv run pytest .agent/tests -q                   # framework tooling tests
 ```
 
 ---
@@ -207,7 +213,7 @@ python .agent/tools/forge.py memory prune       # prune expired snapshots (dry-r
 - **Episodic**: `docs/maintenance/` session logs + `.agent-state/history/`.
 - **Semantic**: `.agent-state/memory/AGENT_LESSONS.md` + `SKILL.md` files.
 
-Policy: `.agent-state/memory/memory_policy.md`. Lessons older than 90 days that are already reflected in a `SKILL.md` are pruned by `forge memory prune`.
+Policy: `.agent-state/memory/memory_policy.md`. Lessons older than 90 days that are already reflected in a `SKILL.md` are pruned by `forge memory prune --apply`; without `--apply` the command is a dry-run.
 
 ---
 

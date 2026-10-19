@@ -1,6 +1,7 @@
 ---
 description: How to run tests inside QGIS (integration testing)
-agent: QA Engineer
+agent: qa_engineer
+template: true
 skills: [qa-docker]
 validation: |
   - Verify that QGIS is installed correctly

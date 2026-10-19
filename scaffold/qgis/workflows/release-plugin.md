@@ -1,9 +1,10 @@
 ---
 description: Unified Release Workflow (QGIS Release Flow) based on IA Guide
-agent: QA Engineer
+agent: qa_engineer
+template: true
 skills: [release-management, qa-docker, commit-standards, i18n-standards, changelog-generator]
 validation: |
-  - Verify that 535+ tests pass in Docker
+  - Verify that the project test suite passes
   - Confirm that qgis-analyzer score > 25/100
   - Ensure Zero High-Severity Security Findings (`security --deep`)
   - Validate that versions are synchronized in 3 files

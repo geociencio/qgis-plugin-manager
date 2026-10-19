@@ -1,0 +1,40 @@
+{
+    "schema_version": 1,
+    "generated_at": "2026-10-19T03:06:00+00:00",
+    "summary": {
+        "test_count": 217,
+        "tests_ok": 217,
+        "coverage_percent": 90.48,
+        "quality_score_latest": 90.48,
+        "maintainability_score": null,
+        "security_score": null,
+        "cyclomatic_complexity_gate": "PASS",
+        "i18n_hygiene_gate": "N/A",
+        "total_issues": 0,
+        "task_completion_rate": 1.0,
+        "total_sessions": 0
+    },
+    "last_session": {},
+    "history": [],
+    "ground_truth_sources": {
+        "pytest": {
+            "date": "2026-10-19",
+            "command": "pytest -q --cov=qgis_manager",
+            "result": "PASS"
+        },
+        "coverage": {
+            "date": "2026-10-19",
+            "percent": 90.48
+        },
+        "ruff": {
+            "date": "2026-10-19",
+            "command": "ruff check .",
+            "result": "PASS"
+        },
+        "mypy": {
+            "date": "2026-10-19",
+            "command": "mypy src",
+            "result": "PASS"
+        }
+    }
+}
