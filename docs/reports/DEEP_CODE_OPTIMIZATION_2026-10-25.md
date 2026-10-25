@@ -12,8 +12,9 @@ strict mypy clean, framework v1.4.2.
 
 **Status**: the P0 batch was implemented on 2026-10-25 (CLI single instantiation,
 BaseCommand error wrapper, deploy/package extraction, compile timeouts + ignore-aware
-scan, dead helper removal). Result: **250 tests, 91.83 % coverage**, deploy/package no
-longer C901; validation split and ignore-loader refactor remain P1.
+scan, dead helper removal). Result after P1: **253 tests, 92.35 % coverage, C901 = 0**; validation and metadata
+are modular, CLI uses a registry, compile tools share a context and deploy compares
+file content.
 
 ---
 

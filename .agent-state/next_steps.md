@@ -2,9 +2,9 @@
 
 **Date**: 2026-10-25
 **Last session**: `p1_p2_completion` (closed; P1/P2 complete)
-**Current session**: P0 optimization batch implemented (2026-10-25).
-**Context**: P1/P2 are closed and the P0 optimization batch is implemented. Project:
-**250 tests**, **91.83 %** line coverage; framework v1.4.2 with 37 tests.
+**Current session**: P1 structural optimization implemented (2026-10-25).
+**Context**: P1/P2 are closed; P0 and P1 optimization batches are implemented.
+Project: **253 tests**, **92.35 %** line coverage; framework v1.4.2 with 37 tests.
 
 **Completed (this cycle):**
 - [x] Adopted Agentic Forge **v1.4.1** (upstream P0).
@@ -35,7 +35,9 @@
 - [x] P2-2: Gen 7/8 plans annotated in `docs/architecture/AGENTIC_SYSTEM_PLANS.md`.
 - [x] P0-1..P0-6: CLI single instantiation/error wrapper, deploy/package
       extraction, compile timeouts/ignore scan and dead-helper removal.
-      Project tests: 250, coverage 91.83 %.
+- [x] P1-1..P1-6: ignore/validation/metadata splits, command registry,
+      CompileContext and deploy content comparison. Project tests: 253,
+      coverage 92.35 %, C901 = 0.
 
 **Pending:**
 - No active project items. Remaining framework work belongs upstream in `agentic-forge`.
