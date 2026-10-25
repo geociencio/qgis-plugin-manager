@@ -26,6 +26,15 @@ class TestCleanCommand(_CommandTestBase):
         self.assertIn("remove cache", output)
         self.assertIn("Dry run", output)
 
+    @patch("qgis_manager.cli.commands.clean.clean_artifacts")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_clean_prints_tracked_warning(self, mock_find, mock_clean):
+        mock_find.return_value = Path(tempfile.mkdtemp())
+        mock_clean.return_value = ["warning: resources.py is tracked by Git"]
+        exit_code, _, error = self._invoke(["clean"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("tracked by Git", error)
+
 
 class TestInstallDepsCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.install_deps.install_external_libs")
@@ -63,6 +72,15 @@ class TestAnalyzeCommand(_CommandTestBase):
         exit_code, _, _ = self._invoke(["analyze"])
         self.assertEqual(exit_code, 0)
 
+    @patch("qgis_manager.cli.analyzer.subprocess.run")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_analyze_failure(self, mock_find, mock_run):
+        mock_find.return_value = Path(tempfile.mkdtemp())
+        mock_run.return_value.returncode = 2
+        exit_code, output, _ = self._invoke(["analyze"])
+        self.assertEqual(exit_code, 2)
+        self.assertIn("Analysis failed", output)
+
 
 class TestSecurityCommand(_CommandTestBase):
     @patch("qgis_manager.cli.analyzer.subprocess.run")
@@ -85,3 +103,15 @@ class TestSecurityCommand(_CommandTestBase):
         mock_run.return_value.returncode = 1
         exit_code, _, _ = self._invoke(["security"])
         self.assertEqual(exit_code, 1)
+
+    @patch("qgis_manager.cli.analyzer.subprocess.run")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_security_strict_with_output(self, mock_find, mock_run):
+        mock_find.return_value = Path(tempfile.mkdtemp())
+        mock_run.return_value.returncode = 0
+        exit_code, _, _ = self._invoke(["security", "--strict", "-o", "reports"])
+        self.assertEqual(exit_code, 0)
+        argv = mock_run.call_args_list[-1][0][0]
+        self.assertIn("--strict", argv)
+        self.assertIn("-o", argv)
+        self.assertIn("reports", argv)

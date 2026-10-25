@@ -156,6 +156,80 @@ class TestCLI(unittest.TestCase):
         exit_code, _, _ = self._invoke(["--verbose", "deploy"])
         self.assertEqual(exit_code, 1)
 
+    def test_main_entrypoint_exits_with_app_code(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+
+        from qgis_manager.cli import main
+
+        fake_app = SimpleNamespace(run=lambda: 7)
+        with (
+            patch("qgis_manager.cli.CLIApp", return_value=fake_app),
+            patch("qgis_manager.cli.sys.exit") as mock_exit,
+        ):
+            main()
+        mock_exit.assert_called_once_with(7)
+
+    def test_version_fallback_when_package_missing(self):
+        import importlib
+        from importlib.metadata import PackageNotFoundError
+        from unittest.mock import patch
+
+        import qgis_manager
+
+        with patch(
+            "importlib.metadata.version",
+            side_effect=PackageNotFoundError("qgis-manage"),
+        ):
+            importlib.reload(qgis_manager)
+            self.assertEqual(qgis_manager.__version__, "0.0.0-unknown")
+        importlib.reload(qgis_manager)
+
+    def test_app_run_with_argv_none(self):
+        with patch("sys.argv", ["qgis-manage"]):
+            exit_code, output, _ = self._invoke(None)
+        self.assertEqual(exit_code, 0)
+        self.assertIn("usage:", output.lower())
+
+    @patch("qgis_manager.cli.app.logging.FileHandler")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_app_log_file_handler(self, mock_find, mock_handler):
+        mock_find.side_effect = FileNotFoundError("No project found")
+        exit_code, _, _ = self._invoke(
+            ["--verbose", "--log-file", "/tmp/qgis-test.log", "deploy"]
+        )
+        self.assertEqual(exit_code, 1)
+        mock_handler.assert_called_once_with("/tmp/qgis-test.log")
+
+    @patch("qgis_manager.cli.app.CLIApp._setup_logging")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_app_unexpected_error_after_parse(self, _mock_find, mock_setup):
+        mock_setup.side_effect = RuntimeError("logging failed")
+        exit_code, _, error = self._invoke(["deploy"])
+        self.assertEqual(exit_code, 1)
+        self.assertIn("logging failed", error)
+
+    def test_registry_skips_broken_and_non_command_entry_points(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+
+        from qgis_manager.cli.registry import build_commands
+
+        class NotACommand:
+            pass
+
+        broken = SimpleNamespace(
+            name="broken", load=lambda: (_ for _ in ()).throw(RuntimeError("boom"))
+        )
+        invalid = SimpleNamespace(name="invalid", load=lambda: NotACommand)
+        with patch(
+            "qgis_manager.cli.registry.entry_points",
+            return_value=[broken, invalid],
+        ):
+            commands = build_commands()
+        self.assertTrue(commands)
+        self.assertFalse(any(command.name == "broken" for command in commands))
+
 
 if __name__ == "__main__":
     unittest.main()
