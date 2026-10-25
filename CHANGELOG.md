@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.10.0] - 2026-10-25
 
 ### Added
 - **Safe lifecycle operations**: plugin names produce validated ASCII slugs; empty or unsafe names are rejected before deploy/dclean/init/package.
@@ -27,10 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Packaging**: dependencies are installed before the compliance check and install failures abort the package.
-
 - **Typing and tooling**: the package now ships `py.typed` and passes `mypy --strict`; `make test` uses pytest, `make lint` runs strict mypy on `src`, and `make format` applies Ruff formatting.
 - **Cleanup and docs**: removed the shadowed `cli.py` and dead `IgnoreMatcher.get_ignore_func`, fixed `get_source_files(include_dev=...)`, corrected the README ignore snippet, and marked the QGIS 3 hardcode note as resolved.
-
 - **Framework docs**: documented `// turbo` as an opencode-only runtime hint and `qa-docker` as a deprecated upstream alias not adopted by this project.
 - **Release notes**: active notes now use `vX.Y.Z.md`; the release workflow falls back to legacy `RELEASE_NOTES_*.md` names and a generic body for old tags.
 - **Architecture**: added `docs/architecture/AGENTIC_SYSTEM_PLANS.md` to record the Gen 7/8 plan status without modifying the shared framework submodule.
@@ -38,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Internal architecture**: validation and metadata are modular, CLI commands use a registry, compile tools share a bounded context, and deploy detects content changes beyond size/mtime.
 - **Quality hardening**: narrowed exception handling, enforced 90 % branch coverage, portable config paths, ignore negation, Git-boundary project discovery and split test suites.
 - **Platform controls**: nested ignore files, policy-bounded hooks/dependencies, `compile --jobs`, and external `qgis_manager.commands` entry points.
+
 ## [0.9.2] - 2026-10-10
 
 ### Fixed
