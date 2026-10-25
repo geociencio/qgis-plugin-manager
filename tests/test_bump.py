@@ -134,6 +134,52 @@ class TestBumpCommand(unittest.TestCase):
 
         self.assertEqual(exit_code, 1)
 
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_bump_short_version_is_padded(self, mock_find):
+        root = self._make_project("1.2")
+        mock_find.return_value = root
+
+        exit_code, _, _ = self._invoke(["bump", "patch"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(get_plugin_metadata(root)["version"], "1.2.1")
+
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_bump_falls_back_to_metadata_version(self, mock_find):
+        root = Path(tempfile.mkdtemp())
+        (root / "metadata.txt").write_text(
+            "[general]\nname = demo\nversion = 1.2.3\n", encoding="utf-8"
+        )
+        mock_find.return_value = root
+
+        exit_code, _, _ = self._invoke(["bump", "patch"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(get_plugin_metadata(root)["version"], "1.2.4")
+
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_bump_sync_without_version(self, mock_find):
+        root = Path(tempfile.mkdtemp())
+        (root / "pyproject.toml").write_text("[project]\nname='demo'\n")
+        mock_find.return_value = root
+
+        exit_code, output, _ = self._invoke(["bump", "sync"])
+
+        self.assertEqual(exit_code, 1)
+        self.assertIn("No version found", output)
+
+    @patch("qgis_manager.cli.commands.bump.set_project_version", return_value=False)
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_bump_pyproject_without_version_entry(self, mock_find, _mock_set_version):
+        root = self._make_project("1.2.3")
+        (root / "pyproject.toml").write_text("[project]\nname='demo'\n")
+        mock_find.return_value = root
+
+        exit_code, output, _ = self._invoke(["bump", "patch"])
+
+        self.assertEqual(exit_code, 1)
+        self.assertIn("Failed to update version", output)
+
 
 if __name__ == "__main__":
     unittest.main()
