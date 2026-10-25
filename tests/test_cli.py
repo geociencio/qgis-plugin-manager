@@ -94,6 +94,47 @@ class TestCLI(unittest.TestCase):
         self.assertEqual(exit_code, 1)
         self.assertIn("boom", error)
 
+    def test_external_command_entry_point(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+
+        from qgis_manager.cli.base import BaseCommand
+        from qgis_manager.cli.registry import build_commands
+
+        class ExternalCommand(BaseCommand):
+            @property
+            def name(self):
+                return "external"
+
+            @property
+            def help(self):
+                return "External command"
+
+            def configure_parser(self, parser):
+                pass
+
+            def execute(self, args):
+                return 0
+
+        entry = SimpleNamespace(name="external", load=lambda: ExternalCommand)
+        with patch("qgis_manager.cli.registry.entry_points", return_value=[entry]):
+            classes = build_commands()
+        self.assertTrue(
+            any(isinstance(command, ExternalCommand) for command in classes)
+        )
+
+    def test_duplicate_external_command_is_rejected(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+
+        from qgis_manager.cli.commands.deploy import DeployCommand
+        from qgis_manager.cli.registry import build_commands
+
+        entry = SimpleNamespace(name="duplicate", load=lambda: DeployCommand)
+        with patch("qgis_manager.cli.registry.entry_points", return_value=[entry]):
+            with self.assertRaises(ValueError):
+                build_commands()
+
     def test_command_registry_is_complete_and_unique(self):
         from qgis_manager.cli.base import BaseCommand
         from qgis_manager.cli.registry import COMMAND_CLASSES

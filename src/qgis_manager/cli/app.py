@@ -25,9 +25,9 @@ class CLIApp:
         Returns:
             Dictionary mapping command names to command instances.
         """
-        from .registry import COMMAND_CLASSES
+        from .registry import build_commands
 
-        instances = [command_class() for command_class in COMMAND_CLASSES]
+        instances = build_commands()
         return {command.name: command for command in instances}
 
     def _build_parser(self) -> argparse.ArgumentParser:
