@@ -94,6 +94,11 @@ class TestCLI(unittest.TestCase):
         self.assertEqual(exit_code, 1)
         self.assertIn("boom", error)
 
+    @patch("qgis_manager.cli.commands.deploy.DeployCommand.__init__", return_value=None)
+    def test_commands_are_instantiated_once(self, mock_init):
+        CLIApp()
+        self.assertEqual(mock_init.call_count, 1)
+
     @patch("qgis_manager.cli.commands.deploy.find_project_root")
     def test_cli_verbose(self, mock_find):
         mock_find.side_effect = FileNotFoundError("No project found")

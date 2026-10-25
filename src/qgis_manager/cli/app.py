@@ -52,7 +52,8 @@ class CLIApp:
             HooksCommand,
             BumpCommand,
         ]
-        return {cmd().name: cmd() for cmd in command_classes}
+        instances = [command_class() for command_class in command_classes]
+        return {command.name: command for command in instances}
 
     def _build_parser(self) -> argparse.ArgumentParser:
         """Build the argument parser with all commands.
