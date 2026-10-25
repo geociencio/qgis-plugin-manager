@@ -1,11 +1,11 @@
 {
     "schema_version": 1,
-    "generated_at": "2026-10-25T13:51:02+00:00",
+    "generated_at": "2026-10-25T14:01:50+00:00",
     "summary": {
-        "test_count": 340,
-        "tests_ok": 340,
-        "coverage_percent": 94.67,
-        "quality_score_latest": 94.67,
+        "test_count": 373,
+        "tests_ok": 373,
+        "coverage_percent": 95.32,
+        "quality_score_latest": 95.32,
         "maintainability_score": null,
         "security_score": null,
         "cyclomatic_complexity_gate": "PASS",
@@ -17,8 +17,8 @@
     "last_session": {
         "date": "2026-10-25",
         "topic": "p1_p2_completion",
-        "tests_ok": 340,
-        "quality_score": 94.67,
+        "tests_ok": 373,
+        "quality_score": 95.32,
         "task_completion_rate": 1.0,
         "retries": 0,
         "stop_conditions_triggered": 0,
@@ -46,7 +46,7 @@
         },
         "coverage": {
             "date": "2026-10-25",
-            "percent": 94.67
+            "percent": 95.32
         },
         "ruff": {
             "date": "2026-10-25",

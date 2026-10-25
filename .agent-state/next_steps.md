@@ -2,9 +2,9 @@
 
 **Date**: 2026-10-25
 **Last session**: `p1_p2_completion` (closed; P1/P2 complete)
-**Current session**: P1 performance implemented and 0.11.0 prepared (2026-10-25).
-**Context**: P0, coverage and P1 are complete; P2 remains.
-Project: **340 tests**, **94.67 %** combined coverage; framework v1.4.2.
+**Current session**: P2 platform UX implemented and 0.12.0 prepared (2026-10-25).
+**Context**: P0, coverage, P1 and P2 are complete. Project: **373 tests**,
+**95.32 %** combined coverage; framework v1.4.2.
 
 **Completed (this cycle):**
 - [x] Adopted Agentic Forge **v1.4.1** (upstream P0).
@@ -47,8 +47,10 @@ Project: **340 tests**, **94.67 %** combined coverage; framework v1.4.2.
 - [x] Coverage initiative: 331 tests, 96.55 % statements, 91.47 % branches,
       95/90 gates and E2E P0 contracts.
 - [x] P1-1..P1-4: pruned repo scan, deploy manifest, reflink backups and
-      compile freshness. Project tests: 340, statements 96.01 %, branches
-      90.42 %.
+      compile freshness (see the 0.11.0 release notes for its baseline).
+- [x] P2-1..P2-7: JSON, ignore explain, max-cc, deploy dry-run, profiles,
+      require-docs and non-shell hooks. Project tests: 373, statements
+      96.77 %, branches 90.73 %.
 
 **Pending:**
 - No active project items. Remaining framework work belongs upstream in `agentic-forge`.
