@@ -85,6 +85,28 @@ class TestIgnoreMatcher(unittest.TestCase):
             # And 'should_be_excluded.txt' must be excluded.
             self.assertTrue(matcher.should_exclude(tmp_path / "should_be_excluded.txt"))
 
+    def test_negation_reincludes_file(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / ".qgisignore").write_text(
+                "*.log\n!keep.log\n", encoding="utf-8"
+            )
+            matcher = IgnoreMatcher(tmp_path)
+
+            self.assertTrue(matcher.should_exclude(tmp_path / "debug.log"))
+            self.assertFalse(matcher.should_exclude(tmp_path / "keep.log"))
+
+    def test_negation_reincludes_directory_child(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / ".qgisignore").write_text(
+                "data/\n!data/keep.txt\n", encoding="utf-8"
+            )
+            matcher = IgnoreMatcher(tmp_path)
+
+            self.assertTrue(matcher.should_exclude(tmp_path / "data" / "other.txt"))
+            self.assertFalse(matcher.should_exclude(tmp_path / "data" / "keep.txt"))
+
     def test_implicit_recursion(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)

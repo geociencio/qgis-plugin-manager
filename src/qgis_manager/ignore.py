@@ -92,35 +92,34 @@ class IgnoreMatcher:
         self.patterns = load_ignore_patterns(project_root, include_dev)
 
     def should_exclude(self, path: Path) -> bool:
-        """Determine if a path should be excluded (fnmatch with Git-like semantics)."""
+        """Determine if a path is excluded, honoring ordered ``!`` negations."""
         try:
             rel_path = path.relative_to(self.project_root)
         except ValueError:
             return False
-
         path_str = str(rel_path).replace("\\", "/")
         parts = rel_path.parts
-
+        excluded = False
         for pattern in self.patterns:
-            p = pattern.rstrip("/")
-            is_root_relative = p.startswith("/")
-            if is_root_relative:
-                p = p[1:]
+            negated = pattern.startswith("!")
+            candidate = pattern[1:] if negated else pattern
+            if not candidate:
+                continue
+            if self._matches(path_str, parts, candidate):
+                excluded = not negated
+        return excluded
 
-            if is_root_relative:
-                if fnmatch.fnmatch(path_str, p) or path_str.startswith(p + "/"):
-                    return True
-            else:
-                # Global matching (matches any part of the path or the whole path)
-                if any(fnmatch.fnmatch(part, p) for part in parts):
-                    return True
-
-                # Match full path
-                if fnmatch.fnmatch(path_str, p) or fnmatch.fnmatch(path_str, f"*/{p}"):
-                    return True
-
-                # Implicit recursion for directories
-                if path_str.startswith(f"{p}/") or f"/{p}/" in path_str:
-                    return True
-
-        return False
+    @staticmethod
+    def _matches(path_str: str, parts: tuple[str, ...], pattern: str) -> bool:
+        """Return True when one ignore pattern matches the relative path."""
+        p = pattern.rstrip("/")
+        is_root_relative = p.startswith("/")
+        if is_root_relative:
+            p = p[1:]
+        if is_root_relative:
+            return fnmatch.fnmatch(path_str, p) or path_str.startswith(p + "/")
+        if any(fnmatch.fnmatch(part, p) for part in parts):
+            return True
+        if fnmatch.fnmatch(path_str, p) or fnmatch.fnmatch(path_str, f"*/{p}"):
+            return True
+        return path_str.startswith(f"{p}/") or f"/{p}/" in path_str
