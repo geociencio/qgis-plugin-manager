@@ -68,3 +68,17 @@ def test_deprecated_qa_docker_alias_is_not_adopted() -> None:
     for name in ("AGENTS.md", "forge.toml", "opencode.json"):
         text = (ROOT / name).read_text(encoding="utf-8")
         assert "qa-docker" not in text, name
+
+
+def test_agentic_architecture_plan_links_exist() -> None:
+    """The Gen 7/8 annotation must link to the upstream plans."""
+    index = ROOT / "docs" / "architecture" / "AGENTIC_SYSTEM_PLANS.md"
+    text = index.read_text(encoding="utf-8")
+
+    for link in (
+        "../../.agent/architecture/IMPROVEMENT_PLAN_GEN7.md",
+        "../../.agent/architecture/IMPROVEMENT_PLAN_GEN8.md",
+        "../../.agent/architecture/IMPROVEMENT_PLAN.md",
+    ):
+        assert f"]({link})" in text
+        assert (index.parent / link).resolve().is_file()

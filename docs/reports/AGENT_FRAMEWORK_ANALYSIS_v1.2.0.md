@@ -321,8 +321,8 @@ Retained project-owned changes:
   clean, validate/graph/conflicts/memory check pass.
 - `forge.py validate`: **15 skills, 14 workflows, 3 templates**, no issues (strict);
   the count dropped after removing the duplicate root QGIS pack.
-- `forge.py metrics validate` / `report`: pass (244 tests, 90.45 %).
-- Project gates: **244 tests**, **90.45 %** line coverage, ruff/format/mypy clean.
+- `forge.py metrics validate` / `report`: pass (248 tests, 90.45 %).
+- Project gates: **248 tests**, **90.45 %** line coverage, ruff/format/mypy clean.
 
 **Sibling compatibility (v1.4.2):** `sec_interp`, `qgis-plugin-analyzer` and
 `ai-context-core` pass validate/metrics/memory/graph/conflicts in temporary copies,
@@ -340,7 +340,6 @@ Path/trust hardening followed (symlink confinement, POSIX ZIP names, `--trust`),
 and the package is now typed (`py.typed`, strict mypy) with the dead `cli.py`
 removed and Makefile/README drift corrected.
 
-**P1 complete:** `// turbo` is documented as an opencode-only framework hint; the
-deprecated `qa-docker` alias remains upstream and is not adopted here. Guard tests
-keep both decisions from leaking into project config. Only P2/architecture cleanup
-remains in `.agent-state/next_steps.md`.
+**P2 complete:** release notes are normalized to `vX.Y.Z.md` (legacy fallback in
+the workflow) and `docs/architecture/AGENTIC_SYSTEM_PLANS.md` records the Gen 7/8
+status without editing the shared submodule. No active project backlog remains.

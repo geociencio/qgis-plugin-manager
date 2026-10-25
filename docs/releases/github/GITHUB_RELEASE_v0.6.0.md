@@ -9,4 +9,4 @@ This release introduces robust project management features for QGIS plugin devel
 - 🐍 **Python Hooks**: Native script execution with project context.
 - 🔍 **Unified Analyze**: Integrated quality checks via `qgis-manage analyze`.
 
-See [RELEASE_NOTES_v0.6.0.md](../notes/RELEASE_NOTES_v0.6.0.md) for full details.
+See [v0.6.0.md](../notes/v0.6.0.md) for full details.

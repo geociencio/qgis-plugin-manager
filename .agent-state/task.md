@@ -1,55 +1,28 @@
-# Active Task: P1 Backlog
+# Active Task: P2 Release & Architecture Cleanup
 
 ## Status
-- **Phase**: P1 (6/6 complete)
+- **Phase**: P2 (2/2 complete)
 - **Progress**: 100%
-- **Status**: ✅ P1 complete (2026-10-25); P2/architecture backlog pending.
+- **Status**: ✅ P2 complete (2026-10-25); no active project backlog.
 
 ## Objectives
-1. [x] Consolidate root `AGENTS.md` as the project source of truth; framework docs
-   are referenced instead of duplicated, with a regression test.
-2. [x] Use `.agent/scaffold/qgis/` as the only QGIS domain pack and remove the
-   unused root `scaffold/qgis/` copy.
-3. [x] Add end-to-end tests for deploy/package (real CLI, isolated filesystem).
-4. [x] Harden CLI paths: symlinks, POSIX ZIP names and explicit `--trust` for
-   hooks/dependencies.
-5. [x] Add `py.typed` + strict mypy, remove dead `cli.py`/`get_ignore_func`, and
-   fix README ignore syntax / Makefile/docs drift.
-6. [x] Document `// turbo` as opencode-only and keep `qa-docker` as a non-adopted
-   upstream alias; add guard tests.
+1. [x] Normalize release-note filenames to `vX.Y.Z.md`, archive the legacy v0.6.2
+   duplicate and add a workflow fallback for old tags.
+2. [x] Annotate the upstream Gen 7/8 architecture plans and record the project
+   position without editing the shared `.agent` submodule.
 
 ## Todo
-- [x] Pick the first P1 item with the user.
-- [x] Write the technical plan before touching code.
-- [x] Root AGENTS consolidation + `tests/test_agent_docs.py`.
-- [x] Removed root `scaffold/qgis/`; framework pack is canonical.
-- [x] Added 8 E2E tests in `tests/test_e2e_cli.py`; fixed purge with
-  absolute `--profile`.
-- [x] Symlink confinement, POSIX ZIP arcnames, unsafe version rejection and
-  `--trust` gating for hooks/dependencies.
-- [x] `py.typed`, strict mypy, Makefile/README/docs cleanup, dead `cli.py`
-  and `get_ignore_func`.
-- [x] Documented opencode-only `// turbo` and non-adopted `qa-docker` alias;
-  244 tests, 90.45 % coverage.
-- [ ] P1 complete; pick a P2/architecture item.
+- [x] Normalize notes and update the release workflow.
+- [x] Create `docs/architecture/AGENTIC_SYSTEM_PLANS.md` and link checks.
+- [x] Refresh metrics and close P2.
 
 ## Context
 - Framework: **agentic-forge** `.agent/` submodule **v1.4.2** (`b264e35`), clean.
-- Quality: **244 project tests**, **90.45 %** line coverage; **37 framework tests**;
-  ruff/format/mypy clean; `forge.py validate` and `metrics validate` pass.
-- Previous phase: P0 hardening + framework adoption, archived at
-  `.agent-state/history/tasks/task_2026-10-19_p0_framework.md`.
-- P1-1: root `AGENTS.md` is canonical; generic framework tables are linked from
-  `.agent/AGENTS.md` / `.agent/QUICK_REFERENCE.md`; `tests/test_agent_docs.py`
-  prevents drift.
-- P1-2: QGIS domain pack is framework-only at `.agent/scaffold/qgis/`;
-  `scaffold/mining/` remains project-owned; `tests/test_agent_docs.py` guards it.
-- P1-3: `tests/test_e2e_cli.py` covers deploy/package via subprocess; found and
-  fixed `--purge-backups` for absolute `--profile` paths.
-- P1-4: symlink sources/targets are confined; ZIP members use `/`; unsafe
-  versions are rejected; hooks/deps require explicit `--trust`.
-- P1-5: package is typed (`py.typed`, `mypy --strict`), Makefile targets are
-  current, README ignore syntax is fixed, and dead `cli.py` is gone.
-- P1-6: `// turbo` documented as opencode-only; `qa-docker` remains a
-  deprecated upstream alias and is not adopted by this project.
-- Next: `.agent-state/next_steps.md` (P2 backlog).
+- Quality: **248 project tests**, **90.45 %** line coverage; **37 framework tests**;
+  ruff/format/strict mypy clean; `forge.py validate` and `metrics validate` pass.
+- Previous phase: P1 complete, archived at
+  `.agent-state/history/tasks/task_2026-10-25_p1_complete.md`.
+- Release notes: active files use `vX.Y.Z.md`; workflow also accepts
+  `RELEASE_NOTES_vX.Y.Z.md` and falls back to a generic body.
+- Architecture: Gen 7 is superseded by Gen 8; Gen 8 remains upstream-owned and
+  Agentic Forge v1.4.2 is the baseline.

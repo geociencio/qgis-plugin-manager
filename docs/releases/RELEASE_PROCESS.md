@@ -29,7 +29,8 @@ git push vX.Y.Z (tag)
 ```
 
 - **Stage 1 — tag push**: creates a **draft** GitHub Release (`draft-release` job), using
-  `docs/releases/notes/<tag>.md` as the body when present.
+  `docs/releases/notes/<tag>.md` as the body when present. The workflow also accepts
+  legacy `RELEASE_NOTES_<tag>.md` files and falls back to a generic body for old tags.
 - **Stage 2 — release published**: when you publish the draft, the `publish-pypi` job
   builds the distribution and uploads it to PyPI using the repo secret `PYPI_TOKEN`.
 

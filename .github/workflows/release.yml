@@ -21,13 +21,30 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Resolve release notes
+        id: release_notes
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          NORMALIZED="docs/releases/notes/${TAG}.md"
+          LEGACY="docs/releases/notes/RELEASE_NOTES_${TAG}.md"
+          if [ -f "$NORMALIZED" ]; then
+            echo "path=$NORMALIZED" >> "$GITHUB_OUTPUT"
+          elif [ -f "$LEGACY" ]; then
+            echo "path=$LEGACY" >> "$GITHUB_OUTPUT"
+          else
+            FALLBACK="${RUNNER_TEMP}/release-notes-${TAG}.md"
+            printf '# Release %s\n\nNo dedicated release notes were provided.\n' "$TAG" > "$FALLBACK"
+            echo "path=$FALLBACK" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Create GitHub Release Draft
         uses: softprops/action-gh-release@v2
         with:
           draft: true
           name: "Release ${{ github.ref_name }}"
-          # Use the per-version notes if present; never fail on a missing file.
-          body_path: docs/releases/notes/${{ github.ref_name }}.md
+          # Normalized notes first, legacy names as a fallback, then a generic body.
+          body_path: ${{ steps.release_notes.outputs.path }}
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

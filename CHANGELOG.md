@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cleanup and docs**: removed the shadowed `cli.py` and dead `IgnoreMatcher.get_ignore_func`, fixed `get_source_files(include_dev=...)`, corrected the README ignore snippet, and marked the QGIS 3 hardcode note as resolved.
 
 - **Framework docs**: documented `// turbo` as an opencode-only runtime hint and `qa-docker` as a deprecated upstream alias not adopted by this project.
+- **Release notes**: active notes now use `vX.Y.Z.md`; the release workflow falls back to legacy `RELEASE_NOTES_*.md` names and a generic body for old tags.
+- **Architecture**: added `docs/architecture/AGENTIC_SYSTEM_PLANS.md` to record the Gen 7/8 plan status without modifying the shared framework submodule.
 ## [0.9.2] - 2026-10-10
 
 ### Fixed
