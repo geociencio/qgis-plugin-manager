@@ -38,7 +38,7 @@ qgis-manage deploy --trust   # allow project hooks to execute
 ### 🪝 Native Python Hooks
 Automate your workflow in pure Python via `plugin_hooks.py` — or shell commands. Hooks receive full project context (metadata, paths, profiles).
 
-> **Trust**: hooks are project-controlled code. `deploy` skips them unless you pass `--trust`; `hooks test` is always explicit.
+> **Trust**: hooks are project-controlled code. `deploy` skips them unless you pass `--trust`; `hooks test` is always explicit. Hook commands are bounded to 300 s and receive a minimal environment; set `HookPolicy(shell=False)` when using the Python API to avoid shell parsing.
 
 ```python
 # plugin_hooks.py
@@ -59,6 +59,7 @@ Compile `.ui` (pyuic), `.qrc` (rcc), and `.ts` (lrelease) files — with dynamic
 
 ```bash
 qgis-manage compile
+qgis-manage compile --jobs 4   # opt-in parallel UI/QRC/TS compilation
 ```
 
 ### 🔢 Automated Versioning
@@ -237,6 +238,7 @@ qgis-manage security --strict
 
 # Install plugin dependencies into a local folder
 qgis-manage install-deps --target libs
+qgis-manage install-deps --dry-run   # print the installer command only
 
 # Clean caches, compiled UI/resources and docs output
 qgis-manage clean
@@ -261,12 +263,15 @@ profile = "default"
 
 ignore = [
     "data/*.csv",
-    "tests/temp/*"
+    "tests/temp/*",
+    "!tests/temp/keep.csv"
 ]
 
 [tool.qgis-manager.hooks]
 post_deploy = "python scripts/notify.py"
 ```
+
+Nested `.qgisignore`/`.gitignore` files apply to their subtree; deeper rules and `!negations` win. External commands can be registered through the `qgis_manager.commands` entry-point group.
 
 ## 🌍 Internationalization (i18n)
 
