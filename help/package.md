@@ -1,12 +1,13 @@
 # qgis-manage package
 
 ```text
-qgis-manage package v0.11.0
+qgis-manage package v0.12.0
 Create distributable ZIP package
 
 Usage: qgis-manage package [-h] [-o OUTPUT] [--dev] [--repo-check]
                            [--sync-version] [--stamp]
                            [--release-version RELEASE_VERSION] [--trust]
+                           [--json] [--require-docs]
                            [path]
 
 Arguments:
@@ -27,6 +28,8 @@ Options:
                         stamping
   --trust               Allow dependency installation from this project
                         (trusted only)
+  --json                Emit machine-readable JSON on stdout
+  --require-docs        Fail packaging when help/html/index.html is missing
 
 Examples:
     # Create a ZIP package

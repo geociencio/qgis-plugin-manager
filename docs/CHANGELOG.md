@@ -8,6 +8,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2026-10-25
+
+### Added
+- **JSON output**: `--json` for `validate`, `analyze` and `package`, with a versioned schema on stdout and unchanged exit codes.
+- **Ignore inspection**: `ignore check <path>` and `--explain` report the winning nested/negated rule.
+- **Deploy dry-run**: `deploy --dry-run` reports copy/delete/backup/purge/hook actions without mutating the target.
+- **Profiles list**: `profiles list` shows profiles and plugin counts without creating anything.
+- **Docs gate**: `package --require-docs` fails when `help/html/index.html` is missing.
+- **Complexity passthrough**: `analyze --max-cc N` forwards the threshold to qgis-analyzer.
+
+### Changed
+- **Breaking: hooks are non-shell by default**. `HookPolicy.shell` defaults to `False`; shell syntax now requires an explicit `HookPolicy(shell=True)` and a clear migration error is logged.
+
 ## [0.11.0] - 2026-10-25
 
 ### Added

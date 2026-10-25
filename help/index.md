@@ -1,7 +1,7 @@
 # qgis-manage
 
 ```text
-qgis-manage v0.11.0
+qgis-manage v0.12.0
 QGIS Plugin Manager - Modern CLI for plugin development.
 
 Usage: qgis-manage [-h] [-v] [--verbose] [--log-file LOG_FILE] SUBCOMMAND ...
@@ -17,6 +17,8 @@ Subcommands:
     analyze            Run QGIS Plugin Analyzer on the project
     security           Run a security audit (secrets and PyQGIS rules)
     validate           Validate metadata.txt compliance and project structure
+    profiles           List QGIS profiles and plugin counts
+    ignore             Check ignore rules for a path
     install-deps       Install plugin dependencies to a local folder
     hooks              Manage and test plugin hooks
     bump               Automate project versioning

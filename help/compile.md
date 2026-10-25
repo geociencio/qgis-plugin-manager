@@ -1,7 +1,7 @@
 # qgis-manage compile
 
 ```text
-qgis-manage compile v0.11.0
+qgis-manage compile v0.12.0
 Compile resources, UI files and translations
 
 Usage: qgis-manage compile [-h] [--jobs JOBS]

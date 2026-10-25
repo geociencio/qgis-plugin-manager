@@ -38,7 +38,7 @@ qgis-manage deploy --trust   # allow project hooks to execute
 ### 🪝 Native Python Hooks
 Automate your workflow in pure Python via `plugin_hooks.py` — or shell commands. Hooks receive full project context (metadata, paths, profiles), run with a 300 s timeout and a minimal environment, and require `--trust` during deploy.
 
-> **Trust**: hooks are project-controlled code. `deploy` skips them unless you pass `--trust`; `hooks test` is always explicit. Hook commands are bounded to 300 s and receive a minimal environment. The shell remains enabled for backward compatibility; use `HookPolicy(shell=False)` from the Python API for argv-only execution.
+> **Trust**: hooks are project-controlled code. `deploy` skips them unless you pass `--trust`; `hooks test` is always explicit. Hook commands are bounded to 300 s and receive a minimal environment. Hooks run as argv (no shell) by default; use `HookPolicy(shell=True)` explicitly for shell syntax.
 
 ```python
 # plugin_hooks.py
@@ -122,7 +122,7 @@ Every command provides a structured `--help` output with usage, options, and exa
 ```text
 $ qgis-manage --help
 
-qgis-manage v0.11.0
+qgis-manage v0.12.0
 QGIS Plugin Manager - Modern CLI for plugin development.
 
 Usage: qgis-manage [-h] ... SUBCOMMAND ...
@@ -263,7 +263,7 @@ qgis-manage dclean
 
 ## ⚙️ Configuration (`pyproject.toml`)
 
-Leverage YOUR existing configuration. No new files needed. Current project version: **0.11.0** (Python 3.11+).
+Leverage YOUR existing configuration. No new files needed. Current project version: **0.12.0** (Python 3.11+).
 
 ```toml
 [tool.qgis-manager]
