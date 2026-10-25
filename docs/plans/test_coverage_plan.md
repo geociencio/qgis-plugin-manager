@@ -52,8 +52,9 @@ and unreachable compatibility branches would create brittle tests or unhelpful
 
 Initial thresholds are the current values rounded down, so the gate catches
 regressions without forcing an immediate large patch. Raise them in Commit 5.
-**Status**: Commit 1 implemented 2026-10-25 with `scripts/check_coverage.py`;
-current gate is 92.50 % statements / 85.00 % branches.
+**Status**: Commits 1-5 implemented 2026-10-25. The gate is now 95.00 %
+statements / 90.00 % branches; coverage is 96.55 % / 91.47 % with 326 tests.
+Commit 6 (E2E/fixtures) and final threshold documentation remain.
 
 ### Acceptance
 

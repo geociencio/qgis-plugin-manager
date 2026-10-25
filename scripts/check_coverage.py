@@ -22,13 +22,13 @@ def main() -> int:
     parser.add_argument(
         "--min-statements",
         type=float,
-        default=92.5,
+        default=95.0,
         help="Minimum statement coverage percentage (default: 92.5)",
     )
     parser.add_argument(
         "--min-branches",
         type=float,
-        default=85.0,
+        default=90.0,
         help="Minimum branch coverage percentage (default: 85.0)",
     )
     args = parser.parse_args()
