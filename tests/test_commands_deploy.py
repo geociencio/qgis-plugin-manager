@@ -377,6 +377,71 @@ class TestDeployCommand(_CommandTestBase):
         self.assertEqual(exit_code, 1)
         mock_deploy.assert_not_called()
 
+    @patch("qgis_manager.core.purge_backups", return_value=2)
+    @patch("qgis_manager.cli.commands.deploy.click.confirm")
+    @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
+    @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
+    @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
+    @patch("qgis_manager.cli.commands.deploy.load_project_config")
+    @patch("qgis_manager.cli.commands.deploy.load_config")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_deploy_purge_backups_yes(
+        self,
+        mock_find,
+        mock_load_config,
+        mock_load_project,
+        mock_meta,
+        mock_dir,
+        mock_deploy,
+        mock_confirm,
+        mock_purge,
+    ):
+        self._patch_common(mock_find, mock_load_config, mock_load_project)
+        mock_meta.return_value = {"name": "Test", "slug": "test"}
+        mock_dir.return_value = Path(tempfile.mkdtemp())
+
+        exit_code, output, _ = self._invoke(["deploy", "--purge-backups", "--yes"])
+
+        self.assertEqual(exit_code, 0)
+        mock_confirm.assert_not_called()
+        mock_purge.assert_called_once()
+        mock_deploy.assert_called_once()
+        self.assertIn("Backups purged", output)
+
+    @patch("qgis_manager.cli.commands.deploy.click.confirm")
+    @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
+    @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
+    @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
+    @patch("qgis_manager.cli.commands.deploy.load_project_config")
+    @patch("qgis_manager.cli.commands.deploy.load_config")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_deploy_yes_creates_missing_target(
+        self,
+        mock_find,
+        mock_load_config,
+        mock_load_project,
+        mock_meta,
+        mock_dir,
+        mock_deploy,
+        mock_confirm,
+    ):
+        root = self._patch_common(mock_find, mock_load_config, mock_load_project)
+        mock_meta.return_value = {"name": "Test", "slug": "test"}
+        missing = root / "plugins"
+        mock_dir.return_value = missing
+
+        exit_code, _, _ = self._invoke(["deploy", "--yes"])
+
+        self.assertEqual(exit_code, 0)
+        mock_confirm.assert_not_called()
+        self.assertTrue(missing.exists())
+        self.assertEqual(mock_deploy.call_args.kwargs["dest_dir"], missing)
+
+    def test_deploy_yes_conflicts_with_interactive(self):
+        exit_code, _, stderr = self._invoke(["deploy", "--yes", "--interactive"])
+        self.assertEqual(exit_code, 1)
+        self.assertIn("cannot be used together", stderr)
+
 
 class TestDCleanCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.dclean.uninstall_plugin")

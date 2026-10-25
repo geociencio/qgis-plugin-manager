@@ -64,6 +64,11 @@ class DeployCommand(BaseCommand):
             help="Remove all existing backups for this plugin",
         )
         parser.add_argument(
+            "--yes",
+            action="store_true",
+            help="Assume yes for purge/create/deploy confirmations",
+        )
+        parser.add_argument(
             "--qgis-version",
             type=int,
             help="Major QGIS version (3 or 4)",
@@ -75,6 +80,9 @@ class DeployCommand(BaseCommand):
         )
 
     def execute(self, args: argparse.Namespace) -> int:
+        if args.interactive and args.yes:
+            click.echo("❌ --interactive and --yes cannot be used together.", err=True)
+            return 1
         root = self.project_root(args)
         settings = load_project_config(root, load_config())
 
@@ -89,11 +97,13 @@ class DeployCommand(BaseCommand):
             args, target_profile, qgis_version
         )
         if args.purge_backups and not self._purge_backups(
-            target_dir, slug, target_profile
+            target_dir, slug, target_profile, args.yes
         ):
             return 0
 
-        resolved_target = self._ensure_target_dir(target_dir, absolute_profile)
+        resolved_target = self._ensure_target_dir(
+            target_dir, absolute_profile, args.yes
+        )
         if resolved_target is None:
             return 1
         target_dir = resolved_target
@@ -150,17 +160,22 @@ class DeployCommand(BaseCommand):
             return Path(args.profile), True
         return get_qgis_plugin_dir(profile, version=qgis_version), False
 
-    def _purge_backups(self, target_dir: Path, slug: str, profile: str) -> bool:
+    def _purge_backups(
+        self, target_dir: Path, slug: str, profile: str, assume_yes: bool = False
+    ) -> bool:
         msg = f"🗑️  Purge all backups for '{slug}' in profile '{profile}'?"
-        if click.confirm(msg):
+        if assume_yes or click.confirm(msg):
             from ...core import purge_backups
 
             removed = purge_backups(target_dir, slug)
             click.echo(f"✨ Backups purged ({removed}).")
-        return click.confirm("Proceed with deployment?")
+        return True if assume_yes else click.confirm("Proceed with deployment?")
 
     def _ensure_target_dir(
-        self, target_dir: Path, absolute_profile: bool
+        self,
+        target_dir: Path,
+        absolute_profile: bool,
+        assume_yes: bool = False,
     ) -> Path | None:
         if absolute_profile or target_dir.exists():
             return target_dir
@@ -169,7 +184,7 @@ class DeployCommand(BaseCommand):
                 f"⚠️  Target directory does not exist: {target_dir}", fg="yellow"
             )
         )
-        if click.confirm("Do you want to create it?"):
+        if assume_yes or click.confirm("Do you want to create it?"):
             target_dir.mkdir(parents=True)
             return target_dir
         manual_path = click.prompt(
