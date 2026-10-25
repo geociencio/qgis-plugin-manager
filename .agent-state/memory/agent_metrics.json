@@ -1,6 +1,6 @@
 {
     "schema_version": 1,
-    "generated_at": "2026-10-25T11:22:22+00:00",
+    "generated_at": "2026-10-25T11:30:55+00:00",
     "summary": {
         "test_count": 248,
         "tests_ok": 248,
@@ -12,7 +12,7 @@
         "i18n_hygiene_gate": "N/A",
         "total_issues": 0,
         "task_completion_rate": 1.0,
-        "total_sessions": 0
+        "total_sessions": 1
     },
     "last_session": {
         "date": "2026-10-25",

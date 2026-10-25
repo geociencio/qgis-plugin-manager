@@ -2,7 +2,7 @@
 
 **Date**: 2026-10-25
 **Last session**: `p1_p2_completion` (closed; P1/P2 complete)
-**Current session**: none; P1 and P2 closed on 2026-10-25.
+**Current session**: started 2026-10-25; no active project item selected.
 **Context**: P1 closed docs/domain-pack/E2E/path/trust/typing work; P2 normalized release
 notes and annotated the upstream architecture plans. Project: **248 tests**, **90.45 %**
 line coverage; framework v1.4.2 with 37 tests.
