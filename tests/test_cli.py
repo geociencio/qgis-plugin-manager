@@ -94,6 +94,16 @@ class TestCLI(unittest.TestCase):
         self.assertEqual(exit_code, 1)
         self.assertIn("boom", error)
 
+    def test_command_registry_is_complete_and_unique(self):
+        from qgis_manager.cli.base import BaseCommand
+        from qgis_manager.cli.registry import COMMAND_CLASSES
+
+        names = [command().name for command in COMMAND_CLASSES]
+        self.assertEqual(len(names), len(set(names)))
+        self.assertTrue(
+            all(issubclass(command, BaseCommand) for command in COMMAND_CLASSES)
+        )
+
     @patch("qgis_manager.cli.commands.deploy.DeployCommand.__init__", return_value=None)
     def test_commands_are_instantiated_once(self, mock_init):
         CLIApp()

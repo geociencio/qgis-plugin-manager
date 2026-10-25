@@ -25,34 +25,9 @@ class CLIApp:
         Returns:
             Dictionary mapping command names to command instances.
         """
-        from .commands.analyze import AnalyzeCommand
-        from .commands.bump import BumpCommand
-        from .commands.clean import CleanCommand
-        from .commands.compile import CompileCommand
-        from .commands.dclean import DCleanCommand
-        from .commands.deploy import DeployCommand
-        from .commands.hooks import HooksCommand
-        from .commands.init import InitCommand
-        from .commands.install_deps import InstallDepsCommand
-        from .commands.package import PackageCommand
-        from .commands.security import SecurityCommand
-        from .commands.validate import ValidateCommand
+        from .registry import COMMAND_CLASSES
 
-        command_classes: list[type[BaseCommand]] = [
-            DeployCommand,
-            DCleanCommand,
-            CompileCommand,
-            PackageCommand,
-            InitCommand,
-            CleanCommand,
-            AnalyzeCommand,
-            SecurityCommand,
-            ValidateCommand,
-            InstallDepsCommand,
-            HooksCommand,
-            BumpCommand,
-        ]
-        instances = [command_class() for command_class in command_classes]
+        instances = [command_class() for command_class in COMMAND_CLASSES]
         return {command.name: command for command in instances}
 
     def _build_parser(self) -> argparse.ArgumentParser:
