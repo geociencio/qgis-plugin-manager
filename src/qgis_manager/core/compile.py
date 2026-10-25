@@ -1,7 +1,9 @@
 """Compilation of Qt resources, UI files, translations and documentation."""
 
+import fnmatch
 import importlib.util
 import logging
+import os
 import shutil
 import subprocess
 import sys
@@ -12,6 +14,25 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+#: Maximum time a single external compiler may run.
+COMPILE_TIMEOUT_SECONDS = 300
+
+#: Directories that never contain project sources to compile.
+_COMPILE_EXCLUDED_DIRS = {
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "env",
+    "libs",
+    "node_modules",
+    "venv",
+}
+
 #: Qt binding import prefixes emitted by uic/rcc that must be redirected to
 #: the binding shipped with QGIS (PyQt5, PyQt6, PySide2 or PySide6).
 _QT_IMPORT_PREFIXES = (
@@ -20,6 +41,27 @@ _QT_IMPORT_PREFIXES = (
     "from PySide2",
     "from PySide6",
 )
+
+
+def _iter_compile_sources(project_root: Path, pattern: str) -> list[Path]:
+    """Return matching source files, excluding vendor/build/cache directories."""
+    matches: list[Path] = []
+    for current, dirnames, filenames in os.walk(project_root):
+        root = Path(current)
+        dirnames[:] = sorted(
+            name
+            for name in dirnames
+            if name not in _COMPILE_EXCLUDED_DIRS and not (root / name).is_symlink()
+        )
+        for name in sorted(filenames):
+            path = root / name
+            if (
+                fnmatch.fnmatch(name, pattern)
+                and path.is_file()
+                and not path.is_symlink()
+            ):
+                matches.append(path)
+    return matches
 
 
 def _run_sphinx(cmd: list[str], callback: Callable[[str], Any] | None) -> None:
@@ -41,7 +83,12 @@ def _run_sphinx(cmd: list[str], callback: Callable[[str], Any] | None) -> None:
                     callback(f"PROGRESS:{line}")
                 logger.debug(f"Sphinx: {line}")
 
-    process.wait()
+    try:
+        process.wait(timeout=COMPILE_TIMEOUT_SECONDS)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait()
+        raise
     if process.returncode != 0:
         raise subprocess.CalledProcessError(process.returncode, cmd)
 
@@ -171,10 +218,10 @@ def count_compile_steps(project_root: Path, res_type: str) -> int:
     """
     total = 0
     if res_type in ["resources", "all"]:
-        total += len(list(project_root.rglob("*.qrc")))
-        total += len(list(project_root.rglob("*.ui")))
+        total += len(_iter_compile_sources(project_root, "*.qrc"))
+        total += len(_iter_compile_sources(project_root, "*.ui"))
     if res_type in ["translations", "all"]:
-        total += len(list(project_root.rglob("*.ts")))
+        total += len(_iter_compile_sources(project_root, "*.ts"))
     if res_type in ["docs", "all"]:
         if (project_root / "docs" / "source" / "conf.py").exists():
             total += 1
@@ -284,7 +331,7 @@ def compile_ui_files(
         True if there was nothing to compile or every file compiled, False when
         a tool is missing or a compilation failed.
     """
-    ui_files = list(project_root.rglob("*.ui"))
+    ui_files = _iter_compile_sources(project_root, "*.ui")
     if not ui_files:
         return True
 
@@ -314,9 +361,14 @@ def compile_ui_files(
                     check=True,
                     capture_output=True,
                     text=True,
+                    timeout=COMPILE_TIMEOUT_SECONDS,
                 )
                 patch_ui_file(py_file)
-            except (subprocess.CalledProcessError, OSError) as e:
+            except (
+                subprocess.CalledProcessError,
+                subprocess.TimeoutExpired,
+                OSError,
+            ) as e:
                 logger.error(f"  ❌ Error compiling {ui.name}: {e}")
                 success = False
 
@@ -345,13 +397,18 @@ def _compile_single_qrc(
             check=True,
             capture_output=True,
             text=True,
+            timeout=COMPILE_TIMEOUT_SECONDS,
         )
         patch_resource_file(py_file)
         if callback:
             callback(f"DONE:Resource {rel_qrc.name}")
         logger.debug("  ✅ Done.")
         return True
-    except (subprocess.CalledProcessError, OSError) as e:
+    except (
+        subprocess.CalledProcessError,
+        subprocess.TimeoutExpired,
+        OSError,
+    ) as e:
         logger.error(f"  ❌ Error compiling {qrc.name}: {e}")
         return False
 
@@ -360,7 +417,7 @@ def _compile_qrc_files(
     project_root: Path, callback: Callable[[str], Any] | None
 ) -> bool:
     """Compile every .qrc file in the project using the detected RCC tool."""
-    qrc_files = list(project_root.rglob("*.qrc"))
+    qrc_files = _iter_compile_sources(project_root, "*.qrc")
     if not qrc_files:
         return True
 
@@ -389,13 +446,17 @@ def _compile_single_ts(
 
     try:
         subprocess.run(
-            ["lrelease", str(ts)], check=True, capture_output=True, text=True
+            ["lrelease", str(ts)],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=COMPILE_TIMEOUT_SECONDS,
         )
         if callback:
             callback(f"DONE:Translation {rel_ts.name}")
         logger.debug("  ✅ Done.")
         return True
-    except subprocess.CalledProcessError as e:
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
         logger.error(f"  ❌ Error compiling {ts.name}: {e}")
         return False
     except FileNotFoundError:
@@ -408,7 +469,7 @@ def _compile_ts_files(
 ) -> bool:
     """Compile every .ts translation file in the project."""
     success = True
-    for ts in project_root.rglob("*.ts"):
+    for ts in _iter_compile_sources(project_root, "*.ts"):
         if not _compile_single_ts(ts, project_root, callback):
             success = False
     return success
