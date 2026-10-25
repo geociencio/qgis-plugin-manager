@@ -206,3 +206,23 @@ class TestDiscovery(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+    def test_find_project_root_stops_at_git_boundary(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            repo = Path(tmp_dir) / "monorepo"
+            (repo / ".git").mkdir(parents=True)
+            (repo / "pyproject.toml").write_text("[project]\nname='parent'\n")
+            nested = repo / "packages" / "child"
+            nested.mkdir(parents=True)
+
+            with self.assertRaises(FileNotFoundError):
+                find_project_root(nested)
+
+    def test_find_project_root_finds_metadata_inside_git_repo(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            plugin = Path(tmp_dir) / "plugin"
+            (plugin / ".git").mkdir(parents=True)
+            (plugin / "metadata.txt").write_text("[general]\nname=Demo\n")
+            nested = plugin / "src"
+            nested.mkdir()
+            self.assertEqual(find_project_root(nested), plugin.resolve())

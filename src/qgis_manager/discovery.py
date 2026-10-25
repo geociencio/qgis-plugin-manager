@@ -64,7 +64,17 @@ def find_project_root(start_path: Path) -> Path:
     """
     current = start_path.resolve()
     while current != current.parent:
-        if (current / "metadata.txt").exists() or (current / "pyproject.toml").exists():
+        has_metadata = (current / "metadata.txt").exists()
+        has_pyproject = (current / "pyproject.toml").exists()
+        if current == start_path.resolve():
+            if has_metadata or has_pyproject:
+                return current
+        elif has_metadata:
+            return current
+        elif (current / ".git").exists():
+            # Do not select a parent monorepo pyproject.toml above the repo.
+            break
+        elif has_pyproject:
             return current
         current = current.parent
     raise FileNotFoundError(
