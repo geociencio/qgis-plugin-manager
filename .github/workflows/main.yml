@@ -57,4 +57,4 @@ jobs:
       - name: Test with pytest
         run: >
           uv run pytest -q
-          --cov=qgis_manager --cov-report=term-missing --cov-fail-under=80
+          --cov=qgis_manager --cov-branch --cov-report=term-missing --cov-fail-under=90

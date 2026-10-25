@@ -21,7 +21,7 @@ strict_agent_system = true   # this repo opts into strict links/state/template c
 
 # Commands consumed by the shared workflows. Other projects may use different runners.
 test_command = "uv run pytest -q"
-test_command_full = "uv run pytest -q --cov=qgis_manager --cov-report=term-missing --cov-fail-under=80"
+test_command_full = "uv run pytest -q --cov=qgis_manager --cov-branch --cov-report=term-missing --cov-fail-under=90"
 lint_command = "uv run ruff check ."
 format_command = "uv run ruff format ."
 type_command = "uv run mypy src"
