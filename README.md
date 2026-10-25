@@ -9,7 +9,7 @@
 [![Checked with mypy](https://img.shields.io/badge/mypy-checked-blue)](http://mypy-lang.org/)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/geociencio/qgis-plugin-manager/graphs/commit-activity)
 [![License: GPL v2+](https://img.shields.io/badge/License-GPL%20v2%2B-blue.svg)](LICENSE)
-[![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen)](https://github.com/geociencio/qgis-plugin-manager)
+[![Coverage](https://img.shields.io/badge/coverage-91.03%25-brightgreen)](https://github.com/geociencio/qgis-plugin-manager)
 [![GitHub stars](https://img.shields.io/github/stars/geociencio/qgis-plugin-manager.svg?style=social&label=Star)](https://github.com/geociencio/qgis-plugin-manager/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/geociencio/qgis-plugin-manager.svg?style=social&label=Issue)](https://github.com/geociencio/qgis-plugin-manager/issues)
 
@@ -20,7 +20,7 @@
 ## ✨ Features
 
 ### ⚡ Smart Synchronization
-Deploy with idempotent, rsync-like sync: only changed files are copied (compared by size + mtime), and files removed from the source are cleaned up in the target. No more slow "delete and copy".
+Deploy with idempotent, rsync-like sync: only changed files are copied (size first, then content when sizes match, so same-size rewrites are detected), and files removed from the source are cleaned up in the target. No more slow "delete and copy".
 
 ```bash
 qgis-manage deploy
@@ -36,9 +36,9 @@ qgis-manage deploy --trust   # allow project hooks to execute
 ```
 
 ### 🪝 Native Python Hooks
-Automate your workflow in pure Python via `plugin_hooks.py` — or shell commands. Hooks receive full project context (metadata, paths, profiles).
+Automate your workflow in pure Python via `plugin_hooks.py` — or shell commands. Hooks receive full project context (metadata, paths, profiles), run with a 300 s timeout and a minimal environment, and require `--trust` during deploy.
 
-> **Trust**: hooks are project-controlled code. `deploy` skips them unless you pass `--trust`; `hooks test` is always explicit. Hook commands are bounded to 300 s and receive a minimal environment; set `HookPolicy(shell=False)` when using the Python API to avoid shell parsing.
+> **Trust**: hooks are project-controlled code. `deploy` skips them unless you pass `--trust`; `hooks test` is always explicit. Hook commands are bounded to 300 s and receive a minimal environment. The shell remains enabled for backward compatibility; use `HookPolicy(shell=False)` from the Python API for argv-only execution.
 
 ```python
 # plugin_hooks.py
@@ -122,7 +122,7 @@ Every command provides a structured `--help` output with usage, options, and exa
 ```text
 $ qgis-manage --help
 
-qgis-manage v0.8.0
+qgis-manage v0.10.0
 QGIS Plugin Manager - Modern CLI for plugin development.
 
 Usage: qgis-manage [-h] ... SUBCOMMAND ...
@@ -172,6 +172,9 @@ qgis-manage deploy --qgis-version 4
 # Deploy to a specific profile
 qgis-manage deploy --profile production
 
+# Run trusted project hooks during deploy
+qgis-manage deploy --trust
+
 # Purge old backups to save space
 qgis-manage deploy --purge-backups
 ```
@@ -186,6 +189,9 @@ qgis-manage compile
 
 # Compile only translations
 qgis-manage compile --type translations
+
+# Compile up to four files concurrently (default: 1)
+qgis-manage compile --jobs 4
 ```
 
 ### 4. Advanced Hooks (`hooks`)
@@ -221,6 +227,9 @@ qgis-manage package
 # Package with strict compliance check (fails if binaries or errors found)
 qgis-manage package --repo-check --sync-version
 
+# Allow declared dependencies to be installed while packaging
+qgis-manage package --trust
+
 # Stamp git build info (commit SHA, commit number, datetime, experimental)
 qgis-manage package --stamp
 ```
@@ -239,6 +248,7 @@ qgis-manage security --strict
 # Install plugin dependencies into a local folder
 qgis-manage install-deps --target libs
 qgis-manage install-deps --dry-run   # print the installer command only
+qgis-manage install-deps --timeout 120
 
 # Clean caches, compiled UI/resources and docs output
 qgis-manage clean
@@ -253,7 +263,7 @@ qgis-manage dclean
 
 ## ⚙️ Configuration (`pyproject.toml`)
 
-Leverage YOUR existing configuration. No new files needed.
+Leverage YOUR existing configuration. No new files needed. Current project version: **0.10.0** (Python 3.11+).
 
 ```toml
 [tool.qgis-manager]
