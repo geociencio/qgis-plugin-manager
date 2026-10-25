@@ -66,26 +66,6 @@ def get_required_fields() -> list[str]:
     ]
 
 
-def get_optional_fields() -> list[str]:
-    """Get list of optional but recommended metadata fields.
-
-    Returns:
-        List of field names that are optional but recommended.
-    """
-    return [
-        "homepage",
-        "tracker",
-        "repository",
-        "tags",
-        "category",
-        "icon",
-        "experimental",
-        "deprecated",
-        "qgisMaximumVersion",
-        "changelog",
-    ]
-
-
 def validate_version(version_str: str, allow_short: bool = True) -> bool:
     """Validate version format using semantic versioning.
 

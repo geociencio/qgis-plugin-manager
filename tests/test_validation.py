@@ -3,7 +3,6 @@ import unittest
 from pathlib import Path
 
 from qgis_manager.validation import (
-    get_optional_fields,
     get_required_fields,
     validate_boolean_field,
     validate_category,
@@ -27,12 +26,6 @@ class TestValidation(unittest.TestCase):
         self.assertIn("author", required)
         self.assertIn("email", required)
         self.assertNotIn("repository", required)
-
-    def test_get_optional_fields(self):
-        optional = get_optional_fields()
-        self.assertIn("homepage", optional)
-        self.assertIn("repository", optional)
-        self.assertIn("tags", optional)
 
     def test_validate_version_valid(self):
         self.assertTrue(validate_version("1.0.0"))
