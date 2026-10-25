@@ -38,6 +38,7 @@ pre_deploy = "echo 1"
             self.assertFalse(settings.auto_compile)
             self.assertEqual(settings.hooks["pre_deploy"], "echo 1")
 
+    @patch("qgis_manager.config.sys.platform", "linux")
     @patch.dict("os.environ", {"XDG_CONFIG_HOME": ""}, clear=False)
     @patch("pathlib.Path.home")
     def test_load_config_no_file(self, mock_home):
@@ -45,6 +46,7 @@ pre_deploy = "echo 1"
         settings = load_config()
         self.assertEqual(settings.profile, "default")
 
+    @patch("qgis_manager.config.sys.platform", "linux")
     @patch.dict("os.environ", {"XDG_CONFIG_HOME": ""}, clear=False)
     @patch("pathlib.Path.home")
     def test_load_config_with_file(self, mock_home):

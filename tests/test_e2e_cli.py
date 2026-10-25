@@ -189,9 +189,10 @@ def test_package_creates_zip_and_checksum(tmp_path: Path) -> None:
         assert not any(
             ".git" in name or name.startswith("demo_plugin/dist") for name in names
         )
-        assert archive.read("demo_plugin/metadata.txt").decode() == (
-            project / "metadata.txt"
-        ).read_text(encoding="utf-8")
+        assert (
+            archive.read("demo_plugin/metadata.txt")
+            == (project / "metadata.txt").read_bytes()
+        )
 
 
 def test_package_stamp_does_not_modify_source_metadata(tmp_path: Path) -> None:
