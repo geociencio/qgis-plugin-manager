@@ -377,6 +377,14 @@ def _emit_result(context: CompileContext, result: tuple[bool, list[str]]) -> boo
     return success
 
 
+def _replace_generated(temp: Path, target: Path) -> None:
+    """Replace a generated file only when its bytes changed."""
+    if target.exists() and temp.read_bytes() == target.read_bytes():
+        temp.unlink(missing_ok=True)
+        return
+    os.replace(temp, target)
+
+
 def compile_ui_files(
     project_root: Path,
     callback: Callable[[str], Any] | None = None,
@@ -405,9 +413,15 @@ def compile_ui_files(
             logger.debug(
                 f"🎨 Compiling UI: {rel_ui} -> {py_file.name} using {uic_tool}"
             )
-            ok = context.run([uic_tool, "-o", str(py_file), str(ui)], ui.name)
-            if ok:
-                patch_ui_file(py_file)
+            temp = py_file.with_name(f".{py_file.name}.tmp")
+            try:
+                ok = context.run([uic_tool, "-o", str(temp), str(ui)], ui.name)
+                if ok:
+                    patch_ui_file(temp)
+                    if temp.exists():
+                        _replace_generated(temp, py_file)
+            finally:
+                temp.unlink(missing_ok=True)
         events.append(f"DONE:UI {rel_ui.name}")
         return ok, events
 
@@ -424,10 +438,16 @@ def _compile_single_qrc(
     py_file = qrc.with_suffix(".py")
     rel_qrc = qrc.relative_to(context.project_root)
     logger.debug(f"🔨 Compiling resource: {rel_qrc} -> {py_file.name} using {rcc_tool}")
-    ok = context.run([rcc_tool, "-o", str(py_file), str(qrc)], qrc.name)
-    if ok:
-        patch_resource_file(py_file)
-        logger.debug("  ✅ Done.")
+    temp = py_file.with_name(f".{py_file.name}.tmp")
+    try:
+        ok = context.run([rcc_tool, "-o", str(temp), str(qrc)], qrc.name)
+        if ok:
+            patch_resource_file(temp)
+            if temp.exists():
+                _replace_generated(temp, py_file)
+            logger.debug("  ✅ Done.")
+    finally:
+        temp.unlink(missing_ok=True)
     return ok, [f"START:Resource {rel_qrc.name}", f"DONE:Resource {rel_qrc.name}"]
 
 
@@ -454,10 +474,15 @@ def _compile_qrc_files(
 def _compile_single_ts(ts: Path, context: CompileContext) -> tuple[bool, list[str]]:
     """Compile a single .ts translation file with lrelease."""
     rel_ts = ts.relative_to(context.project_root)
-    logger.debug(f"🌍 Compiling translation: {rel_ts}")
-    ok = context.run(["lrelease", str(ts)], ts.name)
-    if ok:
-        logger.debug("  ✅ Done.")
+    qm = ts.with_suffix(".qm")
+    if qm.exists() and not _is_stale(ts, qm):
+        logger.debug(f"  ⏭️  {rel_ts.name} up to date")
+        ok = True
+    else:
+        logger.debug(f"🌍 Compiling translation: {rel_ts}")
+        ok = context.run(["lrelease", str(ts)], ts.name)
+        if ok:
+            logger.debug("  ✅ Done.")
     return ok, [f"START:Translation {rel_ts.name}", f"DONE:Translation {rel_ts.name}"]
 
 

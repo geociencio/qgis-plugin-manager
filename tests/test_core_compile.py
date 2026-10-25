@@ -351,3 +351,39 @@ class TestCoreCompile(unittest.TestCase):
     def test_compile_all_with_no_sources_succeeds(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             self.assertTrue(compile_qt_resources(Path(tmp_dir), res_type="all"))
+
+    @patch("qgis_manager.core.compile.subprocess.run")
+    def test_compile_translations_skips_fresh_qm(self, mock_run):
+        import os
+        import time
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            ts = root / "translations.ts"
+            ts.touch()
+            qm = root / "translations.qm"
+            qm.write_text("qm", encoding="utf-8")
+            future = time.time() + 100
+            os.utime(qm, (future, future))
+
+            self.assertTrue(compile_qt_resources(root, res_type="translations"))
+            mock_run.assert_not_called()
+
+    @patch("qgis_manager.core.compile.get_rcc_tool", return_value="pyside6-rcc")
+    @patch("qgis_manager.core.compile.subprocess.run")
+    def test_compile_qrc_does_not_rewrite_identical_output(self, mock_run, _mock_tool):
+        def fake_run(command, **_kwargs):
+            Path(command[2]).write_text("same", encoding="utf-8")
+            return MagicMock()
+
+        mock_run.side_effect = fake_run
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "resources.qrc").touch()
+            py_file = root / "resources.py"
+            py_file.write_text("same", encoding="utf-8")
+            before = py_file.stat().st_mtime_ns
+
+            self.assertTrue(compile_qt_resources(root, res_type="resources"))
+
+            self.assertEqual(py_file.stat().st_mtime_ns, before)
