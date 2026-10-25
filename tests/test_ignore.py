@@ -150,3 +150,33 @@ class TestIgnoreMatcher(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+    def test_path_outside_project_is_not_excluded(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            matcher = IgnoreMatcher(root)
+            self.assertFalse(matcher.should_exclude(root.parent / "outside.txt"))
+
+    def test_pyproject_ignore_must_be_a_list(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "pyproject.toml").write_text(
+                '[tool.qgis-manager]\nignore = "not-a-list"\n',
+                encoding="utf-8",
+            )
+            matcher = IgnoreMatcher(root)
+            self.assertNotIn("not-a-list", matcher.patterns)
+
+    def test_unreadable_ignore_file_falls_back(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / ".qgisignore").write_text("secret\n", encoding="utf-8")
+            with unittest.mock.patch("builtins.open", side_effect=OSError("denied")):
+                matcher = IgnoreMatcher(root)
+            self.assertFalse(matcher.should_exclude(root / "secret"))
+
+    def test_nested_rules_outside_project(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            matcher = IgnoreMatcher(root)
+            self.assertEqual(list(matcher._nested_rules(root.parent / "x")), [])

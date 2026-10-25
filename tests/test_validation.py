@@ -289,3 +289,54 @@ class TestValidation(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+    def test_validate_metadata_name_without_ascii_slug(self):
+        metadata = {
+            "name": "¡!",
+            "description": "A test plugin",
+            "about": "About",
+            "version": "1.0.0",
+            "qgisMinimumVersion": "3.0",
+            "author": "Test Author",
+            "email": "test@example.com",
+            "repository": "https://example.com/repo",
+        }
+        result = validate_metadata(metadata)
+        self.assertFalse(result.is_valid)
+        self.assertTrue(any("ASCII" in error for error in result.errors))
+
+    def test_validate_metadata_invalid_qgis_minimum_version(self):
+        metadata = {
+            "name": "Test Plugin",
+            "description": "A test plugin",
+            "about": "About",
+            "version": "1.0.0",
+            "qgisMinimumVersion": "3.x",
+            "author": "Test Author",
+            "email": "test@example.com",
+            "repository": "https://example.com/repo",
+        }
+        result = validate_metadata(metadata)
+        self.assertFalse(result.is_valid)
+        self.assertTrue(any("qgisMinimumVersion" in error for error in result.errors))
+
+    def test_validate_metadata_invalid_url_and_tags_and_category(self):
+        metadata = {
+            "name": "Test Plugin",
+            "description": "A test plugin",
+            "about": "About",
+            "version": "1.0.0",
+            "qgisMinimumVersion": "3.0",
+            "author": "Test Author",
+            "email": "test@example.com",
+            "homepage": "ftp://example.com",
+            "repository": "https://example.com/repo",
+            "tags": ",,",
+            "category": "Unknown",
+        }
+        result = validate_metadata(metadata)
+        self.assertTrue(any("Invalid URL" in warning for warning in result.warnings))
+        self.assertTrue(any("Tags should" in warning for warning in result.warnings))
+        self.assertTrue(
+            any("Unknown category" in warning for warning in result.warnings)
+        )

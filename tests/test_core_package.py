@@ -135,3 +135,18 @@ class TestCorePackage(unittest.TestCase):
             self.assertIn("version=1.0.0", content)
             # Source metadata.txt must not be modified
             self.assertNotIn("commitSha1", (tmp_path / "metadata.txt").read_text())
+
+    def test_stamped_metadata_without_metadata_file(self):
+        from qgis_manager.core.package import _build_stamped_metadata
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            self.assertIsNone(_build_stamped_metadata(Path(tmp_dir), "1.0.0"))
+
+    def test_create_package_rejects_unsafe_release_version(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "metadata.txt").write_text(
+                "[general]\nname=Demo\nversion=1.0.0\n", encoding="utf-8"
+            )
+            with self.assertRaises(ValueError):
+                create_plugin_package(root, release_version="..")

@@ -81,3 +81,26 @@ class TestStructuralValidation(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+    def test_missing_class_factory(self):
+        (self.test_dir / "__init__.py").write_text("pass\n", encoding="utf-8")
+        result = validate_project_structure(self.test_dir, self.metadata)
+        self.assertFalse(result.is_valid)
+        self.assertTrue(any("classFactory" in error for error in result.errors))
+
+    def test_unreadable_init_py(self):
+        (self.test_dir / "__init__.py").write_text("pass\n", encoding="utf-8")
+        with unittest.mock.patch(
+            "pathlib.Path.read_text", side_effect=OSError("denied")
+        ):
+            result = validate_project_structure(self.test_dir, self.metadata)
+        self.assertFalse(result.is_valid)
+        self.assertIn("Could not read '__init__.py'", result.errors)
+
+    def test_too_few_python_files_warning(self):
+        (self.test_dir / "__init__.py").write_text(
+            "def classFactory(iface): pass", encoding="utf-8"
+        )
+        (self.test_dir / "icon.png").touch()
+        result = validate_project_structure(self.test_dir, self.metadata)
+        self.assertTrue(any("very few Python files" in w for w in result.warnings))
