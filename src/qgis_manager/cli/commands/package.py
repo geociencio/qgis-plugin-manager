@@ -7,7 +7,7 @@ import click
 
 from ...core import create_plugin_package
 from ...dependencies import get_dependencies, install_external_libs
-from ...metadata import sync_metadata_version
+from ...metadata import get_plugin_metadata, sync_metadata_version
 from ...toml_utils import get_project_version
 from ..base import BaseCommand
 
@@ -67,6 +67,8 @@ class PackageCommand(BaseCommand):
     def execute(self, args: argparse.Namespace) -> int:
         root = self.project_root(args)
         self._sync_version(root, args)
+        if not self._validate_release_version(root, args):
+            return 1
         if not self._install_dependencies(root, args):
             return 1
         if not self._check_compliance(root, args):
@@ -82,6 +84,24 @@ class PackageCommand(BaseCommand):
         if py_version:
             click.echo(f"🔄 Syncing version to {py_version}...")
             sync_metadata_version(root)
+
+    def _validate_release_version(self, root: Path, args: argparse.Namespace) -> bool:
+        if not args.release_version:
+            return True
+        current = get_plugin_metadata(root).get("version")
+        if args.stamp or current == args.release_version:
+            return True
+        click.echo(
+            click.style(
+                f"❌ --release-version {args.release_version} does not match "
+                f"metadata.txt ({current or 'missing'}); use --stamp or "
+                "--sync-version.",
+                fg="red",
+                bold=True,
+            ),
+            err=True,
+        )
+        return False
 
     def _install_dependencies(self, root: Path, args: argparse.Namespace) -> bool:
         dependencies = get_dependencies(root)

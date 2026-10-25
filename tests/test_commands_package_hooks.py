@@ -206,3 +206,43 @@ class TestHooksCommand(_CommandTestBase):
         self.assertIn(
             "original", (root / "plugin_hooks.py").read_text(encoding="utf-8")
         )
+
+    @patch("qgis_manager.cli.commands.package.install_external_libs")
+    @patch("qgis_manager.cli.commands.package.create_plugin_package")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_package_rejects_release_version_mismatch(
+        self, mock_find, mock_package, _mock_install
+    ):
+        root = Path(tempfile.mkdtemp())
+        (root / "metadata.txt").write_text(
+            "[general]\nname=Test Plugin\nversion=1.0.0\n", encoding="utf-8"
+        )
+        mock_find.return_value = root
+
+        exit_code, _, stderr = self._invoke(["package", "--release-version", "9.9.9"])
+
+        self.assertEqual(exit_code, 1)
+        self.assertIn("does not match metadata.txt", stderr)
+        mock_package.assert_not_called()
+
+    @patch("qgis_manager.cli.commands.package.install_external_libs")
+    @patch("qgis_manager.cli.commands.package.create_plugin_package")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_package_release_version_with_stamp(
+        self, mock_find, mock_package, _mock_install
+    ):
+        root = Path(tempfile.mkdtemp())
+        metadata = root / "metadata.txt"
+        metadata.write_text(
+            "[general]\nname=Test Plugin\nversion=1.0.0\n", encoding="utf-8"
+        )
+        mock_find.return_value = root
+        mock_package.return_value = root / "dist" / "test_plugin.9.9.9.zip"
+
+        exit_code, _, _ = self._invoke(
+            ["package", "--stamp", "--release-version", "9.9.9"]
+        )
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(mock_package.call_args.kwargs["release_version"], "9.9.9")
+        self.assertIn("version=1.0.0", metadata.read_text(encoding="utf-8"))
