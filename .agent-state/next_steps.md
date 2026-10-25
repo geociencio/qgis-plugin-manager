@@ -2,9 +2,9 @@
 
 **Date**: 2026-10-25
 **Last session**: `p1_p2_completion` (closed; P1/P2 complete)
-**Current session**: P3 platform controls implemented (2026-10-25).
-**Context**: P0-P3 batches are implemented. Project: **269 tests**, **91.03 %**
-line+branch coverage; framework v1.4.2 with 37 tests.
+**Current session**: P0 remediation for 0.10.1 implemented (2026-10-25).
+**Context**: P0 remediation is implemented; P0-P3 platform batches remain.
+Project: **279 tests**, **90.80 %** line+branch coverage; framework v1.4.2.
 
 **Completed (this cycle):**
 - [x] Adopted Agentic Forge **v1.4.1** (upstream P0).
@@ -41,8 +41,10 @@ line+branch coverage; framework v1.4.2 with 37 tests.
       ignore negation, Git-boundary root, BaseCommand.project_root and split
       test suites.
 - [x] P3-1..P3-7: nested ignore rules, hook/dependency policies, compile jobs,
-      entry-point commands and init/bump contracts. Project tests: 269,
-      coverage 91.03 %, C901 = 0.
+      entry-point commands and init/bump contracts.
+- [x] P0-1..P0-5: collision-safe backups, repeatable --type, release-version
+      validation, deploy --yes and clean dry-run. Project tests: 279,
+      coverage 90.80 %, C901 = 0.
 
 **Pending:**
 - No active project items. Remaining framework work belongs upstream in `agentic-forge`.

@@ -1,29 +1,27 @@
-# Active Task: P3 Platform Controls
+# Active Task: P0 Remediation (0.10.1)
 
 ## Status
-- **Phase**: P3 (7/7 implemented)
+- **Phase**: P0 (5/5 fixes complete)
 - **Progress**: 100%
-- **Status**: ✅ P3 core implemented (2026-10-25); compatibility deviations recorded.
+- **Status**: ✅ P0 implemented and 0.10.1 prepared locally (2026-10-25);
+  push/tag/publication pending.
 
-## Objectives
-1. [x] Nested `.qgisignore`/`.gitignore` rules with ordered negation.
-2. [x] Hook policy with timeout, allowlisted environment and non-shell option.
-3. [x] Bounded dependency installation with timeout and dry-run.
-4. [x] `compile --jobs` with ordered callbacks.
-5. [x] External `qgis_manager.commands` entry points.
-6. [x] Init/bump contract E2E tests.
-7. [x] Docs/help/changelog refreshed.
+## Fixes
+1. [x] Collision-safe deploy backups (microseconds + suffix).
+2. [x] Repeatable `compile --type`.
+3. [x] `package --release-version` consistency validation.
+4. [x] `deploy --yes` for non-interactive purge/create/deploy.
+5. [x] `clean --dry-run` and `--keep-generated` protection.
 
-## Deviations from plan
-- Hook shell mode defaults to `True` for backward compatibility; `HookPolicy(shell=False)`
-  is available via the API but not the default.
-- `compile_jobs` is exposed as `compile --jobs`, not yet read from `project.toml`.
-- Dependency index/constraints options are not added; timeout + dry-run are.
-- Nesting is covered; `.git/info/exclude` remains unsupported.
+## Next
+- Review/publish 0.10.1.
+- P1: repo-check pruning, deploy manifest, reflink backups, compiled-output
+  freshness.
+- P2: JSON, ignore explain, max-cc, dry-run, profiles, require-docs, shell=False.
 
 ## Context
 - Framework: **agentic-forge** `.agent/` submodule **v1.4.2** (`b264e35`), clean.
-- Quality: **269 project tests**, **91.03 %** combined coverage; branch gate 90 %;
+- Quality: **279 project tests**, **90.80 %** combined coverage; branch gate 90 %;
   **37 framework tests**; ruff/format/strict mypy clean; C901 = 0.
-- Previous phase: P2 complete, archived at
-  `.agent-state/history/tasks/task_2026-10-25_p2_quality.md`.
+- Previous phase: P3 complete, archived at
+  `.agent-state/history/tasks/task_2026-10-25_p3_platform.md`.
