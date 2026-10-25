@@ -23,7 +23,13 @@ from typing import Any
 class _HelpFormatter(argparse.RawDescriptionHelpFormatter):
     """Preserves blank lines in descriptions and uses a ``Usage:`` prefix."""
 
-    def _format_usage(self, usage, actions, groups, prefix):
+    def _format_usage(
+        self,
+        usage: str | None,
+        actions: Any,
+        groups: Any,
+        prefix: str | None,
+    ) -> str:
         if prefix is None:
             prefix = "Usage: "
         return super()._format_usage(usage, actions, groups, prefix)

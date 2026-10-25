@@ -6,7 +6,7 @@ Create distributable ZIP package
 
 Usage: qgis-manage package [-h] [-o OUTPUT] [--dev] [--repo-check]
                            [--sync-version] [--stamp]
-                           [--release-version RELEASE_VERSION]
+                           [--release-version RELEASE_VERSION] [--trust]
                            [path]
 
 Arguments:
@@ -25,6 +25,8 @@ Options:
   --release-version RELEASE_VERSION
                         Override the version used for the ZIP name and
                         stamping
+  --trust               Allow dependency installation from this project
+                        (trusted only)
 
 Examples:
     # Create a ZIP package

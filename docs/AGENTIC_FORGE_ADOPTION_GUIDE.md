@@ -110,6 +110,13 @@ consumed unless the project opts in (mount the needed ones as overlay). This pro
 keeps no duplicate copy: the framework pack is the single source. Generic projects
 ignore `scaffold/`.
 
+### 3.6 Framework runtime hints and deprecated aliases
+- `// turbo` markers are **opencode-only runtime hints**; other agents ignore them. The
+  project adds none of its own.
+- `qa-docker` is a deprecated framework alias for `testing-standards`; it remains
+  upstream until the next major release and is **not** an active project skill. Use
+  `testing-standards` instead.
+
 ---
 
 ## 4. Verification gates

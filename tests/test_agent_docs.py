@@ -51,3 +51,20 @@ def test_qgis_domain_pack_has_single_source() -> None:
     assert (ROOT / ".agent/scaffold/qgis").is_dir()
     assert not (ROOT / "scaffold/qgis").exists()
     assert ".agent/scaffold/qgis" in text
+
+
+def test_no_project_turbo_runtime_hints() -> None:
+    """`// turbo` is an opencode-only framework hint, not a project directive."""
+    assert "// turbo" not in AGENTS.read_text(encoding="utf-8")
+    overlay = ROOT / ".agent-state" / "workflows"
+    if overlay.is_dir():
+        for path in overlay.rglob("*.md"):
+            assert "// turbo" not in path.read_text(encoding="utf-8"), path
+
+
+def test_deprecated_qa_docker_alias_is_not_adopted() -> None:
+    """The project uses testing-standards, not the deprecated framework alias."""
+    assert not (ROOT / ".agent-state" / "skills" / "qa-docker").exists()
+    for name in ("AGENTS.md", "forge.toml", "opencode.json"):
+        text = (ROOT / name).read_text(encoding="utf-8")
+        assert "qa-docker" not in text, name

@@ -2,6 +2,8 @@
 
 Este documento detalla los cambios necesarios en la herramienta `qgis-manage` para eliminar hardcodes de versión (QGIS 3) y permitir un despliegue interactivo y flexible.
 
+> **Estado (2026-10-25): resuelto.** `get_qgis_plugin_dir(profile, version)` ya soporta QGIS 3/4 y `deploy --qgis-version 4 --profile <nombre|ruta>` funciona. Este documento se conserva como registro histórico; no uses el workaround de `rsync` salvo que necesites un comportamiento ajeno a `qgis-manage`.
+
 ## 1. Problemas Identificados (Hardcodes)
 
 Actualmente, `qgis-manage` tiene hardcodeada la versión 3 de QGIS en la detección de rutas:

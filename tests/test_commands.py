@@ -707,7 +707,7 @@ class TestDeployCommand(_CommandTestBase):
         )
         mock_run_hook.return_value = True
 
-        exit_code, _, _ = self._invoke(["deploy"])
+        exit_code, _, _ = self._invoke(["deploy", "--trust"])
 
         self.assertEqual(exit_code, 0)
         hook_names = [c.args[0] for c in mock_run_hook.call_args_list]
@@ -741,7 +741,7 @@ class TestDeployCommand(_CommandTestBase):
         )
         mock_run_hook.return_value = False
 
-        exit_code, _, _ = self._invoke(["deploy"])
+        exit_code, _, _ = self._invoke(["deploy", "--trust"])
 
         self.assertEqual(exit_code, 1)
         mock_deploy.assert_not_called()

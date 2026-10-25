@@ -33,7 +33,7 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
-from .ignore import IgnoreMatcher, load_ignore_patterns
+from .ignore import IgnoreMatcher
 from .metadata import (
     format_general_entries,
     update_general_keys,
@@ -248,8 +248,7 @@ def get_source_files(project_root: Path, include_dev: bool = False) -> Iterator[
     Yields:
         Path objects for the root-level items to include in the package.
     """
-    spec = load_ignore_patterns(project_root, include_dev=include_dev)
-    matcher = IgnoreMatcher(project_root, spec)
+    matcher = IgnoreMatcher(project_root, include_dev=include_dev)
 
     # We copy everything except excluded items at the root level
     for item in project_root.iterdir():

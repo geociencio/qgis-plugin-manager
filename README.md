@@ -32,10 +32,13 @@ Every deploy creates a timestamped backup of the previous installation, with aut
 ```bash
 qgis-manage deploy --profile production --qgis-version 4
 qgis-manage deploy --purge-backups
+qgis-manage deploy --trust   # allow project hooks to execute
 ```
 
 ### 🪝 Native Python Hooks
 Automate your workflow in pure Python via `plugin_hooks.py` — or shell commands. Hooks receive full project context (metadata, paths, profiles).
+
+> **Trust**: hooks are project-controlled code. `deploy` skips them unless you pass `--trust`; `hooks test` is always explicit.
 
 ```python
 # plugin_hooks.py
@@ -72,6 +75,8 @@ Build repo-ready ZIPs, run compliance checks before upload, and stamp build meta
 ```bash
 qgis-manage package --repo-check --sync-version --stamp
 ```
+
+> **Dependencies**: if `[tool.qgis-manager].dependencies` is declared, `package` requires `--trust` before installing them.
 
 ### ✅ Deep Validation
 Validate metadata and project structure against the official QGIS repository rules — catch errors *before* you upload.
@@ -254,7 +259,6 @@ qgis_version = 4  # Target QGIS 4 by default
 max_backups = 5   # Control backup rotation
 profile = "default"
 
-[tool.qgis-manager.ignore]
 ignore = [
     "data/*.csv",
     "tests/temp/*"

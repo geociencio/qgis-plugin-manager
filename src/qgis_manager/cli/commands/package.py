@@ -6,7 +6,7 @@ from pathlib import Path
 import click
 
 from ...core import create_plugin_package
-from ...dependencies import install_external_libs
+from ...dependencies import get_dependencies, install_external_libs
 from ...discovery import find_project_root, sync_metadata_version
 from ...toml_utils import get_project_version
 from ..base import BaseCommand
@@ -58,6 +58,11 @@ class PackageCommand(BaseCommand):
             "--release-version",
             help="Override the version used for the ZIP name and stamping",
         )
+        parser.add_argument(
+            "--trust",
+            action="store_true",
+            help="Allow dependency installation from this project (trusted only)",
+        )
 
     def execute(self, args: argparse.Namespace) -> int:
         try:
@@ -71,7 +76,20 @@ class PackageCommand(BaseCommand):
                     sync_metadata_version(root)
 
             # 2. Install dependencies before validating so the packaged file set
-            #    is the one that compliance rules inspect.
+            #    is the one that compliance rules inspect. Installation executes
+            #    project-controlled package specs, so require explicit trust.
+            dependencies = get_dependencies(root)
+            if dependencies and not args.trust:
+                click.echo(
+                    click.style(
+                        "❌ Project declares dependencies; re-run with --trust "
+                        "to allow installation.",
+                        fg="red",
+                        bold=True,
+                    ),
+                    err=True,
+                )
+                return 1
             if not install_external_libs(root):
                 click.echo(
                     click.style(
@@ -119,7 +137,7 @@ class PackageCommand(BaseCommand):
                 show_pos=True,
             ) as bar:
 
-                def update_bar(n):
+                def update_bar(n: int) -> None:
                     if bar.length == 100:
                         bar.length = n
                         bar.update(0)

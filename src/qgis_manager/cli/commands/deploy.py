@@ -66,6 +66,11 @@ class DeployCommand(BaseCommand):
             type=int,
             help="Major QGIS version (3 or 4)",
         )
+        parser.add_argument(
+            "--trust",
+            action="store_true",
+            help="Allow hooks from this project to execute (trusted checkout only)",
+        )
 
     def execute(self, args: argparse.Namespace) -> int:
         try:
@@ -84,9 +89,15 @@ class DeployCommand(BaseCommand):
             metadata = get_plugin_metadata(root)
             slug = validate_slug(str(metadata["slug"]), source="plugin metadata")
 
+            # Destination determination (before purge so absolute paths are honored)
+            absolute_profile = bool(args.profile and Path(args.profile).is_absolute())
+            if absolute_profile:
+                target_dir = Path(args.profile)
+            else:
+                target_dir = get_qgis_plugin_dir(target_profile, version=qgis_version)
+
             # Handle --purge-backups
             if args.purge_backups:
-                target_dir = get_qgis_plugin_dir(target_profile, version=qgis_version)
                 msg = (
                     f"🗑️  Purge all backups for '{slug}' in profile '{target_profile}'?"
                 )
@@ -99,32 +110,26 @@ class DeployCommand(BaseCommand):
                 if not click.confirm("Proceed with deployment?"):
                     return 0
 
-            # Destination determination
-            if args.profile and Path(args.profile).is_absolute():
-                target_dir = Path(args.profile)
-            else:
-                target_dir = get_qgis_plugin_dir(target_profile, version=qgis_version)
-
-                # Interactive check for directory existence
-                if not target_dir.exists():
-                    click.echo(
-                        click.style(
-                            f"⚠️  Target directory does not exist: {target_dir}",
-                            fg="yellow",
-                        )
+            # Interactive check for directory existence (named profiles only)
+            if not absolute_profile and not target_dir.exists():
+                click.echo(
+                    click.style(
+                        f"⚠️  Target directory does not exist: {target_dir}",
+                        fg="yellow",
                     )
-                    if not click.confirm("Do you want to create it?"):
-                        manual_path = click.prompt(
-                            "Please enter the absolute path to the plugins directory "
-                            "(or press Enter to abort)",
-                            default="",
-                        )
-                        if not manual_path:
-                            click.echo("Aborted.")
-                            return 1
-                        target_dir = Path(manual_path)
-                    else:
-                        target_dir.mkdir(parents=True)
+                )
+                if not click.confirm("Do you want to create it?"):
+                    manual_path = click.prompt(
+                        "Please enter the absolute path to the plugins directory "
+                        "(or press Enter to abort)",
+                        default="",
+                    )
+                    if not manual_path:
+                        click.echo("Aborted.")
+                        return 1
+                    target_dir = Path(manual_path)
+                else:
+                    target_dir.mkdir(parents=True)
 
             target_path = target_dir / slug
 
@@ -141,13 +146,20 @@ class DeployCommand(BaseCommand):
             }
 
             if pre_hook or (root / "plugin_hooks.py").exists():
-                if args.interactive:
-                    if not click.confirm("🪝  Execute pre-deploy hook?"):
-                        click.echo("⏭️  Skipping hook.")
-                        pre_hook = None
+                if not args.trust:
+                    click.echo(
+                        "⚠️  Skipping pre-deploy hooks: project is untrusted "
+                        "(pass --trust).",
+                        err=True,
+                    )
+                else:
+                    if args.interactive:
+                        if not click.confirm("🪝  Execute pre-deploy hook?"):
+                            click.echo("⏭️  Skipping hook.")
+                            pre_hook = None
 
-                if not run_hook("pre_deploy", pre_hook, root, context=hook_ctx):
-                    return 1
+                    if not run_hook("pre_deploy", pre_hook, root, context=hook_ctx):
+                        return 1
 
             if args.interactive:
                 if not click.confirm(
@@ -194,12 +206,19 @@ class DeployCommand(BaseCommand):
             # Post-deploy hook
             post_hook = settings.hooks.get("post_deploy")
             if post_hook or (root / "plugin_hooks.py").exists():
-                if args.interactive:
-                    if not click.confirm("🪝  Execute post-deploy hook?"):
-                        click.echo("⏭️  Skipping hook.")
-                        post_hook = None
+                if not args.trust:
+                    click.echo(
+                        "⚠️  Skipping post-deploy hooks: project is untrusted "
+                        "(pass --trust).",
+                        err=True,
+                    )
+                else:
+                    if args.interactive:
+                        if not click.confirm("🪝  Execute post-deploy hook?"):
+                            click.echo("⏭️  Skipping hook.")
+                            post_hook = None
 
-                run_hook("post_deploy", post_hook, root, context=hook_ctx)
+                    run_hook("post_deploy", post_hook, root, context=hook_ctx)
 
             click.echo(click.style("✨ Deployment complete!", fg="green", bold=True))
             return 0

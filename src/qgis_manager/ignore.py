@@ -31,7 +31,7 @@ from .constants import DEFAULT_EXCLUDE_PATTERNS
 from .toml_utils import load_toml
 
 
-def load_ignore_patterns(project_root: Path, include_dev: bool = False):
+def load_ignore_patterns(project_root: Path, include_dev: bool = False) -> list[str]:
     """
     Load ignore patterns from .gitignore and pyproject.toml.
 
@@ -122,17 +122,3 @@ class IgnoreMatcher:
                     return True
 
         return False
-
-    def get_ignore_func(self):
-        """Returns a function compatible with shutil.copytree's ignore argument."""
-
-        def ignore_func(directory: str, contents: list[str]) -> list[str]:
-            dir_path = Path(directory)
-            ignored = []
-            for name in contents:
-                full_path = dir_path / name
-                if self.should_exclude(full_path):
-                    ignored.append(name)
-            return ignored
-
-        return ignore_func

@@ -44,7 +44,7 @@ def _remove_docs_output(project_root: Path) -> None:
             logger.debug(f"  🗑️ {docs_dir}")
 
 
-def clean_artifacts(project_root: Path):
+def clean_artifacts(project_root: Path) -> None:
     """Clean build artifacts: caches, compiled UI/resources and docs output."""
     logger.info("Cleaning artifacts...")
     _remove_cache_dirs(project_root)

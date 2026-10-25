@@ -38,6 +38,9 @@ def uninstall_plugin(
     plugin_dir = plugins_dir / slug
     if plugin_dir.parent != plugins_dir:
         raise ValueError(f"Refusing to remove unsafe path: {plugin_dir}")
+    if plugin_dir.is_symlink():
+        plugin_dir.unlink()
+        return plugin_dir
     if plugin_dir.exists():
         shutil.rmtree(plugin_dir)
         return plugin_dir
@@ -52,7 +55,11 @@ def rotate_backups(parent_dir: Path, slug: str, limit: int) -> None:
     # Find all backup directories for this slug
     backups = []
     for item in parent_dir.iterdir():
-        if item.is_dir() and item.name.startswith(f"{slug}.bak."):
+        if (
+            item.is_dir()
+            and not item.is_symlink()
+            and item.name.startswith(f"{slug}.bak.")
+        ):
             backups.append(item)
 
     # Sort by name (which contains timestamp) descending
@@ -124,6 +131,10 @@ def _cleanup_destination(src: Path, dst: Path, matcher: IgnoreMatcher) -> None:
     are preserved.
     """
     for item in dst.iterdir():
+        if item.is_symlink():
+            item.unlink()
+            logger.debug(f"  🗑️ {item.name} (destination symlink)")
+            continue
         source_item = src / item.name
         if source_item.exists() or matcher.should_exclude(source_item):
             continue
@@ -134,19 +145,26 @@ def _cleanup_destination(src: Path, dst: Path, matcher: IgnoreMatcher) -> None:
         logger.debug(f"  🗑️ {item.name} (removed from target)")
 
 
-def sync_directory(src: Path, dst: Path, matcher: IgnoreMatcher):
+def sync_directory(src: Path, dst: Path, matcher: IgnoreMatcher) -> None:
     """Sync source to destination only copying changed files (rsync-like)."""
     if not dst.exists():
         dst.mkdir(parents=True)
 
-    # 1. Copy/update files from source
+    # 1. Copy/update files from source. Never follow symlinks: a plugin
+    #    must not be able to read or copy files outside its project root.
     for item in src.iterdir():
+        if item.is_symlink():
+            logger.warning(f"Skipping symlink in source: {item}")
+            continue
         if matcher.should_exclude(item):
             continue
         if _is_same_or_nested(item, dst):
             continue
 
         dest_item = dst / item.name
+        if dest_item.is_symlink():
+            dest_item.unlink()
+            logger.warning(f"Removing destination symlink: {dest_item}")
         if item.is_dir():
             sync_directory(item, dest_item, matcher)
         elif _needs_copy(item, dest_item):
@@ -179,6 +197,8 @@ def deploy_plugin(
         dest_dir = get_qgis_plugin_dir(profile, version=qgis_version)
 
     target_path = dest_dir / slug
+    if target_path.is_symlink():
+        raise ValueError(f"Refusing to deploy to symlink target: {target_path}")
     if target_path == dest_dir or target_path.parent != dest_dir:
         raise ValueError(
             f"Refusing to deploy outside the plugin directory: {target_path}"
@@ -189,7 +209,7 @@ def deploy_plugin(
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         backup_path = target_path.parent / f"{slug}.bak.{timestamp}"
         logger.info(f"📦 Creating backup at: {backup_path.name}")
-        shutil.copytree(target_path, backup_path)
+        shutil.copytree(target_path, backup_path, symlinks=True)
 
         # Rotate backups
         rotate_backups(target_path.parent, slug, max_backups)

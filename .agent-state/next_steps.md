@@ -2,10 +2,10 @@
 
 **Date**: 2026-10-25
 **Last session**: `p0_and_forge_v1_4_2` (closed; CLI P0 + Agentic Forge v1.4.2)
-**Current session**: started 2026-10-25; P1 item not selected yet.
-**Context**: Agent Framework P0 is complete: metrics bootstrap, safe pruning, extended
-validator, CI gate, workflow adaptation and tooling dogfooding. The repository also has
-the earlier CLI P0 hardening (220 tests, 90.48 % line coverage).
+**Current session**: P1 complete (2026-10-25); P2/architecture backlog pending.
+**Context**: P1 is complete: docs consolidated, QGIS pack unified, deploy/package E2E,
+path/trust hardening, strict typing and framework-hint decisions. Project: **244 tests**,
+**90.45 %** line coverage; framework v1.4.2 with 37 tests.
 
 **Completed (this cycle):**
 - [x] Adopted Agentic Forge **v1.4.1** (upstream P0).
@@ -23,16 +23,19 @@ the earlier CLI P0 hardening (220 tests, 90.48 % line coverage).
 - [x] P1-1: consolidated root `AGENTS.md`; framework docs linked, no duplicate tables;
       `tests/test_agent_docs.py` guards the links.
 - [x] P1-2: `.agent/scaffold/qgis/` is the only QGIS pack; removed the unused root
-      `scaffold/qgis/` copy. Project tests: 221.
+      `scaffold/qgis/` copy.
+- [x] P1-3: 8 end-to-end deploy/package tests in `tests/test_e2e_cli.py`; fixed
+      `--purge-backups` with absolute `--profile`.
+- [x] P1-4: symlink confinement, POSIX ZIP arcnames, unsafe-version rejection
+      and explicit `--trust` for hooks/dependencies.
+- [x] P1-5: `py.typed`, strict mypy, Makefile/README/docs cleanup and dead
+      `cli.py` removal.
+- [x] P1-6: `// turbo` documented as opencode-only; `qa-docker` is a
+      non-adopted upstream alias. Project tests: 244, coverage 90.45 %.
 
-**Pending (P1/P2):**
-- [ ] Remove the remaining `// turbo` runtime hints or document them as opencode-only.
-- [ ] Decide whether the `qa-docker` skill should remain active (the repository has no
-      Docker setup; workflows now use local commands).
-- [ ] Add end-to-end tests for deploy/package (CLI P1 backlog).
-- [ ] Address CLI P1 items: symlink traversal, Windows ZIP separators, trust model for
-      hooks/dependencies, `py.typed`/strict mypy, dead `cli.py`, README ignore syntax,
-      docs/Makefile drift, release-note filenames.
+**Pending (P2):**
+- [ ] Normalize release-note filenames (`vX.Y.Z.md` vs `RELEASE_NOTES_v*.md`) and add a
+      fallback in the release workflow.
 - [ ] Archive/annotate the Gen 7/8 architecture plans.
 
 **Command to resume:**

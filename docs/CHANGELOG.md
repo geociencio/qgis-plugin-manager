@@ -17,15 +17,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Metadata preservation**: `bump`, `sync` and build stamping no longer destroy comments, custom sections or multiline values in `metadata.txt`.
-- **Backups**: `deploy --purge-backups` now removes all matching backups instead of being a no-op.
+- **Backups**: `deploy --purge-backups` now removes all matching backups instead of being a no-op, and honors an absolute `--profile` plugins directory.
 - **Scaffolding**: generated class/module names are valid Python identifiers; template metadata uses a valid `0.1.0` version.
 - **UI compilation**: `pyuic6`/PyQt6 imports are patched to `qgis.PyQt`.
 - **Configuration**: the configured `profile` is honored and CLI flags still override it.
 - **Validation**: valid `True`/`False` values no longer warn; plugin versions require `X.Y.Z`.
 
+### Security
+- **Trusted execution**: `deploy` skips project hooks and `package` refuses to install declared dependencies unless `--trust` is passed.
+- **Path confinement**: deploy/package skip source symlinks and refuse symlink destinations; ZIP member names always use POSIX `/`.
+- **Package versions**: path separators, empty versions and `..` are rejected before writing the ZIP.
+
 ### Changed
 - **Packaging**: dependencies are installed before the compliance check and install failures abort the package.
 
+- **Typing and tooling**: the package now ships `py.typed` and passes `mypy --strict`; `make test` uses pytest, `make lint` runs strict mypy on `src`, and `make format` applies Ruff formatting.
+- **Cleanup and docs**: removed the shadowed `cli.py` and dead `IgnoreMatcher.get_ignore_func`, fixed `get_source_files(include_dev=...)`, corrected the README ignore snippet, and marked the QGIS 3 hardcode note as resolved.
+
+- **Framework docs**: documented `// turbo` as an opencode-only runtime hint and `qa-docker` as a deprecated upstream alias not adopted by this project.
 ## [0.9.2] - 2026-10-10
 
 ### Fixed

@@ -2,12 +2,13 @@
 
 import hashlib
 import logging
+import os
 import re
 import subprocess
 import zipfile
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import Any
 
 from ..discovery import get_plugin_metadata, get_source_files, validate_slug
@@ -112,6 +113,24 @@ def _is_packable(path: Path, matcher: IgnoreMatcher) -> bool:
     return path.is_file() and not path.is_symlink() and not matcher.should_exclude(path)
 
 
+def _zip_arcname(project_root: PurePath, file_path: PurePath, slug: str) -> str:
+    """Return a POSIX ZIP member name (ZIP uses ``/`` on every platform)."""
+    return f"{slug}/{file_path.relative_to(project_root).as_posix()}"
+
+
+def _iter_package_files(directory: Path) -> Iterator[Path]:
+    """Yield files under ``directory`` without following symlinks."""
+    for current, dirnames, filenames in os.walk(directory, followlinks=False):
+        root = Path(current)
+        dirnames[:] = sorted(
+            name for name in dirnames if not (root / name).is_symlink()
+        )
+        for name in sorted(filenames):
+            path = root / name
+            if not path.is_symlink():
+                yield path
+
+
 def _collect_zip_items(
     project_root: Path, matcher: IgnoreMatcher, slug: str, include_dev: bool
 ) -> list[tuple[Path, str]]:
@@ -119,11 +138,11 @@ def _collect_zip_items(
     items: list[tuple[Path, str]] = []
     for item in get_source_files(project_root, include_dev=include_dev):
         if item.is_file():
-            items.append((item, f"{slug}/{item.name}"))
+            items.append((item, _zip_arcname(project_root, item, slug)))
         elif item.is_dir():
-            for file_path in item.rglob("*"):
+            for file_path in _iter_package_files(item):
                 if _is_packable(file_path, matcher):
-                    arcname = f"{slug}/{file_path.relative_to(project_root)}"
+                    arcname = _zip_arcname(project_root, file_path, slug)
                     items.append((file_path, arcname))
     return items
 
@@ -185,6 +204,12 @@ def create_plugin_package(
     metadata = get_plugin_metadata(project_root)
     slug = validate_slug(str(metadata["slug"]), source="plugin metadata")
     version = release_version or metadata.get("version", "0.0.0")
+    if any(separator in version for separator in ("/", "\\")) or version in {
+        "",
+        ".",
+        "..",
+    }:
+        raise ValueError(f"Unsafe package version: {version!r}")
 
     metadata_content = _build_stamped_metadata(project_root, version) if stamp else None
 

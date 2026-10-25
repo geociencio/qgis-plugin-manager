@@ -564,8 +564,8 @@ committed):
 | Validation fixes | Valid `True`/`False` no longer warn; plugin version requires `X.Y.Z`; `about` required; `repository` warning locally and error in `--repo` mode; regex typo fixed | boolean, short-version, repo-mode tests |
 | Compliance ordering/ignore-aware scan | Dependencies installed before compliance; final file set validated; binary scan uses `IgnoreMatcher`; `metadata.txt` required; repo metadata enforced | `.venv` binaries ignored; install-before-compliance order; install failure aborts |
 
-**Verification after the changes**: **221 tests + 13 subtests pass**; line coverage
-**90.48 %**, branch coverage **~88.7 %**; `ruff check`, `ruff format --check` and
+**Verification after the changes**: **244 tests + 13 subtests pass**; line coverage
+**90.45 %**, branch coverage **~88.7 %**; `ruff check`, `ruff format --check` and
 `mypy src` clean; wheel rebuilt, contains `qgis_manager/metadata.py`, and `init` +
 `validate` pass from the wheel. `make`'s `unittest discover` runner also passes.
 

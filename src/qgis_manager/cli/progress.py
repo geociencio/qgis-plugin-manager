@@ -2,6 +2,7 @@
 
 import time
 from collections.abc import Callable
+from typing import Any
 
 COMPILE_ICONS = {
     "Resource": "🔨",
@@ -11,7 +12,7 @@ COMPILE_ICONS = {
 _SPINNER = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
 
 
-def make_compile_callback(bar) -> Callable[[str], None]:
+def make_compile_callback(bar: Any) -> Callable[[str], None]:
     """Build a callback that drives a click progressbar from compile events.
 
     Args:

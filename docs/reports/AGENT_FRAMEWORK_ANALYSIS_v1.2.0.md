@@ -321,8 +321,8 @@ Retained project-owned changes:
   clean, validate/graph/conflicts/memory check pass.
 - `forge.py validate`: **15 skills, 14 workflows, 3 templates**, no issues (strict);
   the count dropped after removing the duplicate root QGIS pack.
-- `forge.py metrics validate` / `report`: pass (221 tests, 90.48 %).
-- Project gates: **221 tests**, **90.48 %** line coverage, ruff/format/mypy clean.
+- `forge.py metrics validate` / `report`: pass (244 tests, 90.45 %).
+- Project gates: **244 tests**, **90.45 %** line coverage, ruff/format/mypy clean.
 
 **Sibling compatibility (v1.4.2):** `sec_interp`, `qgis-plugin-analyzer` and
 `ai-context-core` pass validate/metrics/memory/graph/conflicts in temporary copies,
@@ -334,5 +334,13 @@ issue, not a framework regression.
 was removed; the framework pack at `.agent/scaffold/qgis/` is the single QGIS source.
 `tests/test_agent_docs.py` guards both decisions.
 
-**Still open:** end-to-end CLI tests, trust model, `py.typed`, and the remaining P1
-items in `.agent-state/next_steps.md`.
+**P1 progress:** 8 end-to-end deploy/package tests now run the real CLI in a
+subprocess. They found and fixed `--purge-backups` ignoring an absolute `--profile`.
+Path/trust hardening followed (symlink confinement, POSIX ZIP names, `--trust`),
+and the package is now typed (`py.typed`, strict mypy) with the dead `cli.py`
+removed and Makefile/README drift corrected.
+
+**P1 complete:** `// turbo` is documented as an opencode-only framework hint; the
+deprecated `qa-docker` alias remains upstream and is not adopted here. Guard tests
+keep both decisions from leaking into project config. Only P2/architecture cleanup
+remains in `.agent-state/next_steps.md`.
