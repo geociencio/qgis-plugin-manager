@@ -299,6 +299,7 @@ class TestCoreDeploy(unittest.TestCase):
             self.assertFalse(link.exists())
             self.assertTrue(real.exists())
 
+    @patch("qgis_manager.core.deploy.sys.platform", "linux")
     @patch("qgis_manager.core.deploy.subprocess.run")
     def test_copy_backup_falls_back_when_reflink_fails(self, mock_run):
         mock_run.return_value.returncode = 1
