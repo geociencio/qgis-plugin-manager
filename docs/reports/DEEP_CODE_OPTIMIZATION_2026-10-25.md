@@ -10,6 +10,11 @@ paths. No production code was changed for this analysis.
 **Baseline**: 248 tests passed (+13 subtests), 90.45 % line coverage, 0 import cycles,
 strict mypy clean, framework v1.4.2.
 
+**Status**: the P0 batch was implemented on 2026-10-25 (CLI single instantiation,
+BaseCommand error wrapper, deploy/package extraction, compile timeouts + ignore-aware
+scan, dead helper removal). Result: **250 tests, 91.83 % coverage**, deploy/package no
+longer C901; validation split and ignore-loader refactor remain P1.
+
 ---
 
 ## 1. Executive summary

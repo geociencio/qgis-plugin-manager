@@ -37,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Framework docs**: documented `// turbo` as an opencode-only runtime hint and `qa-docker` as a deprecated upstream alias not adopted by this project.
 - **Release notes**: active notes now use `vX.Y.Z.md`; the release workflow falls back to legacy `RELEASE_NOTES_*.md` names and a generic body for old tags.
 - **Architecture**: added `docs/architecture/AGENTIC_SYSTEM_PLANS.md` to record the Gen 7/8 plan status without modifying the shared framework submodule.
+- **Internal optimization**: CLI commands are instantiated once, command errors are centralized, deploy/package orchestration is split, compile tools have timeouts and skip dev/vendor directories, and dead validation code was removed.
 ## [0.9.2] - 2026-10-10
 
 ### Fixed

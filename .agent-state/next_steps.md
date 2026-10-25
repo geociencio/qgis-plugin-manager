@@ -2,10 +2,9 @@
 
 **Date**: 2026-10-25
 **Last session**: `p1_p2_completion` (closed; P1/P2 complete)
-**Current session**: started 2026-10-25; no active project item selected.
-**Context**: P1 closed docs/domain-pack/E2E/path/trust/typing work; P2 normalized release
-notes and annotated the upstream architecture plans. Project: **248 tests**, **90.45 %**
-line coverage; framework v1.4.2 with 37 tests.
+**Current session**: P0 optimization batch implemented (2026-10-25).
+**Context**: P1/P2 are closed and the P0 optimization batch is implemented. Project:
+**250 tests**, **91.83 %** line coverage; framework v1.4.2 with 37 tests.
 
 **Completed (this cycle):**
 - [x] Adopted Agentic Forge **v1.4.1** (upstream P0).
@@ -34,7 +33,9 @@ line coverage; framework v1.4.2 with 37 tests.
       non-adopted upstream alias.
 - [x] P2-1: release notes normalized to `vX.Y.Z.md`; workflow fallback added.
 - [x] P2-2: Gen 7/8 plans annotated in `docs/architecture/AGENTIC_SYSTEM_PLANS.md`.
-      Project tests: 248, coverage 90.45 %.
+- [x] P0-1..P0-6: CLI single instantiation/error wrapper, deploy/package
+      extraction, compile timeouts/ignore scan and dead-helper removal.
+      Project tests: 250, coverage 91.83 %.
 
 **Pending:**
 - No active project items. Remaining framework work belongs upstream in `agentic-forge`.

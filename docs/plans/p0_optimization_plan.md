@@ -4,6 +4,7 @@
 **Baseline**: 248 tests (+13 subtests), 90.45 % line coverage, strict mypy clean,
 framework v1.4.2, 0 import cycles.
 **Source analysis**: [`docs/reports/DEEP_CODE_OPTIMIZATION_2026-10-25.md`](../reports/DEEP_CODE_OPTIMIZATION_2026-10-25.md).
+**Status**: ✅ Implemented 2026-10-25 in commits `3904eef`, `30f4d88`, `6099986`, `1bf2afd`, `4f88cda`, `d5544f6`.
 
 ## 1. Goal
 
