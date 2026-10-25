@@ -73,7 +73,7 @@ class TestCLI(unittest.TestCase):
         exit_code, output, _ = self._invoke(["compile", "--type", "docs"])
         self.assertEqual(exit_code, 0)
         mock_compile.assert_called_once_with(
-            tmp_path, "docs", callback=unittest.mock.ANY
+            tmp_path, "docs", callback=unittest.mock.ANY, jobs=1
         )
 
     def test_cli_no_command(self):

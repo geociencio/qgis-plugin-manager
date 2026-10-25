@@ -33,3 +33,21 @@ def test_compile_ui_timeout_is_reported(tmp_path: Path) -> None:
         patch("qgis_manager.core.compile.subprocess.run", side_effect=timeout),
     ):
         assert compile_ui_files(tmp_path) is False
+
+
+def test_parallel_compile_preserves_callback_order(tmp_path: Path) -> None:
+    for name in ("a.ui", "b.ui"):
+        (tmp_path / name).write_text("", encoding="utf-8")
+    events: list[str] = []
+    with (
+        patch("qgis_manager.core.compile.get_uic_tool", return_value="pyuic6"),
+        patch("qgis_manager.core.compile.subprocess.run"),
+    ):
+        assert compile_ui_files(tmp_path, events.append, jobs=2) is True
+
+    assert events == [
+        "START:UI a.ui",
+        "DONE:UI a.ui",
+        "START:UI b.ui",
+        "DONE:UI b.ui",
+    ]

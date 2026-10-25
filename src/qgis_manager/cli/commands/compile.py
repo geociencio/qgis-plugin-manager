@@ -30,6 +30,12 @@ class CompileCommand(BaseCommand):
     def configure_parser(self, parser: argparse.ArgumentParser) -> None:
         self.add_common_args(parser, include_profile=False)
         parser.add_argument(
+            "--jobs",
+            type=int,
+            default=1,
+            help="Number of files to compile concurrently (default: 1)",
+        )
+        parser.add_argument(
             "--type",
             dest="res_type",
             choices=["resources", "translations", "docs", "all"],
@@ -47,10 +53,13 @@ class CompileCommand(BaseCommand):
                 length=total_steps, label="📚 Compilando", show_pos=True
             ) as bar:
                 compiled = compile_qt_resources(
-                    root, args.res_type, callback=make_compile_callback(bar)
+                    root,
+                    args.res_type,
+                    callback=make_compile_callback(bar),
+                    jobs=args.jobs,
                 )
         else:
-            compiled = compile_qt_resources(root, args.res_type)
+            compiled = compile_qt_resources(root, args.res_type, jobs=args.jobs)
 
         if not compiled:
             click.echo(

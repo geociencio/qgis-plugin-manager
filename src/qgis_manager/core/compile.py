@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -348,62 +349,83 @@ class CompileContext:
         return False
 
 
+def _run_jobs(
+    items: list[Path],
+    worker: Callable[[Path], tuple[bool, list[str]]],
+    jobs: int,
+) -> list[tuple[bool, list[str]]]:
+    """Run ``worker`` over items, preserving input order."""
+    if jobs <= 1:
+        return [worker(item) for item in items]
+    with ThreadPoolExecutor(max_workers=jobs) as executor:
+        return list(executor.map(worker, items))
+
+
+def _emit_result(context: CompileContext, result: tuple[bool, list[str]]) -> bool:
+    success, events = result
+    for event in events:
+        context.emit(event)
+    return success
+
+
 def compile_ui_files(
     project_root: Path,
     callback: Callable[[str], Any] | None = None,
+    jobs: int = 1,
 ) -> bool:
     """Compile .ui files to Python using pyuic (PyQt5/PyQt6/PySide)."""
     ui_files = _iter_compile_sources(project_root, "*.ui")
     if not ui_files:
         return True
-
     uic_tool = get_uic_tool()
     if not uic_tool:
         logger.warning(
             "  ⚠️  No UIC tool found (pyuic6, pyuic5). Cannot compile UI files."
         )
         return False
-
     context = CompileContext(project_root, callback)
-    success = True
-    for ui in ui_files:
+
+    def work(ui: Path) -> tuple[bool, list[str]]:
         py_file = ui.with_suffix(".py")
         rel_ui = ui.relative_to(project_root)
-        context.emit(f"START:UI {rel_ui.name}")
+        events = [f"START:UI {rel_ui.name}"]
         if not _is_stale(ui, py_file):
             logger.debug(f"  ⏭️  {rel_ui.name} up to date")
+            ok = True
         else:
             logger.debug(
                 f"🎨 Compiling UI: {rel_ui} -> {py_file.name} using {uic_tool}"
             )
-            if context.run([uic_tool, "-o", str(py_file), str(ui)], ui.name):
+            ok = context.run([uic_tool, "-o", str(py_file), str(ui)], ui.name)
+            if ok:
                 patch_ui_file(py_file)
-            else:
-                success = False
-        context.emit(f"DONE:UI {rel_ui.name}")
-    return success
+        events.append(f"DONE:UI {rel_ui.name}")
+        return ok, events
+
+    results = _run_jobs(ui_files, work, jobs)
+    return all(_emit_result(context, result) for result in results)
 
 
 def _compile_single_qrc(
     qrc: Path,
     context: CompileContext,
     rcc_tool: str,
-) -> bool:
+) -> tuple[bool, list[str]]:
     """Compile a single .qrc file and patch the generated module."""
     py_file = qrc.with_suffix(".py")
     rel_qrc = qrc.relative_to(context.project_root)
-    context.emit(f"START:Resource {rel_qrc.name}")
     logger.debug(f"🔨 Compiling resource: {rel_qrc} -> {py_file.name} using {rcc_tool}")
-    if not context.run([rcc_tool, "-o", str(py_file), str(qrc)], qrc.name):
-        return False
-    patch_resource_file(py_file)
-    context.emit(f"DONE:Resource {rel_qrc.name}")
-    logger.debug("  ✅ Done.")
-    return True
+    ok = context.run([rcc_tool, "-o", str(py_file), str(qrc)], qrc.name)
+    if ok:
+        patch_resource_file(py_file)
+        logger.debug("  ✅ Done.")
+    return ok, [f"START:Resource {rel_qrc.name}", f"DONE:Resource {rel_qrc.name}"]
 
 
 def _compile_qrc_files(
-    project_root: Path, callback: Callable[[str], Any] | None
+    project_root: Path,
+    callback: Callable[[str], Any] | None,
+    jobs: int = 1,
 ) -> bool:
     """Compile every .qrc file in the project using the detected RCC tool."""
     qrc_files = _iter_compile_sources(project_root, "*.qrc")
@@ -414,41 +436,42 @@ def _compile_qrc_files(
         logger.error("  ❌ No RCC tool found (pyside6-rcc, pyside2-rcc, pyrcc5).")
         return False
     context = CompileContext(project_root, callback)
-    success = True
-    for qrc in qrc_files:
-        if not _compile_single_qrc(qrc, context, rcc_tool):
-            success = False
-    return success
+    results = _run_jobs(
+        qrc_files, lambda qrc: _compile_single_qrc(qrc, context, rcc_tool), jobs
+    )
+    return all(_emit_result(context, result) for result in results)
 
 
-def _compile_single_ts(ts: Path, context: CompileContext) -> bool:
+def _compile_single_ts(ts: Path, context: CompileContext) -> tuple[bool, list[str]]:
     """Compile a single .ts translation file with lrelease."""
     rel_ts = ts.relative_to(context.project_root)
-    context.emit(f"START:Translation {rel_ts.name}")
     logger.debug(f"🌍 Compiling translation: {rel_ts}")
-    if not context.run(["lrelease", str(ts)], ts.name):
-        return False
-    context.emit(f"DONE:Translation {rel_ts.name}")
-    logger.debug("  ✅ Done.")
-    return True
+    ok = context.run(["lrelease", str(ts)], ts.name)
+    if ok:
+        logger.debug("  ✅ Done.")
+    return ok, [f"START:Translation {rel_ts.name}", f"DONE:Translation {rel_ts.name}"]
 
 
 def _compile_ts_files(
-    project_root: Path, callback: Callable[[str], Any] | None
+    project_root: Path,
+    callback: Callable[[str], Any] | None,
+    jobs: int = 1,
 ) -> bool:
     """Compile every .ts translation file in the project."""
     context = CompileContext(project_root, callback)
-    success = True
-    for ts in _iter_compile_sources(project_root, "*.ts"):
-        if not _compile_single_ts(ts, context):
-            success = False
-    return success
+    results = _run_jobs(
+        _iter_compile_sources(project_root, "*.ts"),
+        lambda ts: _compile_single_ts(ts, context),
+        jobs,
+    )
+    return all(_emit_result(context, result) for result in results)
 
 
 def compile_qt_resources(
     project_root: Path,
     res_type: str = "all",
     callback: Callable[[str], Any] | None = None,
+    jobs: int = 1,
 ) -> bool:
     """Compile Qt resources, UI files, translations, and documentation.
 
@@ -465,11 +488,13 @@ def compile_qt_resources(
 
     if res_type in ["resources", "all"]:
         # Compile .ui files to Python (pyuic) and .qrc resources to Python (rcc)
-        success = compile_ui_files(project_root, callback=callback) and success
-        success = _compile_qrc_files(project_root, callback) and success
+        success = (
+            compile_ui_files(project_root, callback=callback, jobs=jobs) and success
+        )
+        success = _compile_qrc_files(project_root, callback, jobs) and success
 
     if res_type in ["translations", "all"]:
-        success = _compile_ts_files(project_root, callback) and success
+        success = _compile_ts_files(project_root, callback, jobs) and success
 
     if res_type in ["docs", "all"]:
         success = compile_docs(project_root, callback=callback) and success
