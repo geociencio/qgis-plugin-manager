@@ -1,8 +1,8 @@
 # Next Steps
 
 **Date**: 2026-10-25
-**Last session**: `p1_p2_completion` (closed; P1/P2 complete)
-**Current session**: P2 platform UX implemented and 0.12.0 prepared (2026-10-25).
+**Last session**: `p0_p2_platform_release` (closed; 0.10.1, 0.11.0, 0.12.0 published)
+**Current session**: closed 2026-10-25; 0.10.1, 0.11.0 and 0.12.0 published.
 **Context**: P0, coverage, P1 and P2 are complete. Project: **373 tests**,
 **95.32 %** combined coverage; framework v1.4.2.
 
@@ -53,7 +53,8 @@
       96.77 %, branches 90.73 %.
 
 **Pending:**
-- No active project items. Remaining framework work belongs upstream in `agentic-forge`.
+- No active project items. Post-0.12 backlog: hook sandboxing, config-file shell
+  policy, global Git excludes and formal benchmarks.
 
 **Command to resume:**
 `/start-session` (it now refreshes metrics and runs the validators).

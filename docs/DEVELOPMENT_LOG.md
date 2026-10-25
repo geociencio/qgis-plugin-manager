@@ -1,5 +1,16 @@
 # Development Log: qgis-manage
 
+## [2026-10-25] P0/P1/P2 Platform Releases
+- **Achievement**: Closed the 0.10.0 analysis remediation across 0.10.1, 0.11.0 and 0.12.0, including a risk-weighted coverage initiative.
+- **Changes**:
+    - P0: collision-safe backups, repeatable `--type`, release-version validation, `deploy --yes`, safe `clean`.
+    - Coverage: separate 95/90 statement/branch gate, new error-path and E2E tests, 373 tests total.
+    - P1: pruned `--repo-check`, deploy manifest, reflink backups, compile freshness.
+    - P2: JSON output, ignore explain, deploy dry-run, profiles, require-docs, max-cc and non-shell hooks.
+- **Quality**: 373 tests (+13 subtests), 96.77 % statements, 90.73 % branches, 95.32 % combined, C901 = 0; framework 37 tests and validators clean.
+- **Release**: tags `v0.10.1`, `v0.11.0`, `v0.12.0` published on GitHub and PyPI; hashes verified.
+- **Maintenance**: [session_2026-10-25_p0_p2_platform_release.md](maintenance/session_2026-10-25_p0_p2_platform_release.md).
+
 ## [2026-10-25] P1/P2 Completion
 - **Achievement**: Closed the P1 and P2 backlogs: docs/domain-pack consolidation, real deploy/package E2E, path/trust hardening, strict typing, normalized release notes and annotated architecture plans.
 - **Changes**:

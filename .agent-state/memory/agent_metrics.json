@@ -1,6 +1,6 @@
 {
     "schema_version": 1,
-    "generated_at": "2026-10-25T14:01:50+00:00",
+    "generated_at": "2026-10-25T14:06:43+00:00",
     "summary": {
         "test_count": 373,
         "tests_ok": 373,
@@ -16,7 +16,7 @@
     },
     "last_session": {
         "date": "2026-10-25",
-        "topic": "p1_p2_completion",
+        "topic": "p0_p2_platform_release",
         "tests_ok": 373,
         "quality_score": 95.32,
         "task_completion_rate": 1.0,
@@ -26,6 +26,17 @@
         "status": "SUCCESS"
     },
     "history": [
+        {
+            "date": "2026-10-25",
+            "tests_ok": 373,
+            "quality_score": 95.32,
+            "task_completion_rate": 1.0,
+            "retries": 0,
+            "stop_conditions_triggered": 0,
+            "tasks": [],
+            "status": "SUCCESS",
+            "session": "p1_p2_completion"
+        },
         {
             "date": "2026-10-19",
             "tests_ok": 248,

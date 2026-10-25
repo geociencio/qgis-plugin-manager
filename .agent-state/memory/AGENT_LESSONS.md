@@ -11,6 +11,34 @@ system; see `memory_policy.md` for retention and promotion rules.
 ```yaml
 lessons:
   - date: 2026-10-25
+    category: TESTING
+    topic: Tests after the __main__ guard are silently uncollected
+    lesson: >-
+      Several regression tests were appended after `if __name__ == "__main__":`;
+      pytest collected zero of them, so branch coverage stayed stale while the
+      file looked correct.
+    action: >-
+      Append tests before the module guard (or drop the guard), and verify the
+      collected test count after adding a batch.
+  - date: 2026-10-25
+    category: ENVIRONMENT
+    topic: Platform-specific branches need explicit test targeting
+    lesson: >-
+      The reflink test assumed Linux `cp`, failing on macOS, and Windows ZIP
+      assertions initially compared translated newlines. CI exposed both.
+    action: >-
+      Patch `sys.platform`/use bytes when asserting platform-sensitive branches,
+      and run the matrix before tagging.
+  - date: 2026-10-25
+    category: TOOLING
+    topic: Rebuild the sdist from the exact release tag before hash checks
+    lesson: >-
+      The local sdist was built before a final test-only commit, so its hash
+      differed from the CI artifact even though the wheel matched.
+    action: >-
+      Rebuild wheel and sdist at the tagged commit before comparing PyPI
+      digests; never compare artifacts from a dirty/ahead working tree.
+  - date: 2026-10-25
     category: TOOLING
     topic: Metrics report assumes a numeric task completion rate
     lesson: >-

@@ -1,28 +1,17 @@
-# Active Task: P2 Platform UX
+# Session Closed: P0/P1/P2 Platform Releases
 
 ## Status
-- **Phase**: P2 (7/7 workstreams complete)
-- **Progress**: 100%
-- **Status**: ✅ P2 implemented and 0.12.0 prepared locally (2026-10-25);
-  push/tag/publication pending.
+- **Phase**: closed (2026-10-25)
+- **Releases**: 0.10.1, 0.11.0 and 0.12.0 published on GitHub and PyPI.
+- **Quality**: 373 tests, 96.77 % statements, 90.73 % branches, C901 = 0.
 
 ## Completed
-1. [x] `--json` for validate/analyze/package.
-2. [x] `ignore check/explain`.
-3. [x] `analyze --max-cc`.
-4. [x] `deploy --dry-run`.
-5. [x] `profiles list`.
-6. [x] `package --require-docs`.
-7. [x] `HookPolicy(shell=False)` default with migration error.
+1. [x] P0 correctness fixes and 0.10.1.
+2. [x] Risk-weighted coverage initiative and 95/90 gates.
+3. [x] P1 performance (scan, manifest, reflink, compile freshness) and 0.11.0.
+4. [x] P2 platform UX/safety and 0.12.0.
 
 ## Next
-- Publish 0.12.0.
-- Post-0.12 backlog: nested ignore global excludes, hook sandboxing, optional
-  config-file shell policy, benchmarks.
-
-## Context
-- Framework: **agentic-forge** `.agent/` submodule **v1.4.2** (`b264e35`), clean.
-- Quality: **373 project tests**, **96.77 % statements / 90.73 % branches**
-  (95.32 % combined), gates 95/90; **37 framework tests**; C901 = 0.
-- Previous phase: P1, archived at
-  `.agent-state/history/tasks/task_2026-10-25_p1_performance.md`.
+- No active phase. Post-0.12 backlog: hook sandboxing, config-file shell policy,
+  global Git excludes, formal benchmarks.
+- Resume with `/start-session`.
