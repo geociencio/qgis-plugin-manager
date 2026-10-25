@@ -170,7 +170,7 @@ def compile_docs(
             callback("DONE:Documentation")
         logger.debug("  ✅ Documentation compiled successfully.")
         return True
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError, shutil.Error) as e:
         logger.error(f"  ❌ Error compiling documentation: {e}")
         shutil.rmtree(build_dir, ignore_errors=True)
         return False
@@ -242,7 +242,7 @@ def verify_resource_patch(py_file: Path) -> bool:
             if prefix in content:
                 return False
         return True
-    except Exception:
+    except (OSError, UnicodeDecodeError):
         return False
 
 
@@ -282,7 +282,7 @@ def patch_resource_file(py_file: Path) -> bool:
                 )
             return True
 
-    except Exception as e:
+    except (OSError, UnicodeDecodeError) as e:
         logger.warning(f"  ⚠️  Failed to patch {py_file.name}: {e}")
 
     return False
@@ -309,7 +309,7 @@ def patch_ui_file(py_file: Path) -> bool:
             py_file.write_text(content, encoding="utf-8")
             logger.debug(f"  ✅ Patched UI imports in {py_file.name}")
             return True
-    except Exception as e:
+    except (OSError, UnicodeDecodeError) as e:
         logger.warning(f"  ⚠️  Failed to patch {py_file.name}: {e}")
 
     return False

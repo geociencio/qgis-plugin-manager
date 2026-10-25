@@ -111,7 +111,7 @@ def _is_same_or_nested(item: Path, dst: Path) -> bool:
         resolved = item.resolve()
         dst_resolved = dst.resolve()
         return resolved == dst_resolved or dst_resolved.is_relative_to(resolved)
-    except Exception:
+    except (OSError, ValueError, RuntimeError):
         return False
 
 
@@ -229,7 +229,7 @@ def deploy_plugin(
             rel_target = target_path.resolve().relative_to(project_root.resolve())
             matcher.patterns.append(str(rel_target))
             matcher.patterns.append(f"/{rel_target}")
-    except Exception:
+    except (OSError, ValueError, RuntimeError):
         pass
 
     logger.info(f"🚀 Syncing files to {target_path}")

@@ -55,7 +55,14 @@ def execute_python_hook(
             return True
 
         return True  # Function not found is not an error, just skip
-    except Exception as e:
+    except (
+        ImportError,
+        AttributeError,
+        OSError,
+        RuntimeError,
+        TypeError,
+        ValueError,
+    ) as e:
         logger.error(f"❌ Error executing native hook '{func_name}': {e}")
         return False
 
@@ -117,6 +124,6 @@ def run_hook(
 
         logger.debug(f"✅ Hook command '{name}' finished successfully")
         return True
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError, ValueError) as e:
         logger.error(f"❌ Error running hook command '{name}': {e}")
         return False

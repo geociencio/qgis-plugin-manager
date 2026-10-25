@@ -183,17 +183,17 @@ def get_plugin_metadata(project_root: Path) -> dict[str, Any]:
     except UnicodeDecodeError:
         try:
             config.read(metadata_path, encoding="latin-1")
-        except Exception as e:
+        except (configparser.Error, OSError) as e:
             logger.error(f"Critical error in get_plugin_metadata (read latin-1): {e}")
             return {"name": project_root.name, "slug": slugify(project_root.name)}
-    except Exception as e:
+    except (configparser.Error, OSError) as e:
         logger.error(f"Critical error in get_plugin_metadata (read utf-8): {e}")
         # Fallback if file exists but is empty/malformed
         return {"name": project_root.name, "slug": slugify(project_root.name)}
 
     try:
         metadata = dict(config["general"])
-    except Exception as e:
+    except KeyError as e:
         logger.error(f"Error accessing ['general'] in metadata.txt: {e}")
         return {"name": project_root.name, "slug": slugify(project_root.name)}
 

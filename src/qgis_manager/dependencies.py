@@ -53,6 +53,6 @@ def install_external_libs(project_root: Path, target_dir: str = "libs") -> bool:
         # Recommendation: user needs to add this folder to sys.path in __init__.py
         # We could automate this, but for now just log it.
         return True
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         logger.error(f"❌ Unexpected error installing dependencies: {e}")
         return False

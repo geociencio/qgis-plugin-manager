@@ -33,7 +33,7 @@ def validate_project_structure(
                 errors.append(
                     "Critical function missing in '__init__.py': 'def classFactory'"
                 )
-        except Exception:
+        except (OSError, UnicodeDecodeError):
             errors.append("Could not read '__init__.py'")
 
     # 2. Icon validation

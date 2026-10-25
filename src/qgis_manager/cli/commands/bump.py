@@ -199,7 +199,7 @@ class BumpCommand(BaseCommand):
             metadata["version"] = version
             save_plugin_metadata(root, metadata)
             click.echo("  📝 Updated metadata.txt")
-        except Exception as e:
+        except (OSError, ValueError) as e:
             logger.error(f"Error updating metadata.txt: {e}")
             click.echo(click.style(f"  ❌ Error updating metadata.txt: {e}", fg="red"))
             success = False

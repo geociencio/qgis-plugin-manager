@@ -18,7 +18,7 @@ def load_toml(path: Path) -> dict[str, Any]:
     try:
         with open(path, "rb") as f:
             return tomllib.load(f)
-    except Exception:
+    except (OSError, ValueError):
         return {}
 
 
