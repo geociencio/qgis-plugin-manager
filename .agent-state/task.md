@@ -1,29 +1,30 @@
-# Active Task: P1 Code Optimization
+# Active Task: P2 Quality & Reliability
 
 ## Status
-- **Phase**: P1 (6/6 complete)
+- **Phase**: P2 (7/7 complete)
 - **Progress**: 100%
-- **Status**: ✅ P1 structural optimization implemented (2026-10-25); C901 is now 0.
+- **Status**: ✅ P2 quality batch implemented (2026-10-25); branch gate and
+  error/config/ignore hardening complete.
 
 ## Objectives
-1. [x] Split ignore pattern loading and keep semantics.
-2. [x] Split validation into result/fields/metadata/repository/structure modules.
-3. [x] Consolidate metadata read/write/sync and extract naming helpers.
-4. [x] Add the ordered CLI command registry.
-5. [x] Introduce `CompileContext` for UI/QRC/TS tools.
-6. [x] Detect deploy content changes beyond size+mtime.
+1. [x] Narrow broad exception handlers outside the CLI boundaries.
+2. [x] Enforce branch coverage ≥90 %.
+3. [x] Portable XDG/APPDATA config and APPDATA fallback.
+4. [x] Ignore negation patterns with ordered last-match semantics.
+5. [x] Stop project-root search at the Git boundary.
+6. [x] Centralize project-root resolution in `BaseCommand.project_root`.
+7. [x] Split command/core test suites.
 
 ## Todo
-- [x] Implement the six P1 commits.
-- [x] Run project/framework/typing/coverage/C90 gates.
+- [x] Implement the seven P2 commits.
+- [x] Run project/framework/typing/line+branch/C90 gates.
 - [x] Update metrics and plan/report status.
-- [ ] P2 quality work (exceptions, branch coverage, config, ignore negation).
+- [ ] P3 backlog (nested ignores, sandboxing, parallel compile, entry points).
 
 ## Context
 - Framework: **agentic-forge** `.agent/` submodule **v1.4.2** (`b264e35`), clean.
-- Quality: **253 project tests**, **92.35 %** line coverage; **37 framework tests**;
-  ruff/format/strict mypy clean; **C901 = 0**.
-- Previous phase: P0 complete, archived at
-  `.agent-state/history/tasks/task_2026-10-25_p0_optimization.md`.
-- Public imports remain compatible via `validation/__init__.py` and
-  `discovery` re-exports; metadata now lives in `metadata.py`/`naming.py`.
+- Quality: **259 project tests**, **90.43 %** combined line+branch coverage;
+  **37 framework tests**; branch gate 90 %; ruff/format/strict mypy clean; C901 = 0.
+- Broad exceptions: only `cli/app.py` and `cli/base.py` guards remain.
+- Previous phase: P1 complete, archived at
+  `.agent-state/history/tasks/task_2026-10-25_p1_optimization.md`.

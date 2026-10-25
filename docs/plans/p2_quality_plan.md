@@ -7,6 +7,7 @@
 **Source**: [`DEEP_CODE_OPTIMIZATION_2026-10-25.md`](../reports/DEEP_CODE_OPTIMIZATION_2026-10-25.md).
 **Predecessors**: [`p0_optimization_plan.md`](p0_optimization_plan.md),
 [`p1_optimization_plan.md`](p1_optimization_plan.md) — implemented.
+**Status**: ✅ Implemented 2026-10-25 in commits `b1afd80`, `8df1ae9`, `6c2c76a`, `dd8e17c`, `f8bd39b`, `e316303`, `b9d5297`.
 
 ## 1. Goal
 
