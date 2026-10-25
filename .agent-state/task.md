@@ -1,30 +1,29 @@
-# Active Task: P2 Quality & Reliability
+# Active Task: P3 Platform Controls
 
 ## Status
-- **Phase**: P2 (7/7 complete)
+- **Phase**: P3 (7/7 implemented)
 - **Progress**: 100%
-- **Status**: ✅ P2 quality batch implemented (2026-10-25); branch gate and
-  error/config/ignore hardening complete.
+- **Status**: ✅ P3 core implemented (2026-10-25); compatibility deviations recorded.
 
 ## Objectives
-1. [x] Narrow broad exception handlers outside the CLI boundaries.
-2. [x] Enforce branch coverage ≥90 %.
-3. [x] Portable XDG/APPDATA config and APPDATA fallback.
-4. [x] Ignore negation patterns with ordered last-match semantics.
-5. [x] Stop project-root search at the Git boundary.
-6. [x] Centralize project-root resolution in `BaseCommand.project_root`.
-7. [x] Split command/core test suites.
+1. [x] Nested `.qgisignore`/`.gitignore` rules with ordered negation.
+2. [x] Hook policy with timeout, allowlisted environment and non-shell option.
+3. [x] Bounded dependency installation with timeout and dry-run.
+4. [x] `compile --jobs` with ordered callbacks.
+5. [x] External `qgis_manager.commands` entry points.
+6. [x] Init/bump contract E2E tests.
+7. [x] Docs/help/changelog refreshed.
 
-## Todo
-- [x] Implement the seven P2 commits.
-- [x] Run project/framework/typing/line+branch/C90 gates.
-- [x] Update metrics and plan/report status.
-- [ ] P3 backlog (nested ignores, sandboxing, parallel compile, entry points).
+## Deviations from plan
+- Hook shell mode defaults to `True` for backward compatibility; `HookPolicy(shell=False)`
+  is available via the API but not the default.
+- `compile_jobs` is exposed as `compile --jobs`, not yet read from `project.toml`.
+- Dependency index/constraints options are not added; timeout + dry-run are.
+- Nesting is covered; `.git/info/exclude` remains unsupported.
 
 ## Context
 - Framework: **agentic-forge** `.agent/` submodule **v1.4.2** (`b264e35`), clean.
-- Quality: **259 project tests**, **90.43 %** combined line+branch coverage;
-  **37 framework tests**; branch gate 90 %; ruff/format/strict mypy clean; C901 = 0.
-- Broad exceptions: only `cli/app.py` and `cli/base.py` guards remain.
-- Previous phase: P1 complete, archived at
-  `.agent-state/history/tasks/task_2026-10-25_p1_optimization.md`.
+- Quality: **269 project tests**, **91.03 %** combined coverage; branch gate 90 %;
+  **37 framework tests**; ruff/format/strict mypy clean; C901 = 0.
+- Previous phase: P2 complete, archived at
+  `.agent-state/history/tasks/task_2026-10-25_p2_quality.md`.

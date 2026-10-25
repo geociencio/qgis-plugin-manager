@@ -2,9 +2,9 @@
 
 **Date**: 2026-10-25
 **Last session**: `p1_p2_completion` (closed; P1/P2 complete)
-**Current session**: P2 quality/reliability batch implemented (2026-10-25).
-**Context**: P0, P1 and P2 optimization/quality batches are implemented.
-Project: **259 tests**, **90.43 %** line+branch coverage; framework v1.4.2 with 37 tests.
+**Current session**: P3 platform controls implemented (2026-10-25).
+**Context**: P0-P3 batches are implemented. Project: **269 tests**, **91.03 %**
+line+branch coverage; framework v1.4.2 with 37 tests.
 
 **Completed (this cycle):**
 - [x] Adopted Agentic Forge **v1.4.1** (upstream P0).
@@ -39,7 +39,10 @@ Project: **259 tests**, **90.43 %** line+branch coverage; framework v1.4.2 with 
       CompileContext and deploy content comparison.
 - [x] P2-1..P2-7: narrowed exceptions, 90 % branch gate, portable config,
       ignore negation, Git-boundary root, BaseCommand.project_root and split
-      test suites. Project tests: 259, coverage 90.43 %, C901 = 0.
+      test suites.
+- [x] P3-1..P3-7: nested ignore rules, hook/dependency policies, compile jobs,
+      entry-point commands and init/bump contracts. Project tests: 269,
+      coverage 91.03 %, C901 = 0.
 
 **Pending:**
 - No active project items. Remaining framework work belongs upstream in `agentic-forge`.
