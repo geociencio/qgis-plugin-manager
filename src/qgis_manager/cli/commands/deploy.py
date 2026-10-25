@@ -13,8 +13,10 @@ from ...core import (
     deploy_plugin,
     get_qgis_plugin_dir,
 )
-from ...discovery import find_project_root, get_plugin_metadata, validate_slug
+from ...discovery import find_project_root
 from ...hooks import run_hook
+from ...metadata import get_plugin_metadata
+from ...naming import validate_slug
 from ..base import BaseCommand
 from ..progress import make_compile_callback
 

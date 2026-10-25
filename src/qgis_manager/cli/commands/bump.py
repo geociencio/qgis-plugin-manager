@@ -6,8 +6,8 @@ from pathlib import Path
 
 import click
 
-from ...discovery import (
-    find_project_root,
+from ...discovery import find_project_root
+from ...metadata import (
     get_plugin_metadata,
     save_plugin_metadata,
     sync_metadata_version,

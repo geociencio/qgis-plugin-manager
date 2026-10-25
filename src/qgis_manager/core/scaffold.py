@@ -57,7 +57,7 @@ def init_plugin_project(
             unknown.
         FileExistsError: If the target project directory already exists.
     """
-    from ..discovery import slugify, validate_slug
+    from ..naming import slugify, validate_slug
     from ..templating import render_template
 
     slug = slugify(name)

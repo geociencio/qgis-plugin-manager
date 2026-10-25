@@ -11,9 +11,10 @@ from datetime import datetime, timezone
 from pathlib import Path, PurePath
 from typing import Any
 
-from ..discovery import get_plugin_metadata, get_source_files, validate_slug
+from ..discovery import get_source_files
 from ..ignore import IgnoreMatcher
-from ..metadata import update_general_keys
+from ..metadata import get_plugin_metadata, update_general_keys
+from ..naming import validate_slug
 
 logger = logging.getLogger(__name__)
 

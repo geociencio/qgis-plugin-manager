@@ -6,7 +6,8 @@ from pathlib import Path
 
 import click
 
-from ...discovery import find_project_root, get_plugin_metadata
+from ...discovery import find_project_root
+from ...metadata import get_plugin_metadata
 from ...validation import validate_metadata, validate_project_structure
 from ..base import BaseCommand
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from ..discovery import slugify
+from ..naming import slugify
 from .fields import (
     get_required_fields,
     validate_boolean_field,

@@ -7,8 +7,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from ..discovery import get_plugin_metadata, validate_slug
 from ..ignore import IgnoreMatcher
+from ..metadata import get_plugin_metadata
+from ..naming import validate_slug
 from .platform import get_qgis_plugin_dir
 
 logger = logging.getLogger(__name__)

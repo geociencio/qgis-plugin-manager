@@ -193,7 +193,7 @@ class TestDiscovery(unittest.TestCase):
                 get_plugin_metadata(tmp_path)["about"], "Line one\nLine two"
             )
 
-    @patch("qgis_manager.discovery.write_text_atomic", side_effect=OSError("boom"))
+    @patch("qgis_manager.metadata.write_text_atomic", side_effect=OSError("boom"))
     def test_save_plugin_metadata_write_error(self, _mock_write):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)

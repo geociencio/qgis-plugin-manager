@@ -9,9 +9,17 @@ formatting.
 
 from __future__ import annotations
 
+import configparser
+import logging
 import os
 import re
 from pathlib import Path
+from typing import Any
+
+from .naming import slugify
+from .toml_utils import get_project_version
+
+logger = logging.getLogger(__name__)
 
 #: ``key=value`` or ``key: value`` inside a section, keeping surrounding spaces.
 _KEY_RE = re.compile(r"^(\s*)([A-Za-z][A-Za-z0-9_]*)(\s*[=:]\s*)(.*)$")
@@ -146,3 +154,112 @@ def write_text_atomic(path: Path, text: str) -> None:
         os.replace(tmp_path, path)
     finally:
         tmp_path.unlink(missing_ok=True)
+
+
+def get_plugin_metadata(project_root: Path) -> dict[str, Any]:
+    """Read metadata.txt and return as a dict.
+
+    Falls back to basic info (name and slug) if the file is missing or malformed.
+
+    Args:
+        project_root: Root directory of the QGIS plugin project.
+
+    Returns:
+        A dictionary containing the metadata fields found in [general].
+    """
+    metadata_path = project_root / "metadata.txt"
+    if not metadata_path.exists():
+        # Minimum metadata for tool-only projects
+        return {
+            "name": project_root.name,
+            "slug": slugify(project_root.name),
+            "version": "unknown",
+        }
+
+    config = configparser.ConfigParser(interpolation=None)
+    config.optionxform = str  # type: ignore[method-assign, assignment] # Preserve case
+    try:
+        config.read(metadata_path, encoding="utf-8")
+    except UnicodeDecodeError:
+        try:
+            config.read(metadata_path, encoding="latin-1")
+        except Exception as e:
+            logger.error(f"Critical error in get_plugin_metadata (read latin-1): {e}")
+            return {"name": project_root.name, "slug": slugify(project_root.name)}
+    except Exception as e:
+        logger.error(f"Critical error in get_plugin_metadata (read utf-8): {e}")
+        # Fallback if file exists but is empty/malformed
+        return {"name": project_root.name, "slug": slugify(project_root.name)}
+
+    try:
+        metadata = dict(config["general"])
+    except Exception as e:
+        logger.error(f"Error accessing ['general'] in metadata.txt: {e}")
+        return {"name": project_root.name, "slug": slugify(project_root.name)}
+
+    if "name" not in metadata:
+        metadata["name"] = project_root.name
+
+    metadata["slug"] = slugify(metadata["name"])
+    return metadata
+
+
+def save_plugin_metadata(project_root: Path, metadata: dict[str, Any]) -> None:
+    """Save metadata back to metadata.txt preserving comments and other sections.
+
+    Only changed keys are rewritten; untouched lines, comments, blank lines and
+    custom sections keep their original formatting.  The write is atomic.
+
+    Args:
+        project_root: Root directory of the QGIS plugin project.
+        metadata: Dictionary with project metadata to persist.
+
+    Raises:
+        OSError: If the file cannot be written.
+    """
+    metadata_path = project_root / "metadata.txt"
+    updates = {str(key): str(value) for key, value in metadata.items() if key != "slug"}
+
+    if metadata_path.exists():
+        current = get_plugin_metadata(project_root)
+        current.pop("slug", None)
+        updates = {
+            key: value for key, value in updates.items() if current.get(key) != value
+        }
+        if not updates:
+            return
+
+        text = metadata_path.read_text(encoding="utf-8")
+        new_text = update_general_keys(text, updates)
+    else:
+        lines = ["[general]", *format_general_entries(updates)]
+        new_text = "\n".join(lines) + "\n"
+
+    try:
+        write_text_atomic(metadata_path, new_text)
+    except OSError as exc:
+        logger.error(f"Error saving metadata.txt: {exc}")
+        raise
+
+
+def sync_metadata_version(project_root: Path) -> bool:
+    """Sync the metadata.txt version from pyproject.toml.
+
+    Args:
+        project_root: Root directory of the plugin project.
+
+    Returns:
+        True if metadata.txt was updated, False if it was already in sync
+        or if pyproject.toml has no version.
+    """
+    version = get_project_version(project_root / "pyproject.toml")
+    if not version:
+        return False
+
+    metadata = get_plugin_metadata(project_root)
+    if metadata.get("version") == version:
+        return False
+
+    metadata["version"] = version
+    save_plugin_metadata(project_root, metadata)
+    return True

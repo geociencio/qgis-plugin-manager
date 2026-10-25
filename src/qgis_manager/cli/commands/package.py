@@ -7,7 +7,8 @@ import click
 
 from ...core import create_plugin_package
 from ...dependencies import get_dependencies, install_external_libs
-from ...discovery import find_project_root, sync_metadata_version
+from ...discovery import find_project_root
+from ...metadata import sync_metadata_version
 from ...toml_utils import get_project_version
 from ..base import BaseCommand
 
@@ -111,7 +112,7 @@ class PackageCommand(BaseCommand):
     def _check_compliance(self, root: Path, args: argparse.Namespace) -> bool:
         if not args.repo_check:
             return True
-        from ...discovery import get_plugin_metadata as fetch_metadata
+        from ...metadata import get_plugin_metadata as fetch_metadata
         from ...validation import (
             validate_metadata,
             validate_official_compliance,
