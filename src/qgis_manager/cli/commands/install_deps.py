@@ -4,7 +4,7 @@ import argparse
 
 import click
 
-from ...dependencies import install_external_libs
+from ...dependencies import DependencyPolicy, install_external_libs
 from ..base import BaseCommand
 
 
@@ -31,10 +31,22 @@ class InstallDepsCommand(BaseCommand):
         parser.add_argument(
             "--target", default="libs", help="Target directory for libraries"
         )
+        parser.add_argument(
+            "--timeout",
+            type=int,
+            default=300,
+            help="Maximum seconds for the dependency installer",
+        )
+        parser.add_argument(
+            "--dry-run",
+            action="store_true",
+            help="Print the installer command without running it",
+        )
 
     def execute(self, args: argparse.Namespace) -> int:
         root = self.project_root(args)
-        if install_external_libs(root, args.target):
+        policy = DependencyPolicy(timeout=args.timeout, dry_run=args.dry_run)
+        if install_external_libs(root, args.target, policy=policy):
             click.echo("✨ Dependencies ready.")
             return 0
         else:

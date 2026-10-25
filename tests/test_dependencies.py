@@ -1,9 +1,14 @@
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from qgis_manager.dependencies import get_dependencies, install_external_libs
+from qgis_manager.dependencies import (
+    DependencyPolicy,
+    get_dependencies,
+    install_external_libs,
+)
 
 
 class TestDependencies(unittest.TestCase):
@@ -54,6 +59,37 @@ class TestDependencies(unittest.TestCase):
             )
             self.assertTrue(install_external_libs(tmp_path))
             self.assertEqual(mock_run.call_count, 2)
+
+    @patch("qgis_manager.dependencies.subprocess.run")
+    def test_install_external_libs_dry_run(self, mock_run):
+        mock_run.return_value.returncode = 0
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / "pyproject.toml").write_text(
+                '[tool.qgis-manager]\ndependencies = ["requests"]\n',
+                encoding="utf-8",
+            )
+            self.assertTrue(
+                install_external_libs(tmp_path, policy=DependencyPolicy(dry_run=True))
+            )
+            self.assertFalse((tmp_path / "libs").exists())
+            self.assertEqual(mock_run.call_count, 1)
+
+    @patch("qgis_manager.dependencies.subprocess.run")
+    def test_install_external_libs_timeout(self, mock_run):
+        mock_run.side_effect = [
+            Mock(),
+            subprocess.TimeoutExpired("pip", 1),
+        ]
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / "pyproject.toml").write_text(
+                '[tool.qgis-manager]\ndependencies = ["requests"]\n',
+                encoding="utf-8",
+            )
+            self.assertFalse(
+                install_external_libs(tmp_path, policy=DependencyPolicy(timeout=1))
+            )
 
     @patch("qgis_manager.dependencies.subprocess.run")
     def test_install_external_libs_fallback_to_pip(self, mock_run):

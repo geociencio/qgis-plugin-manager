@@ -1,11 +1,20 @@
 import logging
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 from .toml_utils import load_toml
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class DependencyPolicy:
+    """Bounded execution policy for dependency installation."""
+
+    timeout: int = 300
+    dry_run: bool = False
 
 
 def get_dependencies(project_root: Path) -> list[str]:
@@ -21,29 +30,52 @@ def get_dependencies(project_root: Path) -> list[str]:
     return [str(d) for d in deps] if isinstance(deps, list) else []
 
 
-def install_external_libs(project_root: Path, target_dir: str = "libs") -> bool:
+def install_external_libs(
+    project_root: Path,
+    target_dir: str = "libs",
+    policy: DependencyPolicy | None = None,
+) -> bool:
     """Install external libraries to a target directory using pip/uv."""
+    policy = policy or DependencyPolicy()
     dependencies = get_dependencies(project_root)
     if not dependencies:
         logger.debug("No dependencies found in pyproject.toml")
         return True
 
     dest_path = project_root / target_dir
-    dest_path.mkdir(parents=True, exist_ok=True)
 
     logger.info(f"📦 Installing {len(dependencies)} dependencies to {target_dir}/...")
 
     # We prefer 'uv pip install' if available for speed and consistency
     cmd_base = ["uv", "pip", "install"]
     try:
-        subprocess.run(["uv", "--version"], capture_output=True, check=True)
-    except (subprocess.CalledProcessError, FileNotFoundError):
+        subprocess.run(
+            ["uv", "--version"],
+            capture_output=True,
+            check=True,
+            timeout=policy.timeout,
+        )
+    except (
+        subprocess.CalledProcessError,
+        subprocess.TimeoutExpired,
+        FileNotFoundError,
+    ):
         cmd_base = [sys.executable, "-m", "pip", "install"]
 
     cmd = cmd_base + ["--target", str(dest_path)] + dependencies
+    if policy.dry_run:
+        logger.info("Dry run: %s", subprocess.list2cmdline(cmd))
+        return True
+    dest_path.mkdir(parents=True, exist_ok=True)
 
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=policy.timeout,
+        )
         if result.returncode != 0:
             logger.error(f"❌ Failed to install dependencies:\n{result.stderr}")
             return False
