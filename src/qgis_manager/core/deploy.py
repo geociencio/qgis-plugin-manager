@@ -1,5 +1,6 @@
 """Plugin deployment, backup rotation and smart directory synchronization."""
 
+import filecmp
 import logging
 import shutil
 from collections.abc import Callable
@@ -118,11 +119,11 @@ def _needs_copy(src: Path, dst: Path) -> bool:
     """Return True if ``src`` differs from ``dst`` (size or mtime)."""
     if not dst.exists():
         return True
-    src_stat = src.stat()
-    dst_stat = dst.stat()
-    return not (
-        src_stat.st_size == dst_stat.st_size and src_stat.st_mtime == dst_stat.st_mtime
-    )
+    if src.stat().st_size != dst.stat().st_size:
+        return True
+    # Size is equal: compare content, because a same-size file can be rewritten
+    # while preserving (or rounding) its mtime.
+    return not filecmp.cmp(src, dst, shallow=False)
 
 
 def _cleanup_destination(src: Path, dst: Path, matcher: IgnoreMatcher) -> None:
