@@ -3,7 +3,8 @@
 ## Status
 - **Phase**: P2 (2/2 complete)
 - **Progress**: 100%
-- **Status**: ✅ P2 complete (2026-10-25); no active project backlog.
+- **Status**: ✅ P2 complete and session closed (2026-10-25, `p1_p2_completion`);
+  no active project backlog.
 
 ## Objectives
 1. [x] Normalize release-note filenames to `vX.Y.Z.md`, archive the legacy v0.6.2

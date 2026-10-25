@@ -1,8 +1,8 @@
 # Next Steps
 
 **Date**: 2026-10-25
-**Last session**: `p0_and_forge_v1_4_2` (closed; CLI P0 + Agentic Forge v1.4.2)
-**Current session**: P1 and P2 complete (2026-10-25); no active project backlog.
+**Last session**: `p1_p2_completion` (closed; P1/P2 complete)
+**Current session**: none; P1 and P2 closed on 2026-10-25.
 **Context**: P1 closed docs/domain-pack/E2E/path/trust/typing work; P2 normalized release
 notes and annotated the upstream architecture plans. Project: **248 tests**, **90.45 %**
 line coverage; framework v1.4.2 with 37 tests.

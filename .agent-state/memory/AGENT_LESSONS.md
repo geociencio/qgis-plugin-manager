@@ -10,6 +10,45 @@ system; see `memory_policy.md` for retention and promotion rules.
 
 ```yaml
 lessons:
+  - date: 2026-10-25
+    category: TOOLING
+    topic: Metrics report assumes a numeric task completion rate
+    lesson: >-
+      forge.py metrics report crashed after close-session because the rotated history entry
+      had task_completion_rate=None; completed sessions need a numeric rate or upstream
+      null handling.
+    action: >-
+      Record task_completion_rate=1.0 for completed sessions and propose a null-safe
+      formatter upstream in agentic-forge.
+  - date: 2026-10-25
+    category: TESTING
+    topic: Subprocess E2E catches path bugs that mocks hide
+    lesson: >-
+      The deploy E2E test found that --purge-backups ignored an absolute --profile
+      because target_dir was resolved inside the purge branch; mocked CLI tests could
+      not observe the real filesystem target.
+    action: >-
+      Keep at least one real-CLI test for path-sensitive commands and assert the
+      filesystem effects, not only exit codes.
+  - date: 2026-10-25
+    category: TOOLING
+    topic: Strict mypy exposes real argument bugs
+    lesson: >-
+      Enabling strict mypy revealed that get_source_files passed an ignore-pattern list
+      as the boolean include_dev argument of IgnoreMatcher, so dev files were not
+      excluded as intended.
+    action: >-
+      Adopt strict typing incrementally and treat new type errors as possible runtime
+      defects rather than adding blanket ignores.
+  - date: 2026-10-25
+    category: AGENTIC_SYSTEM
+    topic: Document shared-framework hints instead of editing the submodule
+    lesson: >-
+      The remaining // turbo hints and qa-docker alias belong to the shared Agentic Forge
+      submodule; editing them locally would fork the framework used by sibling repos.
+    action: >-
+      Record project decisions in AGENTS/docs and add guard tests; propose framework
+      changes upstream in agentic-forge.
   - date: 2026-10-19
     category: AGENTIC_SYSTEM
     topic: Check upstream framework tags before implementing features

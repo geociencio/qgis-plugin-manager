@@ -1,5 +1,15 @@
 # Development Log: qgis-manage
 
+## [2026-10-25] P1/P2 Completion
+- **Achievement**: Closed the P1 and P2 backlogs: docs/domain-pack consolidation, real deploy/package E2E, path/trust hardening, strict typing, normalized release notes and annotated architecture plans.
+- **Changes**:
+    - Root `AGENTS.md` is canonical; `.agent/scaffold/qgis` is the only QGIS pack; E2E deploy/package tests added.
+    - Symlink confinement, POSIX ZIP names, unsafe-version rejection and explicit `--trust` for hooks/dependencies.
+    - `py.typed` + strict mypy, dead `cli.py`/`get_ignore_func` removed, Makefile/README/docs refreshed.
+    - Release notes normalized to `vX.Y.Z.md` with workflow fallback; Gen 7/8 plan status indexed.
+- **Quality**: 248 tests (+13 subtests), 90.45 % line coverage, ruff/format/strict mypy clean; framework 37 tests and validators clean.
+- **Maintenance**: [session_2026-10-25_p1_p2_completion.md](maintenance/session_2026-10-25_p1_p2_completion.md).
+
 ## [2026-10-19] P0 Hardening & Agentic Forge v1.4.2
 - **Achievement**: Hardened the CLI against destructive operations and adopted the released Agentic Forge v1.4.2 with framework validation in CI.
 - **Changes**:
