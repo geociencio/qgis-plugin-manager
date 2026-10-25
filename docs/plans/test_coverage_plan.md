@@ -52,9 +52,10 @@ and unreachable compatibility branches would create brittle tests or unhelpful
 
 Initial thresholds are the current values rounded down, so the gate catches
 regressions without forcing an immediate large patch. Raise them in Commit 5.
-**Status**: Commits 1-5 implemented 2026-10-25. The gate is now 95.00 %
-statements / 90.00 % branches; coverage is 96.55 % / 91.47 % with 326 tests.
-Commit 6 (E2E/fixtures) and final threshold documentation remain.
+**Status**: ✅ Implemented 2026-10-25. Gate is 95.00 % statements / 90.00 %
+branches; coverage is 96.55 % / 91.47 % with 331 tests, including P0 E2E
+contracts. Shared fixtures were unnecessary because the E2E helpers are already
+module-local and reused.
 
 ### Acceptance
 

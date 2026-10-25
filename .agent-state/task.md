@@ -13,6 +13,11 @@
 4. [x] `deploy --yes` for non-interactive purge/create/deploy.
 5. [x] `clean --dry-run` and `--keep-generated` protection.
 
+## Coverage
+- [x] Risk-weighted test coverage: 331 tests, 96.55 % statements,
+  91.47 % branches, gates raised to 95/90.
+- [x] E2E contracts for the P0 fixes.
+
 ## Next
 - Review/publish 0.10.1.
 - P1: repo-check pruning, deploy manifest, reflink backups, compiled-output
