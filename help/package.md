@@ -1,7 +1,7 @@
 # qgis-manage package
 
 ```text
-qgis-manage package v0.10.0
+qgis-manage package v0.10.1
 Create distributable ZIP package
 
 Usage: qgis-manage package [-h] [-o OUTPUT] [--dev] [--repo-check]

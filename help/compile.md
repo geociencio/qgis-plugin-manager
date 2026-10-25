@@ -1,7 +1,7 @@
 # qgis-manage compile
 
 ```text
-qgis-manage compile v0.10.0
+qgis-manage compile v0.10.1
 Compile resources, UI files and translations
 
 Usage: qgis-manage compile [-h] [--jobs JOBS]
@@ -15,7 +15,8 @@ Options:
   -h, --help            show this help message and exit
   --jobs JOBS           Number of files to compile concurrently (default: 1)
   --type {resources,translations,docs,all}
-                        Type of resources to compile (default: all)
+                        Type of resources to compile; may be repeated
+                        (default: all)
 
 Examples:
     # Compile resources and translations

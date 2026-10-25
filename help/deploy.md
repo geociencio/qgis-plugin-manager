@@ -1,12 +1,12 @@
 # qgis-manage deploy
 
 ```text
-qgis-manage deploy v0.10.0
+qgis-manage deploy v0.10.1
 Deploy the plugin to the local QGIS profile
 
 Usage: qgis-manage deploy [-h] [-p PROFILE] [--no-backup] [-i] [--no-compile]
-                          [--purge-backups] [--qgis-version QGIS_VERSION]
-                          [--trust]
+                          [--purge-backups] [--yes]
+                          [--qgis-version QGIS_VERSION] [--trust]
                           [path]
 
 Arguments:
@@ -21,6 +21,7 @@ Options:
   -i, --interactive     Ask for confirmation before each step
   --no-compile          Skip automatic resource compilation
   --purge-backups       Remove all existing backups for this plugin
+  --yes                 Assume yes for purge/create/deploy confirmations
   --qgis-version QGIS_VERSION
                         Major QGIS version (3 or 4)
   --trust               Allow hooks from this project to execute (trusted

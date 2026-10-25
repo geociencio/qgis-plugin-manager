@@ -8,6 +8,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.1] - 2026-10-25
+
+### Fixed
+- **Deploy backups**: use microsecond timestamps and collision-safe suffixes so consecutive deploys no longer fail with `File exists`.
+- **Compile types**: make `--type` repeatable; `--type resources --type translations` now compiles both families instead of silently keeping only the last one.
+- **Package versions**: reject `--release-version` when it differs from `metadata.txt` and neither `--stamp` nor a matching sync resolves it, preventing ZIP names from diverging from portal-validated metadata.
+- **Non-interactive deploy**: add `deploy --yes` for purge/create/deploy confirmations; reject combining it with `--interactive`.
+- **Clean safety**: add `clean --dry-run` and `clean --keep-generated`, and warn when a generated `.py` is tracked by Git.
+
 ## [0.10.0] - 2026-10-25
 
 ### Added
