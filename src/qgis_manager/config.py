@@ -1,3 +1,5 @@
+import os
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -16,13 +18,24 @@ class Settings:
     hooks: dict[str, str] = field(default_factory=dict)
 
 
+def config_path() -> Path:
+    """Return the user config path following XDG/APPDATA conventions."""
+    if sys.platform == "win32":
+        appdata = os.environ.get("APPDATA")
+        base = Path(appdata) if appdata else Path.home() / "AppData" / "Roaming"
+    else:
+        xdg = os.environ.get("XDG_CONFIG_HOME")
+        base = Path(xdg) if xdg else Path.home() / ".config"
+    return base / "qgis-manager" / "config.toml"
+
+
 def load_config() -> Settings:
-    """Load configuration from ~/.config/qgis-manager/config.toml."""
+    """Load configuration from the user config path."""
     settings = Settings()
 
-    config_path = Path.home() / ".config" / "qgis-manager" / "config.toml"
-    if config_path.exists():
-        data = load_toml(config_path)
+    path = config_path()
+    if path.exists():
+        data = load_toml(path)
         defaults = data.get("defaults", {})
         settings.profile = defaults.get("profile", settings.profile)
         settings.qgis_version = defaults.get("qgis_version", settings.qgis_version)

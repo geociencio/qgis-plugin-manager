@@ -20,9 +20,11 @@ def get_qgis_plugin_dir(profile: str = "default", version: int = 3) -> Path:
             / "python/plugins"
         )
     elif sys.platform == "win32":
-        return (
-            Path(os.environ["APPDATA"])
-            / f"QGIS/QGIS{version}/profiles/{profile}/python/plugins"
-        )
+        appdata = os.environ.get("APPDATA")
+        if not appdata:
+            raise OSError(
+                "APPDATA is not set; cannot locate the QGIS plugins directory."
+            )
+        return Path(appdata) / f"QGIS/QGIS{version}/profiles/{profile}/python/plugins"
     else:
         raise OSError(f"Unsupported platform: {sys.platform}")

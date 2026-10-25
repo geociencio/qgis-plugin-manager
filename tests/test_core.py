@@ -58,6 +58,12 @@ class TestCore(unittest.TestCase):
         self.assertEqual(get_qgis_plugin_dir(version=4), expected_v4)
 
     @patch("sys.platform", "win32")
+    @patch("os.environ", {})
+    def test_get_qgis_plugin_dir_win32_missing_appdata(self):
+        with self.assertRaisesRegex(OSError, "APPDATA"):
+            get_qgis_plugin_dir()
+
+    @patch("sys.platform", "win32")
     @patch("os.environ", {"APPDATA": "/appdata"})
     def test_get_qgis_plugin_dir_win32(self):
         expected_v3 = Path("/appdata") / "QGIS/QGIS3/profiles/default/python/plugins"

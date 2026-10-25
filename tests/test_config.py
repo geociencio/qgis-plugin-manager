@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from qgis_manager.config import Settings, load_config, load_project_config
+from qgis_manager.config import Settings, config_path, load_config, load_project_config
 
 
 class TestConfig(unittest.TestCase):
@@ -38,12 +38,14 @@ pre_deploy = "echo 1"
             self.assertFalse(settings.auto_compile)
             self.assertEqual(settings.hooks["pre_deploy"], "echo 1")
 
+    @patch.dict("os.environ", {"XDG_CONFIG_HOME": ""}, clear=False)
     @patch("pathlib.Path.home")
     def test_load_config_no_file(self, mock_home):
         mock_home.return_value = Path("/nonexistent")
         settings = load_config()
         self.assertEqual(settings.profile, "default")
 
+    @patch.dict("os.environ", {"XDG_CONFIG_HOME": ""}, clear=False)
     @patch("pathlib.Path.home")
     def test_load_config_with_file(self, mock_home):
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -64,6 +66,25 @@ pre_deploy = "echo 1"
             self.assertFalse(settings.backup)
             self.assertEqual(settings.max_backups, 5)
             self.assertFalse(settings.auto_compile)
+
+    @patch.dict("os.environ", {"XDG_CONFIG_HOME": "/tmp/xdg"}, clear=False)
+    @patch("qgis_manager.config.sys.platform", "linux")
+    def test_config_path_uses_xdg(self):
+        self.assertEqual(config_path(), Path("/tmp/xdg/qgis-manager/config.toml"))
+
+    @patch.dict("os.environ", {"APPDATA": "/tmp/appdata"}, clear=False)
+    @patch("qgis_manager.config.sys.platform", "win32")
+    def test_config_path_uses_appdata(self):
+        self.assertEqual(config_path(), Path("/tmp/appdata/qgis-manager/config.toml"))
+
+    @patch.dict("os.environ", {}, clear=True)
+    @patch("pathlib.Path.home", return_value=Path("/home/tester"))
+    @patch("qgis_manager.config.sys.platform", "win32")
+    def test_config_path_falls_back_to_home(self, _mock_home):
+        self.assertEqual(
+            config_path(),
+            Path("/home/tester/AppData/Roaming/qgis-manager/config.toml"),
+        )
 
 
 if __name__ == "__main__":
