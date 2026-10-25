@@ -12,6 +12,12 @@ from qgis_manager.core import (
     get_uic_tool,
     patch_ui_file,
 )
+from qgis_manager.core.compile import (
+    CompileContext,
+    _run_sphinx,
+    _sphinx_command,
+    verify_resource_patch,
+)
 
 
 class TestCoreCompile(unittest.TestCase):
@@ -273,3 +279,75 @@ class TestCoreCompile(unittest.TestCase):
             (root / "dialog.ui").touch()
 
             self.assertFalse(compile_ui_files(root))
+
+    @patch(
+        "qgis_manager.core.compile.subprocess.run",
+        side_effect=FileNotFoundError(),
+    )
+    def test_compile_context_missing_tool(self, _mock_run):
+        context = CompileContext(Path("."))
+        self.assertFalse(context.run(["missing"], "missing"))
+
+    @patch(
+        "qgis_manager.core.compile.subprocess.run",
+        side_effect=subprocess.TimeoutExpired("tool", 1),
+    )
+    def test_compile_context_timeout(self, _mock_run):
+        context = CompileContext(Path("."))
+        self.assertFalse(context.run(["slow"], "slow"))
+
+    @patch(
+        "qgis_manager.core.compile.subprocess.run",
+        side_effect=subprocess.CalledProcessError(1, "tool"),
+    )
+    def test_compile_context_nonzero(self, _mock_run):
+        context = CompileContext(Path("."))
+        self.assertFalse(context.run(["tool"], "tool"))
+
+    @patch(
+        "qgis_manager.core.compile.importlib.util.find_spec", side_effect=ImportError
+    )
+    @patch("qgis_manager.core.compile.shutil.which", return_value=None)
+    def test_sphinx_command_handles_find_spec_error(self, _which, _find_spec):
+        self.assertIsNone(_sphinx_command())
+
+    def test_sphinx_timeout_kills_process(self):
+        process = MagicMock()
+        process.stdout = []
+        process.wait.side_effect = subprocess.TimeoutExpired("sphinx", 1)
+        with patch("qgis_manager.core.compile.subprocess.Popen", return_value=process):
+            with self.assertRaises(subprocess.TimeoutExpired):
+                _run_sphinx(["sphinx-build"], None)
+        process.kill.assert_called_once()
+
+    def test_verify_resource_patch_missing_file(self):
+        self.assertFalse(verify_resource_patch(Path("/nonexistent/resources.py")))
+
+    def test_patch_ui_file_read_error(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            py_file = Path(tmp_dir) / "dialog.py"
+            py_file.write_text("x", encoding="utf-8")
+            with patch("pathlib.Path.read_text", side_effect=OSError("denied")):
+                self.assertFalse(patch_ui_file(py_file))
+
+    @patch("qgis_manager.core.compile.subprocess.run")
+    def test_compile_translations(self, mock_run):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "translations.ts").touch()
+            self.assertTrue(compile_qt_resources(root, res_type="translations"))
+            mock_run.assert_called_once()
+            self.assertEqual(mock_run.call_args[0][0][0], "lrelease")
+
+    @patch("qgis_manager.core.compile._compile_qrc_files", return_value=True)
+    @patch("qgis_manager.core.compile.compile_ui_files", return_value=False)
+    def test_compile_resources_aggregates_failure(self, mock_ui, mock_qrc):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            self.assertFalse(compile_qt_resources(root, res_type="resources"))
+            mock_ui.assert_called_once()
+            mock_qrc.assert_called_once()
+
+    def test_compile_all_with_no_sources_succeeds(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            self.assertTrue(compile_qt_resources(Path(tmp_dir), res_type="all"))

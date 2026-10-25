@@ -9,6 +9,7 @@ from qgis_manager.core import (
     sync_directory,
     uninstall_plugin,
 )
+from qgis_manager.core.deploy import _backup_path, _is_same_or_nested
 from qgis_manager.ignore import IgnoreMatcher
 
 
@@ -179,3 +180,124 @@ class TestCoreDeploy(unittest.TestCase):
             backups = sorted(dest.glob("test_plugin.bak.*"))
             self.assertGreaterEqual(len(backups), 2)
             self.assertTrue((dest / "test_plugin" / "plugin.py").exists())
+
+    @patch("qgis_manager.core.deploy.get_plugin_metadata")
+    @patch("qgis_manager.core.deploy.get_qgis_plugin_dir")
+    @patch("qgis_manager.core.deploy.sync_directory")
+    def test_deploy_uses_detected_plugins_dir(
+        self, mock_sync, mock_plugins_dir, mock_meta
+    ):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir) / "project"
+            root.mkdir()
+            dest = Path(tmp_dir) / "plugins"
+            dest.mkdir()
+            mock_meta.return_value = {"name": "Test", "slug": "test_plugin"}
+            mock_plugins_dir.return_value = dest
+
+            deploy_plugin(root, no_backup=True)
+
+            mock_plugins_dir.assert_called_once()
+            mock_sync.assert_called_once()
+
+    @patch(
+        "qgis_manager.core.deploy.get_plugin_metadata",
+        return_value={"name": "Test", "slug": "test_plugin"},
+    )
+    def test_deploy_rejects_symlink_target(self, _mock_meta):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir) / "project"
+            root.mkdir()
+            dest = Path(tmp_dir) / "plugins"
+            dest.mkdir()
+            real = Path(tmp_dir) / "real"
+            real.mkdir()
+            try:
+                (dest / "test_plugin").symlink_to(real, target_is_directory=True)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+
+            with self.assertRaises(ValueError):
+                deploy_plugin(root, dest_dir=dest)
+
+    def test_backup_path_collision_adds_suffix(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            parent = Path(tmp_dir)
+            (parent / "plugin.bak.stamp").mkdir()
+            with patch("qgis_manager.core.deploy.datetime") as mock_datetime:
+                mock_datetime.now.return_value.strftime.return_value = "stamp"
+                path = _backup_path(parent, "plugin")
+            self.assertEqual(path.name, "plugin.bak.stamp-1")
+
+    def test_is_same_or_nested_returns_false_on_resolve_error(self):
+        with patch("pathlib.Path.resolve", side_effect=OSError("bad path")):
+            self.assertFalse(_is_same_or_nested(Path("a"), Path("b")))
+
+    def test_sync_skips_source_symlink(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            src = root / "src"
+            dst = root / "dst"
+            src.mkdir()
+            dst.mkdir()
+            (src / "real.txt").write_text("ok", encoding="utf-8")
+            target = root / "outside.txt"
+            target.write_text("outside", encoding="utf-8")
+            try:
+                (src / "link.txt").symlink_to(target)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+
+            sync_directory(src, dst, IgnoreMatcher(src))
+
+            self.assertTrue((dst / "real.txt").exists())
+            self.assertFalse((dst / "link.txt").exists())
+
+    def test_sync_removes_destination_symlink_and_stale_entries(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            src = root / "src"
+            dst = root / "dst"
+            src.mkdir()
+            dst.mkdir()
+            (src / "keep.txt").write_text("keep", encoding="utf-8")
+            (dst / "keep.txt").write_text("old", encoding="utf-8")
+            (dst / "stale.txt").write_text("stale", encoding="utf-8")
+            (dst / "stale_dir").mkdir()
+            target = root / "outside.txt"
+            target.write_text("outside", encoding="utf-8")
+            try:
+                (dst / "link.txt").symlink_to(target)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+
+            sync_directory(src, dst, IgnoreMatcher(src))
+
+            self.assertTrue((dst / "keep.txt").exists())
+            self.assertFalse((dst / "stale.txt").exists())
+            self.assertFalse((dst / "stale_dir").exists())
+            self.assertFalse((dst / "link.txt").exists())
+
+    @patch(
+        "qgis_manager.core.deploy.get_plugin_metadata",
+        return_value={"slug": "test_plugin"},
+    )
+    def test_uninstall_plugin_symlink(self, _mock_meta):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            plugins = Path(tmp_dir) / "plugins"
+            plugins.mkdir()
+            real = Path(tmp_dir) / "real"
+            real.mkdir()
+            link = plugins / "test_plugin"
+            try:
+                link.symlink_to(real, target_is_directory=True)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+            with patch(
+                "qgis_manager.core.deploy.get_qgis_plugin_dir",
+                return_value=plugins,
+            ):
+                removed = uninstall_plugin(Path("."))
+            self.assertEqual(removed, link)
+            self.assertFalse(link.exists())
+            self.assertTrue(real.exists())
