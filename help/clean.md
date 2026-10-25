@@ -1,7 +1,7 @@
 # qgis-manage clean
 
 ```text
-qgis-manage clean v0.10.1
+qgis-manage clean v0.11.0
 Remove Python cache files and build artifacts
 
 Usage: qgis-manage clean [-h] [--dry-run] [--keep-generated] [path]

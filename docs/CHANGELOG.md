@@ -8,6 +8,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-10-25
+
+### Added
+- **Deploy manifest**: cache source/target content fingerprints in `.qgis-manage/deploy-manifest.json` to skip hashing unchanged files; `--no-manifest` provides a full-scan escape hatch.
+- **Reflink backups**: prefer `cp --reflink=auto` on Linux, with a safe `copytree` fallback.
+- **Compile freshness**: skip translations whose `.qm` is newer than `.ts`; compile UI/QRC to a temporary output and replace only when bytes change.
+
+### Performance
+- **Repository scan**: `--repo-check` now walks once and prunes ignored/symlinked directories before looking for prohibited binaries.
+- **Incremental deploy**: manifest-based checks avoid repeated content reads while preserving same-size rewrite detection.
+- **Compile writes**: identical generated UI/resource output no longer rewrites files or dirties the worktree.
+
 ## [0.10.1] - 2026-10-25
 
 ### Fixed
