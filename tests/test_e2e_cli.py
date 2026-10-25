@@ -384,3 +384,37 @@ def test_redeploy_replaces_destination_symlink(tmp_path: Path) -> None:
     assert not deployed_helper.is_symlink()
     assert deployed_helper.read_text(encoding="utf-8") == "VALUE = 2\n"
     assert outside.read_text(encoding="utf-8") == "SECRET = 1\n"
+
+
+def test_e2e_init_creates_plugin(tmp_path: Path) -> None:
+    result = _run_cli(
+        tmp_path,
+        "init",
+        "Demo Plugin",
+        "--path",
+        str(tmp_path),
+        "--author",
+        "Tester",
+        "--email",
+        "tester@example.com",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert (tmp_path / "demo_plugin" / "metadata.txt").is_file()
+    assert (tmp_path / "demo_plugin" / "demo_plugin.py").is_file()
+
+
+def test_e2e_bump_patch_updates_version(tmp_path: Path) -> None:
+    project = _make_project(tmp_path, version="1.0.0")
+    (project / "pyproject.toml").write_text(
+        '[project]\nname = "demo-plugin"\nversion = "1.0.0"\n',
+        encoding="utf-8",
+    )
+
+    result = _run_cli(project, "bump", str(project), "patch")
+
+    assert result.returncode == 0, result.stderr
+    assert 'version = "1.0.1"' in (project / "pyproject.toml").read_text(
+        encoding="utf-8"
+    )
+    assert "version=1.0.1" in (project / "metadata.txt").read_text(encoding="utf-8")
