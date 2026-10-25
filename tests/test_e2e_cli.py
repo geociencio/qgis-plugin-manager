@@ -419,3 +419,121 @@ def test_e2e_bump_patch_updates_version(tmp_path: Path) -> None:
         encoding="utf-8"
     )
     assert "version=1.0.1" in (project / "metadata.txt").read_text(encoding="utf-8")
+
+
+def _write_fake_tool(path: Path, body: str) -> None:
+    path.write_text(f"#!{sys.executable}\n{body}", encoding="utf-8")
+    path.chmod(0o755)
+
+
+def test_deploy_repeated_immediately_keeps_distinct_backups(tmp_path: Path) -> None:
+    project = _make_project(tmp_path)
+    target = tmp_path / "plugins"
+
+    for _ in range(3):
+        result = _deploy(project, target)
+        assert result.returncode == 0, result.stderr
+
+    assert len(list(target.glob("demo_plugin.bak.*"))) >= 2
+    assert (target / "demo_plugin" / "metadata.txt").is_file()
+
+
+def test_purge_backups_yes_is_non_interactive(tmp_path: Path) -> None:
+    project = _make_project(tmp_path)
+    target = tmp_path / "plugins"
+    assert _deploy(project, target).returncode == 0
+    assert _deploy(project, target).returncode == 0
+    assert list(target.glob("demo_plugin.bak.*"))
+
+    result = _deploy(
+        project,
+        target,
+        "--purge-backups",
+        "--yes",
+        "--no-backup",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert not list(target.glob("demo_plugin.bak.*"))
+    assert (target / "demo_plugin" / "metadata.txt").is_file()
+
+
+def test_clean_dry_run_and_keep_generated(tmp_path: Path) -> None:
+    project = _make_project(tmp_path)
+    (project / "dialog.ui").write_text("<ui/>", encoding="utf-8")
+    (project / "dialog.py").write_text("# generated\n", encoding="utf-8")
+    (project / "__pycache__").mkdir()
+
+    dry = _run_cli(project, "clean", str(project), "--dry-run")
+    assert dry.returncode == 0, dry.stderr
+    assert (project / "dialog.py").is_file()
+    assert (project / "__pycache__").is_dir()
+    assert "Dry run" in dry.stdout
+
+    kept = _run_cli(project, "clean", str(project), "--keep-generated")
+    assert kept.returncode == 0, kept.stderr
+    assert (project / "dialog.py").is_file()
+    assert not (project / "__pycache__").exists()
+
+
+def test_package_rejects_release_version_mismatch_e2e(tmp_path: Path) -> None:
+    project = _make_project(tmp_path, version="1.0.0")
+    output = tmp_path / "packages"
+
+    result = _run_cli(
+        project,
+        "package",
+        str(project),
+        "--output",
+        str(output),
+        "--release-version",
+        "9.9.9",
+    )
+
+    assert result.returncode == 1
+    assert "does not match metadata.txt" in result.stderr
+    assert not list(output.glob("*.zip"))
+
+
+def test_compile_repeated_types_with_fake_tools(tmp_path: Path, monkeypatch) -> None:
+    project = _make_project(tmp_path)
+    tools = tmp_path / "bin"
+    tools.mkdir()
+    _write_fake_tool(
+        tools / "pyuic6",
+        "import sys\nfrom pathlib import Path\n"
+        "out = Path(sys.argv[sys.argv.index('-o') + 1])\n"
+        "out.write_text('from PyQt6 import QtCore\\n')\n",
+    )
+    _write_fake_tool(
+        tools / "pyside6-rcc",
+        "import sys\nfrom pathlib import Path\n"
+        "out = Path(sys.argv[sys.argv.index('-o') + 1])\n"
+        "out.write_text('from PySide6 import QtCore\\n')\n",
+    )
+    _write_fake_tool(
+        tools / "lrelease",
+        "import sys\nfrom pathlib import Path\n"
+        "Path(sys.argv[1]).with_suffix('.qm').write_text('qm')\n",
+    )
+    monkeypatch.setenv("PATH", f"{tools}{os.pathsep}{os.environ['PATH']}")
+    (project / "dialog.ui").write_text("<ui/>", encoding="utf-8")
+    (project / "resources.qrc").write_text("<RCC/>", encoding="utf-8")
+    (project / "translations.ts").write_text("<TS/>", encoding="utf-8")
+
+    result = _run_cli(
+        project,
+        "compile",
+        str(project),
+        "--type",
+        "resources",
+        "--type",
+        "translations",
+        "--jobs",
+        "2",
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert (project / "dialog.py").is_file()
+    assert "qgis.PyQt" in (project / "resources.py").read_text(encoding="utf-8")
+    assert (project / "translations.qm").is_file()
