@@ -10,10 +10,21 @@ class TestCleanCommand(_CommandTestBase):
     @patch("qgis_manager.cli.base.find_project_root")
     def test_clean_success(self, mock_find, mock_clean):
         mock_find.return_value = Path(tempfile.mkdtemp())
+        mock_clean.return_value = []
         exit_code, output, _ = self._invoke(["clean"])
         self.assertEqual(exit_code, 0)
         mock_clean.assert_called_once()
         self.assertIn("Cleanup complete", output)
+
+    @patch("qgis_manager.cli.commands.clean.clean_artifacts")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_clean_dry_run(self, mock_find, mock_clean):
+        mock_find.return_value = Path(tempfile.mkdtemp())
+        mock_clean.return_value = ["remove cache", "warning: tracked"]
+        exit_code, output, _ = self._invoke(["clean", "--dry-run"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("remove cache", output)
+        self.assertIn("Dry run", output)
 
 
 class TestInstallDepsCommand(_CommandTestBase):

@@ -136,3 +136,27 @@ class TestCoreScaffold(unittest.TestCase):
             # Sources are preserved
             self.assertTrue((tmp_path / "dialog.ui").exists())
             self.assertTrue((tmp_path / "resources.qrc").exists())
+
+    def test_clean_artifacts_dry_run_preserves_files(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "a.ui").write_text("<ui/>", encoding="utf-8")
+            (root / "a.py").write_text("# generated", encoding="utf-8")
+            (root / "__pycache__").mkdir()
+
+            actions = clean_artifacts(root, dry_run=True)
+
+            self.assertTrue((root / "a.py").exists())
+            self.assertTrue((root / "__pycache__").exists())
+            self.assertTrue(any("remove a.py" in action for action in actions))
+
+    def test_clean_artifacts_keep_generated(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "a.qrc").write_text("<RCC/>", encoding="utf-8")
+            (root / "a.py").write_text("# generated", encoding="utf-8")
+
+            actions = clean_artifacts(root, keep_generated=True)
+
+            self.assertTrue((root / "a.py").exists())
+            self.assertTrue(any("keep a.py" in action for action in actions))
