@@ -124,6 +124,29 @@ class TestIgnoreMatcher(unittest.TestCase):
             exact_dir = tmp_path / "logs" / "debug"
             self.assertTrue(matcher.should_exclude(exact_dir))
 
+    def test_nested_gitignore_applies_to_subtree(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            sub = tmp_path / "sub"
+            sub.mkdir()
+            (sub / ".gitignore").write_text("*.tmp\n", encoding="utf-8")
+            matcher = IgnoreMatcher(tmp_path)
+
+            self.assertTrue(matcher.should_exclude(sub / "debug.tmp"))
+            self.assertFalse(matcher.should_exclude(tmp_path / "root.tmp"))
+
+    def test_nested_negation_overrides_root_rule(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            sub = tmp_path / "sub"
+            sub.mkdir()
+            (tmp_path / ".gitignore").write_text("*.log\n", encoding="utf-8")
+            (sub / ".gitignore").write_text("!keep.log\n", encoding="utf-8")
+            matcher = IgnoreMatcher(tmp_path)
+
+            self.assertTrue(matcher.should_exclude(sub / "debug.log"))
+            self.assertFalse(matcher.should_exclude(sub / "keep.log"))
+
 
 if __name__ == "__main__":
     unittest.main()

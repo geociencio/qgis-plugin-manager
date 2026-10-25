@@ -25,6 +25,7 @@ without requiring external dependencies like pathspec.
 """
 
 import fnmatch
+from collections.abc import Iterator
 from pathlib import Path
 
 from .constants import DEFAULT_EXCLUDE_PATTERNS
@@ -85,11 +86,17 @@ def load_ignore_patterns(project_root: Path, include_dev: bool = False) -> list[
 
 
 class IgnoreMatcher:
-    """Helper class to filter paths against ignore patterns using standard fnmatch."""
+    """Helper class to filter paths against ignore patterns using standard fnmatch.
+
+    Root patterns are evaluated first, then ignore files found in ancestor
+    directories between the project root and the path. Deeper rules win, and
+    negation is applied in order.
+    """
 
     def __init__(self, project_root: Path, include_dev: bool = False):
         self.project_root = project_root
         self.patterns = load_ignore_patterns(project_root, include_dev)
+        self._nested_cache: dict[Path, list[str]] = {}
 
     def should_exclude(self, path: Path) -> bool:
         """Determine if a path is excluded, honoring ordered ``!`` negations."""
@@ -97,17 +104,45 @@ class IgnoreMatcher:
             rel_path = path.relative_to(self.project_root)
         except ValueError:
             return False
-        path_str = str(rel_path).replace("\\", "/")
-        parts = rel_path.parts
         excluded = False
+        path_str = str(rel_path).replace("\\", "/")
         for pattern in self.patterns:
-            negated = pattern.startswith("!")
-            candidate = pattern[1:] if negated else pattern
-            if not candidate:
+            excluded = self._apply(pattern, path_str, rel_path.parts, excluded)
+        for base_dir, pattern in self._nested_rules(path):
+            try:
+                nested_rel = path.relative_to(base_dir)
+            except ValueError:
                 continue
-            if self._matches(path_str, parts, candidate):
-                excluded = not negated
+            nested_str = str(nested_rel).replace("\\", "/")
+            excluded = self._apply(pattern, nested_str, nested_rel.parts, excluded)
         return excluded
+
+    def _apply(
+        self, pattern: str, path_str: str, parts: tuple[str, ...], excluded: bool
+    ) -> bool:
+        negated = pattern.startswith("!")
+        candidate = pattern[1:] if negated else pattern
+        if candidate and self._matches(path_str, parts, candidate):
+            return not negated
+        return excluded
+
+    def _nested_rules(self, path: Path) -> Iterator[tuple[Path, str]]:
+        try:
+            relative_parent = path.parent.relative_to(self.project_root)
+        except ValueError:
+            return
+        current = self.project_root
+        for part in relative_parent.parts:
+            current = current / part
+            for pattern in self._patterns_for_dir(current):
+                yield current, pattern
+
+    def _patterns_for_dir(self, directory: Path) -> list[str]:
+        if directory in self._nested_cache:
+            return self._nested_cache[directory]
+        patterns = _load_ignore_file(directory)
+        self._nested_cache[directory] = patterns
+        return patterns
 
     @staticmethod
     def _matches(path_str: str, parts: tuple[str, ...], pattern: str) -> bool:
