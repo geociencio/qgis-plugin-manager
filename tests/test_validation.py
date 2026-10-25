@@ -340,3 +340,22 @@ if __name__ == "__main__":
         self.assertTrue(
             any("Unknown category" in warning for warning in result.warnings)
         )
+
+    def test_official_compliance_prunes_ignored_dirs(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "LICENSE").write_text("GPL", encoding="utf-8")
+            (root / "metadata.txt").write_text(
+                "[general]\nname=Demo\n", encoding="utf-8"
+            )
+            (root / "plugin.so").touch()
+            (root / ".venv").mkdir()
+            (root / ".venv" / "hidden.so").touch()
+            (root / "docs").mkdir()
+            (root / "docs" / "hidden.so").touch()
+
+            result = validate_official_compliance(root)
+
+            errors = " ".join(result.errors)
+            self.assertIn("plugin.so", errors)
+            self.assertNotIn("hidden.so", errors)

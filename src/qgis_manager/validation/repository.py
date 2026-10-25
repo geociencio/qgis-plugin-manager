@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
 
@@ -19,9 +20,20 @@ def _validate_required_files(project_root: Path, errors: list[str]) -> None:
 
 def _find_prohibited_binaries(project_root: Path) -> list[str]:
     matcher = IgnoreMatcher(project_root, include_dev=False)
+    extensions = set(_PROHIBITED_BINARIES)
     found: list[str] = []
-    for extension in _PROHIBITED_BINARIES:
-        for path in project_root.rglob(f"*{extension}"):
+    for current, dirnames, filenames in os.walk(project_root, followlinks=False):
+        root = Path(current)
+        dirnames[:] = sorted(
+            name
+            for name in dirnames
+            if not (root / name).is_symlink()
+            and not matcher.should_exclude(root / name)
+        )
+        for name in sorted(filenames):
+            path = root / name
+            if path.suffix not in extensions:
+                continue
             if path.is_symlink() or not path.is_file():
                 continue
             if not matcher.should_exclude(path):
