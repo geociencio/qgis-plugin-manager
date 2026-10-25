@@ -286,10 +286,6 @@ class TestValidation(unittest.TestCase):
             result = validate_official_compliance(root)
             self.assertTrue(result.is_valid, result.errors)
 
-
-if __name__ == "__main__":
-    unittest.main()
-
     def test_validate_metadata_name_without_ascii_slug(self):
         metadata = {
             "name": "¡!",
@@ -359,3 +355,7 @@ if __name__ == "__main__":
             errors = " ".join(result.errors)
             self.assertIn("plugin.so", errors)
             self.assertNotIn("hidden.so", errors)
+
+
+if __name__ == "__main__":
+    unittest.main()

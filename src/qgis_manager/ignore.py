@@ -100,31 +100,33 @@ class IgnoreMatcher:
 
     def should_exclude(self, path: Path) -> bool:
         """Determine if a path is excluded, honoring ordered ``!`` negations."""
+        return self.explain(path)[0]
+
+    def explain(self, path: Path) -> tuple[bool, str | None]:
+        """Return the final decision and the winning rule for a path."""
         try:
             rel_path = path.relative_to(self.project_root)
         except ValueError:
-            return False
+            return False, None
         excluded = False
+        winner: str | None = None
         path_str = str(rel_path).replace("\\", "/")
         for pattern in self.patterns:
-            excluded = self._apply(pattern, path_str, rel_path.parts, excluded)
+            candidate = pattern[1:] if pattern.startswith("!") else pattern
+            if candidate and self._matches(path_str, rel_path.parts, candidate):
+                excluded = not pattern.startswith("!")
+                winner = f"root: {pattern}"
         for base_dir, pattern in self._nested_rules(path):
             try:
                 nested_rel = path.relative_to(base_dir)
             except ValueError:
                 continue
             nested_str = str(nested_rel).replace("\\", "/")
-            excluded = self._apply(pattern, nested_str, nested_rel.parts, excluded)
-        return excluded
-
-    def _apply(
-        self, pattern: str, path_str: str, parts: tuple[str, ...], excluded: bool
-    ) -> bool:
-        negated = pattern.startswith("!")
-        candidate = pattern[1:] if negated else pattern
-        if candidate and self._matches(path_str, parts, candidate):
-            return not negated
-        return excluded
+            candidate = pattern[1:] if pattern.startswith("!") else pattern
+            if candidate and self._matches(nested_str, nested_rel.parts, candidate):
+                excluded = not pattern.startswith("!")
+                winner = f"{base_dir.relative_to(self.project_root)}: {pattern}"
+        return excluded, winner
 
     def _nested_rules(self, path: Path) -> Iterator[tuple[Path, str]]:
         try:

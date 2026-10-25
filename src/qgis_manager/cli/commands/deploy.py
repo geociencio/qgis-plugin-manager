@@ -12,6 +12,7 @@ from ...core import (
     count_compile_steps,
     deploy_plugin,
     get_qgis_plugin_dir,
+    plan_deploy,
 )
 from ...hooks import run_hook
 from ...metadata import get_plugin_metadata
@@ -64,6 +65,11 @@ class DeployCommand(BaseCommand):
             help="Disable the content manifest and re-hash every file",
         )
         parser.add_argument(
+            "--dry-run",
+            action="store_true",
+            help="Show what would be copied, deleted, backed up or purged",
+        )
+        parser.add_argument(
             "--purge-backups",
             action="store_true",
             help="Remove all existing backups for this plugin",
@@ -101,6 +107,16 @@ class DeployCommand(BaseCommand):
         target_dir, absolute_profile = self._determine_target_dir(
             args, target_profile, qgis_version
         )
+        if args.dry_run:
+            return self._dry_run(
+                root,
+                target_dir,
+                slug,
+                target_profile,
+                qgis_version,
+                settings,
+                args,
+            )
         if args.purge_backups and not self._purge_backups(
             target_dir, slug, target_profile, args.yes
         ):
@@ -165,6 +181,38 @@ class DeployCommand(BaseCommand):
         if absolute_profile:
             return Path(args.profile), True
         return get_qgis_plugin_dir(profile, version=qgis_version), False
+
+    def _dry_run(
+        self,
+        root: Path,
+        target_dir: Path,
+        slug: str,
+        profile: str,
+        qgis_version: int,
+        settings: Settings,
+        args: argparse.Namespace,
+    ) -> int:
+        target_path = target_dir / slug
+        plan = plan_deploy(root, target_path, no_backup=not settings.backup)
+        backups = (
+            len(list(target_dir.glob(f"{slug}.bak.*"))) if target_dir.is_dir() else 0
+        )
+        click.echo(f"🧪 Dry run: {slug} -> {target_path}")
+        click.echo(f"  Files to copy: {plan['copy']}")
+        click.echo(f"  Files to delete: {plan['delete']}")
+        click.echo(f"  Backup: {'yes' if plan['backup'] else 'no'}")
+        click.echo(f"  Existing backups: {backups}")
+        if args.purge_backups:
+            click.echo(f"  Backups to purge: {backups}")
+        if settings.hooks.get("pre_deploy") or (root / "plugin_hooks.py").exists():
+            message = (
+                "would run only with --trust"
+                if not args.trust
+                else "would run (pre_deploy/post_deploy)"
+            )
+            click.echo(f"  Hooks: {message}")
+        click.echo("  Manifest: would be updated after a successful deploy")
+        return 0
 
     def _purge_backups(
         self, target_dir: Path, slug: str, profile: str, assume_yes: bool = False

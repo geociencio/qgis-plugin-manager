@@ -47,6 +47,7 @@ from .compile import (
 )
 from .deploy import (
     deploy_plugin,
+    plan_deploy,
     purge_backups,
     rotate_backups,
     sync_directory,
@@ -69,6 +70,7 @@ __all__ = [
     "count_compile_steps",
     "create_plugin_package",
     "deploy_plugin",
+    "plan_deploy",
     "get_git_info",
     "get_qgis_plugin_dir",
     "get_rcc_tool",

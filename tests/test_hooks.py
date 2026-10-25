@@ -56,6 +56,15 @@ class TestHooks(unittest.TestCase):
             tmp_path = Path(tmp_dir)
             self.assertTrue(run_hook("empty", "", tmp_path))
 
+    @patch("qgis_manager.hooks.subprocess.run")
+    def test_run_hook_defaults_to_non_shell(self, mock_run):
+        mock_run.return_value.returncode = 0
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            result = run_hook("default", "echo hello", Path(tmp_dir))
+        self.assertTrue(result)
+        self.assertFalse(mock_run.call_args.kwargs["shell"])
+        self.assertIsInstance(mock_run.call_args.args[0], list)
+
 
 if __name__ == "__main__":
     unittest.main()

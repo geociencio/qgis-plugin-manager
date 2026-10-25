@@ -246,6 +246,45 @@ def _backup_path(parent_dir: Path, slug: str) -> Path:
     return candidate
 
 
+def plan_deploy(
+    project_root: Path, target_path: Path, no_backup: bool = False
+) -> dict[str, int | bool]:
+    """Count files that a deploy would copy or delete without mutating anything."""
+    matcher = IgnoreMatcher(project_root, include_dev=False)
+    copy_count = 0
+    delete_count = 0
+
+    def walk(src: Path, dst: Path) -> None:
+        nonlocal copy_count, delete_count
+        for item in src.iterdir():
+            if item.is_symlink() or matcher.should_exclude(item):
+                continue
+            dest_item = dst / item.name
+            if item.is_dir():
+                walk(item, dest_item)
+            elif (
+                dest_item.is_symlink()
+                or not dest_item.exists()
+                or _needs_copy(item, dest_item)
+            ):
+                copy_count += 1
+        if not dst.is_dir():
+            return
+        for item in dst.iterdir():
+            source_item = src / item.name
+            if item.is_symlink():
+                delete_count += 1
+            elif not source_item.exists() and not matcher.should_exclude(source_item):
+                delete_count += 1
+
+    walk(project_root, target_path)
+    return {
+        "copy": copy_count,
+        "delete": delete_count,
+        "backup": target_path.exists() and not no_backup,
+    }
+
+
 def deploy_plugin(
     project_root: Path,
     dest_dir: Path | None = None,

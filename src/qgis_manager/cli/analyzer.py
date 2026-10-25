@@ -4,7 +4,9 @@ import subprocess
 from pathlib import Path
 
 
-def run_qgis_analyzer(root: Path, subcommand: str, *args: str) -> int:
+def run_qgis_analyzer(
+    root: Path, subcommand: str, *args: str, capture: bool = False
+) -> int:
     """Run ``qgis-analyzer``, falling back to ``uv run`` when not installed.
 
     Args:
@@ -21,4 +23,5 @@ def run_qgis_analyzer(root: Path, subcommand: str, *args: str) -> int:
     except (subprocess.CalledProcessError, FileNotFoundError):
         cmd = ["uv", "run", "qgis-analyzer", subcommand, *args, str(root)]
 
-    return subprocess.run(cmd, check=False).returncode
+    result = subprocess.run(cmd, check=False, capture_output=capture, text=capture)
+    return result.returncode

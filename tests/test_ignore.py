@@ -147,10 +147,6 @@ class TestIgnoreMatcher(unittest.TestCase):
             self.assertTrue(matcher.should_exclude(sub / "debug.log"))
             self.assertFalse(matcher.should_exclude(sub / "keep.log"))
 
-
-if __name__ == "__main__":
-    unittest.main()
-
     def test_path_outside_project_is_not_excluded(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
@@ -180,3 +176,7 @@ if __name__ == "__main__":
             root = Path(tmp_dir)
             matcher = IgnoreMatcher(root)
             self.assertEqual(list(matcher._nested_rules(root.parent / "x")), [])
+
+
+if __name__ == "__main__":
+    unittest.main()

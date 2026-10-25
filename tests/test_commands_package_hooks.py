@@ -117,6 +117,55 @@ class TestPackageCommand(_CommandTestBase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(calls[:2], ["install", "compliance"])
 
+    @patch("qgis_manager.cli.commands.package.install_external_libs")
+    @patch("qgis_manager.cli.commands.package.create_plugin_package")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_package_require_docs_missing(self, mock_find, mock_package, _mock_install):
+        root = Path(tempfile.mkdtemp())
+        (root / "metadata.txt").write_text(
+            "[general]\nname=Demo\nversion=1.0.0\n", encoding="utf-8"
+        )
+        mock_find.return_value = root
+        exit_code, _, stderr = self._invoke(["package", "--require-docs"])
+        self.assertEqual(exit_code, 1)
+        self.assertIn("help/html/index.html", stderr)
+        mock_package.assert_not_called()
+
+    @patch("qgis_manager.cli.commands.package.install_external_libs")
+    @patch("qgis_manager.cli.commands.package.create_plugin_package")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_package_require_docs_present(self, mock_find, mock_package, _mock_install):
+        root = Path(tempfile.mkdtemp())
+        (root / "metadata.txt").write_text(
+            "[general]\nname=Demo\nversion=1.0.0\n", encoding="utf-8"
+        )
+        docs = root / "help" / "html"
+        docs.mkdir(parents=True)
+        (docs / "index.html").write_text("docs", encoding="utf-8")
+        mock_find.return_value = root
+        mock_package.return_value = root / "dist" / "demo.zip"
+        exit_code, _, _ = self._invoke(["package", "--require-docs"])
+        self.assertEqual(exit_code, 0)
+        mock_package.assert_called_once()
+
+    @patch("qgis_manager.cli.commands.package.install_external_libs")
+    @patch("qgis_manager.cli.commands.package.create_plugin_package")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_package_json_output(self, mock_find, mock_package, _mock_install):
+        import json
+
+        root = Path(tempfile.mkdtemp())
+        (root / "metadata.txt").write_text(
+            "[general]\nname=Demo\nversion=1.0.0\n", encoding="utf-8"
+        )
+        mock_find.return_value = root
+        mock_package.return_value = root / "dist" / "demo.zip"
+        exit_code, output, _ = self._invoke(["package", "--json"])
+        self.assertEqual(exit_code, 0)
+        payload = json.loads(output)
+        self.assertEqual(payload["command"], "package")
+        self.assertTrue(payload["success"])
+
 
 class TestHooksCommand(_CommandTestBase):
     @patch("qgis_manager.cli.base.find_project_root")

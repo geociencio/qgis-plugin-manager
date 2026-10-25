@@ -25,7 +25,7 @@ class HookPolicy:
     """Execution limits for project-controlled hook commands."""
 
     timeout: int = 300
-    shell: bool = True
+    shell: bool = False
     inherit_env: bool = False
 
     def environment(self, project_root: Path) -> dict[str, str]:
@@ -159,6 +159,13 @@ def run_hook(
 
         logger.debug(f"✅ Hook command '{name}' finished successfully")
         return True
+    except FileNotFoundError as e:
+        logger.error(
+            "❌ Hook command could not start: %s. Shell syntax requires "
+            "HookPolicy(shell=True).",
+            e,
+        )
+        return False
     except (OSError, subprocess.SubprocessError, ValueError) as e:
         logger.error(f"❌ Error running hook command '{name}': {e}")
         return False

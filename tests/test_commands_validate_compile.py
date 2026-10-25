@@ -94,3 +94,19 @@ class TestCompileCommand(_CommandTestBase):
 
         self.assertEqual(exit_code, 0)
         self.assertEqual(mock_compile.call_args.args[1], ["resources", "translations"])
+
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_validate_json_output(self, mock_find):
+        import json
+
+        root = Path(tempfile.mkdtemp())
+        (root / "metadata.txt").write_text(
+            "[general]\nname=Demo\nversion=1.0.0\n", encoding="utf-8"
+        )
+        mock_find.return_value = root
+        exit_code, output, _ = self._invoke(["validate", "--json"])
+        self.assertEqual(exit_code, 1)
+        payload = json.loads(output)
+        self.assertEqual(payload["schema"], 1)
+        self.assertEqual(payload["command"], "validate")
+        self.assertFalse(payload["success"])

@@ -464,6 +464,65 @@ class TestDeployCommand(_CommandTestBase):
         self.assertEqual(exit_code, 0)
         self.assertFalse(mock_deploy.call_args.kwargs["use_manifest"])
 
+    @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
+    @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
+    @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
+    @patch("qgis_manager.cli.commands.deploy.load_project_config")
+    @patch("qgis_manager.cli.commands.deploy.load_config")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_deploy_dry_run_mutates_nothing(
+        self,
+        mock_find,
+        mock_load_config,
+        mock_load_project,
+        mock_meta,
+        mock_dir,
+        mock_deploy,
+    ):
+        root = self._patch_common(mock_find, mock_load_config, mock_load_project)
+        (root / "plugin.py").write_text("x=1\n", encoding="utf-8")
+        mock_meta.return_value = {"name": "Test", "slug": "test"}
+        target = root / "plugins"
+        mock_dir.return_value = target
+
+        exit_code, output, _ = self._invoke(["deploy", "--dry-run"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Dry run", output)
+        self.assertIn("Files to copy", output)
+        mock_deploy.assert_not_called()
+        self.assertFalse(target.exists())
+
+    @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
+    @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
+    @patch("qgis_manager.cli.commands.deploy.load_project_config")
+    @patch("qgis_manager.cli.commands.deploy.load_config")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_deploy_dry_run_reports_purge_and_hooks(
+        self,
+        mock_find,
+        mock_load_config,
+        mock_load_project,
+        mock_meta,
+        mock_dir,
+    ):
+        root = self._patch_common(mock_find, mock_load_config, mock_load_project)
+        target = root / "plugins"
+        target.mkdir()
+        (target / "test.bak.1").mkdir()
+        (root / "plugin_hooks.py").write_text("def pre_deploy(ctx): pass\n")
+        mock_meta.return_value = {"name": "Test", "slug": "test"}
+        mock_dir.return_value = target
+
+        exit_code, output, _ = self._invoke(
+            ["deploy", "--dry-run", "--purge-backups", "--trust"]
+        )
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Backups to purge", output)
+        self.assertIn("would run", output)
+        self.assertTrue((target / "test.bak.1").exists())
+
 
 class TestDCleanCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.dclean.uninstall_plugin")

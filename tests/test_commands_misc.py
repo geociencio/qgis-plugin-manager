@@ -115,3 +115,27 @@ class TestSecurityCommand(_CommandTestBase):
         self.assertIn("--strict", argv)
         self.assertIn("-o", argv)
         self.assertIn("reports", argv)
+
+    @patch("qgis_manager.cli.analyzer.subprocess.run")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_analyze_max_cc_passthrough(self, mock_find, mock_run):
+        mock_find.return_value = Path(tempfile.mkdtemp())
+        mock_run.return_value.returncode = 0
+        exit_code, _, _ = self._invoke(["analyze", "--max-cc", "10"])
+        self.assertEqual(exit_code, 0)
+        argv = mock_run.call_args_list[-1][0][0]
+        self.assertIn("--max-cc", argv)
+        self.assertIn("10", argv)
+
+    @patch("qgis_manager.cli.analyzer.subprocess.run")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_analyze_json_output(self, mock_find, mock_run):
+        import json
+
+        mock_find.return_value = Path(tempfile.mkdtemp())
+        mock_run.return_value.returncode = 0
+        exit_code, output, _ = self._invoke(["analyze", "--json"])
+        self.assertEqual(exit_code, 0)
+        payload = json.loads(output)
+        self.assertEqual(payload["command"], "analyze")
+        self.assertTrue(payload["success"])

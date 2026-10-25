@@ -91,3 +91,41 @@ def test_manifest_is_excluded_from_packages(tmp_path: Path) -> None:
     with zipfile.ZipFile(zip_path) as archive:
         names = archive.namelist()
     assert not any(".qgis-manage" in name for name in names)
+
+
+def test_manifest_ignores_unknown_schema(tmp_path: Path) -> None:
+    project = _project(tmp_path)
+    target = tmp_path / "plugins"
+    manifest_path = project / ".qgis-manage" / "deploy-manifest.json"
+    manifest_path.parent.mkdir()
+    manifest_path.write_text('{"version": 99, "targets": {}}', encoding="utf-8")
+
+    manifest = manifest_module.DeployManifest(project, target)
+    assert manifest.entries == {}
+
+
+def test_manifest_save_failure_is_non_fatal(tmp_path: Path) -> None:
+    project = _project(tmp_path)
+    manifest = manifest_module.DeployManifest(project, tmp_path / "plugins")
+    with patch(
+        "qgis_manager.core.manifest.write_text_atomic",
+        side_effect=OSError("read-only"),
+    ):
+        manifest.save()
+
+
+def test_manifest_source_outside_root_needs_copy(tmp_path: Path) -> None:
+    project = _project(tmp_path)
+    target = tmp_path / "plugins"
+    target.mkdir()
+    outside = tmp_path / "outside.py"
+    outside.write_text("x", encoding="utf-8")
+    manifest = manifest_module.DeployManifest(project, target)
+    assert manifest.needs_copy(outside, target / "outside.py") is True
+
+
+def test_manifest_record_skips_missing_target(tmp_path: Path) -> None:
+    project = _project(tmp_path)
+    manifest = manifest_module.DeployManifest(project, tmp_path / "plugins")
+    manifest.record(project / "plugin.py", tmp_path / "missing.py")
+    assert manifest.entries == {}

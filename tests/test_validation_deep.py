@@ -78,10 +78,6 @@ class TestStructuralValidation(unittest.TestCase):
         self.assertTrue(result.is_valid)
         self.assertEqual(len(result.errors), 0)
 
-
-if __name__ == "__main__":
-    unittest.main()
-
     def test_missing_class_factory(self):
         (self.test_dir / "__init__.py").write_text("pass\n", encoding="utf-8")
         result = validate_project_structure(self.test_dir, self.metadata)
@@ -104,3 +100,7 @@ if __name__ == "__main__":
         (self.test_dir / "icon.png").touch()
         result = validate_project_structure(self.test_dir, self.metadata)
         self.assertTrue(any("very few Python files" in w for w in result.warnings))
+
+
+if __name__ == "__main__":
+    unittest.main()

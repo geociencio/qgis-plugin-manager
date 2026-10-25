@@ -11,9 +11,11 @@ from .commands.compile import CompileCommand
 from .commands.dclean import DCleanCommand
 from .commands.deploy import DeployCommand
 from .commands.hooks import HooksCommand
+from .commands.ignore import IgnoreCommand
 from .commands.init import InitCommand
 from .commands.install_deps import InstallDepsCommand
 from .commands.package import PackageCommand
+from .commands.profiles import ProfilesCommand
 from .commands.security import SecurityCommand
 from .commands.validate import ValidateCommand
 
@@ -30,6 +32,8 @@ COMMAND_CLASSES: tuple[type[BaseCommand], ...] = (
     AnalyzeCommand,
     SecurityCommand,
     ValidateCommand,
+    ProfilesCommand,
+    IgnoreCommand,
     InstallDepsCommand,
     HooksCommand,
     BumpCommand,

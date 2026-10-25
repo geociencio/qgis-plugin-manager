@@ -10,6 +10,7 @@ from ...dependencies import get_dependencies, install_external_libs
 from ...metadata import get_plugin_metadata, sync_metadata_version
 from ...toml_utils import get_project_version
 from ..base import BaseCommand
+from ..json_output import emit_json
 
 
 class PackageCommand(BaseCommand):
@@ -63,18 +64,37 @@ class PackageCommand(BaseCommand):
             action="store_true",
             help="Allow dependency installation from this project (trusted only)",
         )
+        parser.add_argument(
+            "--json",
+            action="store_true",
+            help="Emit machine-readable JSON on stdout",
+        )
+        parser.add_argument(
+            "--require-docs",
+            action="store_true",
+            help="Fail packaging when help/html/index.html is missing",
+        )
 
     def execute(self, args: argparse.Namespace) -> int:
         root = self.project_root(args)
         self._sync_version(root, args)
         if not self._validate_release_version(root, args):
             return 1
+        if not self._require_docs(root, args):
+            return 1
         if not self._install_dependencies(root, args):
             return 1
         if not self._check_compliance(root, args):
             return 1
         zip_path = self._build_package(root, args)
-        click.echo(click.style(f"✅ Package created: {zip_path}", fg="green"))
+        if args.json:
+            emit_json(
+                "package",
+                True,
+                data={"zip": str(zip_path)},
+            )
+        else:
+            click.echo(click.style(f"✅ Package created: {zip_path}", fg="green"))
         return 0
 
     def _sync_version(self, root: Path, args: argparse.Namespace) -> None:
@@ -96,6 +116,21 @@ class PackageCommand(BaseCommand):
                 f"❌ --release-version {args.release_version} does not match "
                 f"metadata.txt ({current or 'missing'}); use --stamp or "
                 "--sync-version.",
+                fg="red",
+                bold=True,
+            ),
+            err=True,
+        )
+        return False
+
+    def _require_docs(self, root: Path, args: argparse.Namespace) -> bool:
+        if not args.require_docs:
+            return True
+        if (root / "help" / "html" / "index.html").is_file():
+            return True
+        click.echo(
+            click.style(
+                "❌ --require-docs: help/html/index.html is missing.",
                 fg="red",
                 bold=True,
             ),
@@ -152,6 +187,14 @@ class PackageCommand(BaseCommand):
         return False
 
     def _build_package(self, root: Path, args: argparse.Namespace) -> Path:
+        options = {
+            "output_dir": Path(args.output) if args.output else None,
+            "include_dev": args.dev,
+            "stamp": args.stamp,
+            "release_version": args.release_version,
+        }
+        if args.json:
+            return create_plugin_package(root, **options)
         with click.progressbar(
             length=100,
             label="📦 Packaging files",
