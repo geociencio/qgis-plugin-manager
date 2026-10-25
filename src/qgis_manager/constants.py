@@ -45,6 +45,7 @@ DEFAULT_EXCLUDE_PATTERNS = {
     "*.log",
     # QGIS Manager internals
     ".agent",
+    ".qgis-manage",
     ".ai-context",
     "debug_package_list.py",  # Exclude debug scripts if present
     "analysis_results",

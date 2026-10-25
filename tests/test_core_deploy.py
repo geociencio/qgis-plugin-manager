@@ -9,7 +9,7 @@ from qgis_manager.core import (
     sync_directory,
     uninstall_plugin,
 )
-from qgis_manager.core.deploy import _backup_path, _is_same_or_nested
+from qgis_manager.core.deploy import _backup_path, _copy_backup, _is_same_or_nested
 from qgis_manager.ignore import IgnoreMatcher
 
 
@@ -35,12 +35,9 @@ class TestCoreDeploy(unittest.TestCase):
             mock_sync.assert_called_once()
 
     @patch("qgis_manager.core.deploy.get_plugin_metadata")
-    @patch("shutil.copytree")
     @patch("qgis_manager.core.deploy.datetime")
     @patch("qgis_manager.core.deploy.sync_directory")
-    def test_deploy_plugin_with_backup(
-        self, mock_sync, mock_datetime, mock_copytree, mock_get_meta
-    ):
+    def test_deploy_plugin_with_backup(self, mock_sync, mock_datetime, mock_get_meta):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
             # Mocks
@@ -57,7 +54,7 @@ class TestCoreDeploy(unittest.TestCase):
             deploy_plugin(tmp_path, dest_dir=dest_dir)
 
             # Verify backup was created
-            mock_copytree.assert_called()
+            self.assertTrue((dest_dir / "test_plugin.bak.20230101").is_dir())
 
     @patch(
         "qgis_manager.core.deploy.get_plugin_metadata",
@@ -301,3 +298,17 @@ class TestCoreDeploy(unittest.TestCase):
             self.assertEqual(removed, link)
             self.assertFalse(link.exists())
             self.assertTrue(real.exists())
+
+    @patch("qgis_manager.core.deploy.subprocess.run")
+    def test_copy_backup_falls_back_when_reflink_fails(self, mock_run):
+        mock_run.return_value.returncode = 1
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            src = Path(tmp_dir) / "src"
+            dst = Path(tmp_dir) / "dst"
+            src.mkdir()
+            (src / "file.txt").write_text("data", encoding="utf-8")
+
+            _copy_backup(src, dst)
+
+            self.assertEqual((dst / "file.txt").read_text(encoding="utf-8"), "data")
+            self.assertEqual(mock_run.call_count, 1)

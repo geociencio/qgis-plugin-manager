@@ -59,6 +59,11 @@ class DeployCommand(BaseCommand):
             help="Skip automatic resource compilation",
         )
         parser.add_argument(
+            "--no-manifest",
+            action="store_true",
+            help="Disable the content manifest and re-hash every file",
+        )
+        parser.add_argument(
             "--purge-backups",
             action="store_true",
             help="Remove all existing backups for this plugin",
@@ -139,6 +144,7 @@ class DeployCommand(BaseCommand):
             profile=target_profile,
             qgis_version=qgis_version,
             max_backups=settings.max_backups,
+            use_manifest=not args.no_manifest,
         )
 
         self._run_hook(

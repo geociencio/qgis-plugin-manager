@@ -442,6 +442,28 @@ class TestDeployCommand(_CommandTestBase):
         self.assertEqual(exit_code, 1)
         self.assertIn("cannot be used together", stderr)
 
+    @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
+    @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
+    @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
+    @patch("qgis_manager.cli.commands.deploy.load_project_config")
+    @patch("qgis_manager.cli.commands.deploy.load_config")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_deploy_no_manifest(
+        self,
+        mock_find,
+        mock_load_config,
+        mock_load_project,
+        mock_meta,
+        mock_dir,
+        mock_deploy,
+    ):
+        self._patch_common(mock_find, mock_load_config, mock_load_project)
+        mock_meta.return_value = {"name": "Test", "slug": "test"}
+        mock_dir.return_value = Path(tempfile.mkdtemp())
+        exit_code, _, _ = self._invoke(["deploy", "--no-manifest"])
+        self.assertEqual(exit_code, 0)
+        self.assertFalse(mock_deploy.call_args.kwargs["use_manifest"])
+
 
 class TestDCleanCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.dclean.uninstall_plugin")

@@ -3,6 +3,8 @@
 import filecmp
 import logging
 import shutil
+import subprocess
+import sys
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
@@ -11,6 +13,7 @@ from typing import Any
 from ..ignore import IgnoreMatcher
 from ..metadata import get_plugin_metadata
 from ..naming import validate_slug
+from .manifest import DeployManifest
 from .platform import get_qgis_plugin_dir
 
 logger = logging.getLogger(__name__)
@@ -147,10 +150,46 @@ def _cleanup_destination(src: Path, dst: Path, matcher: IgnoreMatcher) -> None:
         logger.debug(f"  🗑️ {item.name} (removed from target)")
 
 
-def sync_directory(src: Path, dst: Path, matcher: IgnoreMatcher) -> None:
+def _sync_item(
+    item: Path,
+    dest_item: Path,
+    matcher: IgnoreMatcher,
+    manifest: DeployManifest | None,
+    source_root: Path,
+    destination_root: Path,
+) -> None:
+    """Sync one source entry into its destination."""
+    if item.is_dir():
+        sync_directory(
+            item,
+            dest_item,
+            matcher,
+            manifest=manifest,
+            project_root=source_root,
+            target_root=destination_root,
+        )
+    elif manifest is not None and not manifest.needs_copy(item, dest_item):
+        logger.debug(f"  ⏭️ {item.name} (manifest unchanged)")
+    elif _needs_copy(item, dest_item):
+        shutil.copy2(item, dest_item)
+        if manifest is not None:
+            manifest.record(item, dest_item)
+        logger.debug(f"  ✅ {item.name} (updated)")
+
+
+def sync_directory(
+    src: Path,
+    dst: Path,
+    matcher: IgnoreMatcher,
+    manifest: DeployManifest | None = None,
+    project_root: Path | None = None,
+    target_root: Path | None = None,
+) -> None:
     """Sync source to destination only copying changed files (rsync-like)."""
     if not dst.exists():
         dst.mkdir(parents=True)
+    source_root = project_root or src
+    destination_root = target_root or dst
 
     # 1. Copy/update files from source. Never follow symlinks: a plugin
     #    must not be able to read or copy files outside its project root.
@@ -167,14 +206,33 @@ def sync_directory(src: Path, dst: Path, matcher: IgnoreMatcher) -> None:
         if dest_item.is_symlink():
             dest_item.unlink()
             logger.warning(f"Removing destination symlink: {dest_item}")
-        if item.is_dir():
-            sync_directory(item, dest_item, matcher)
-        elif _needs_copy(item, dest_item):
-            shutil.copy2(item, dest_item)
-            logger.debug(f"  ✅ {item.name} (updated)")
+        _sync_item(
+            item,
+            dest_item,
+            matcher,
+            manifest,
+            source_root,
+            destination_root,
+        )
 
     # 2. Cleanup entries in destination that no longer exist in source
     _cleanup_destination(src, dst, matcher)
+
+
+def _copy_backup(src: Path, dst: Path) -> None:
+    """Copy a backup, preferring a Linux reflink and falling back to copytree."""
+    if sys.platform.startswith("linux"):
+        result = subprocess.run(
+            ["cp", "-a", "--reflink=auto", str(src), str(dst)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode == 0:
+            return
+        if dst.exists():
+            shutil.rmtree(dst, ignore_errors=True)
+    shutil.copytree(src, dst, symlinks=True)
 
 
 def _backup_path(parent_dir: Path, slug: str) -> Path:
@@ -196,6 +254,7 @@ def deploy_plugin(
     qgis_version: int = 3,
     callback: Callable[[int], Any] | None = None,
     max_backups: int = 3,
+    use_manifest: bool = True,
 ) -> None:
     """Deploy the plugin to the QGIS directory.
 
@@ -221,7 +280,7 @@ def deploy_plugin(
     if target_path.exists() and not no_backup:
         backup_path = _backup_path(target_path.parent, slug)
         logger.info(f"📦 Creating backup at: {backup_path.name}")
-        shutil.copytree(target_path, backup_path, symlinks=True)
+        _copy_backup(target_path, backup_path)
 
         # Rotate backups
         rotate_backups(target_path.parent, slug, max_backups)
@@ -243,7 +302,17 @@ def deploy_plugin(
         pass
 
     logger.info(f"🚀 Syncing files to {target_path}")
-    sync_directory(project_root, target_path, matcher)
+    manifest = DeployManifest(project_root, target_path) if use_manifest else None
+    sync_directory(
+        project_root,
+        target_path,
+        matcher,
+        manifest=manifest,
+        project_root=project_root,
+        target_root=target_path,
+    )
+    if manifest is not None:
+        manifest.save()
 
     if callback:
         callback(100)  # Simple completion signal
