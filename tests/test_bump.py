@@ -33,7 +33,7 @@ class TestBumpCommand(unittest.TestCase):
         )
         return tmp_path
 
-    @patch("qgis_manager.cli.commands.bump.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_bump_patch(self, mock_find):
         root = self._make_project("1.2.3")
         mock_find.return_value = root
@@ -45,7 +45,7 @@ class TestBumpCommand(unittest.TestCase):
         self.assertEqual(get_plugin_metadata(root)["version"], "1.2.4")
         self.assertIn("1.2.3 -> 1.2.4", output)
 
-    @patch("qgis_manager.cli.commands.bump.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_bump_minor(self, mock_find):
         root = self._make_project("1.2.3")
         mock_find.return_value = root
@@ -55,7 +55,7 @@ class TestBumpCommand(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertIn('version = "1.3.0"', (root / "pyproject.toml").read_text())
 
-    @patch("qgis_manager.cli.commands.bump.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_bump_major(self, mock_find):
         root = self._make_project("1.2.3")
         mock_find.return_value = root
@@ -65,7 +65,7 @@ class TestBumpCommand(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertIn('version = "2.0.0"', (root / "pyproject.toml").read_text())
 
-    @patch("qgis_manager.cli.commands.bump.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_bump_sync(self, mock_find):
         root = self._make_project("1.2.3")
         mock_find.return_value = root
@@ -78,7 +78,7 @@ class TestBumpCommand(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(get_plugin_metadata(root)["version"], "1.2.3")
 
-    @patch("qgis_manager.cli.commands.bump.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_bump_preserves_comments_and_custom_sections(self, mock_find):
         root = self._make_project("1.2.3")
         mock_find.return_value = root
@@ -104,7 +104,7 @@ class TestBumpCommand(unittest.TestCase):
         self.assertIn("[custom]\nkeep = me", content)
         self.assertIn("version = 1.2.4", content)
 
-    @patch("qgis_manager.cli.commands.bump.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_bump_no_subcommand(self, mock_find):
         root = self._make_project("1.2.3")
         mock_find.return_value = root
@@ -114,7 +114,7 @@ class TestBumpCommand(unittest.TestCase):
         self.assertEqual(exit_code, 1)
         self.assertIn("No subcommand", output)
 
-    @patch("qgis_manager.cli.commands.bump.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_bump_invalid_version(self, mock_find):
         root = self._make_project("not.a.version")
         mock_find.return_value = root
@@ -124,7 +124,7 @@ class TestBumpCommand(unittest.TestCase):
         self.assertEqual(exit_code, 1)
 
     @patch("qgis_manager.cli.commands.bump.save_plugin_metadata")
-    @patch("qgis_manager.cli.commands.bump.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_bump_metadata_update_failure(self, mock_find, mock_save):
         root = self._make_project("1.2.3")
         mock_find.return_value = root

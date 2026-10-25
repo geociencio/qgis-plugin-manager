@@ -1,11 +1,9 @@
 """Analyze command implementation."""
 
 import argparse
-from pathlib import Path
 
 import click
 
-from ...discovery import find_project_root
 from ..analyzer import run_qgis_analyzer
 from ..base import BaseCommand
 
@@ -27,7 +25,7 @@ class AnalyzeCommand(BaseCommand):
         self.add_common_args(parser, include_profile=False)
 
     def execute(self, args: argparse.Namespace) -> int:
-        root = find_project_root(Path(args.path))
+        root = self.project_root(args)
         click.echo(f"🔍 Analyzing project at {root}...")
 
         code = run_qgis_analyzer(root, "analyze")

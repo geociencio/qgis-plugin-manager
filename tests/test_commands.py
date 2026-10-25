@@ -27,7 +27,7 @@ class _CommandTestBase(unittest.TestCase):
 
 class TestCleanCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.clean.clean_artifacts")
-    @patch("qgis_manager.cli.commands.clean.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_clean_success(self, mock_find, mock_clean):
         mock_find.return_value = Path(tempfile.mkdtemp())
         exit_code, output, _ = self._invoke(["clean"])
@@ -38,7 +38,7 @@ class TestCleanCommand(_CommandTestBase):
 
 class TestInstallDepsCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.install_deps.install_external_libs")
-    @patch("qgis_manager.cli.commands.install_deps.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_install_deps_success(self, mock_find, mock_install):
         mock_find.return_value = Path(tempfile.mkdtemp())
         mock_install.return_value = True
@@ -47,7 +47,7 @@ class TestInstallDepsCommand(_CommandTestBase):
         self.assertIn("Dependencies ready", output)
 
     @patch("qgis_manager.cli.commands.install_deps.install_external_libs")
-    @patch("qgis_manager.cli.commands.install_deps.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_install_deps_failure(self, mock_find, mock_install):
         mock_find.return_value = Path(tempfile.mkdtemp())
         mock_install.return_value = False
@@ -57,7 +57,7 @@ class TestInstallDepsCommand(_CommandTestBase):
 
 class TestAnalyzeCommand(_CommandTestBase):
     @patch("qgis_manager.cli.analyzer.subprocess.run")
-    @patch("qgis_manager.cli.commands.analyze.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_analyze_direct(self, mock_find, mock_run):
         mock_find.return_value = Path(tempfile.mkdtemp())
         mock_run.return_value.returncode = 0
@@ -65,7 +65,7 @@ class TestAnalyzeCommand(_CommandTestBase):
         self.assertEqual(exit_code, 0)
 
     @patch("qgis_manager.cli.analyzer.subprocess.run")
-    @patch("qgis_manager.cli.commands.analyze.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_analyze_fallback_to_uv(self, mock_find, mock_run):
         mock_find.return_value = Path(tempfile.mkdtemp())
         mock_run.side_effect = [FileNotFoundError(), Mock(returncode=0)]
@@ -75,7 +75,7 @@ class TestAnalyzeCommand(_CommandTestBase):
 
 class TestSecurityCommand(_CommandTestBase):
     @patch("qgis_manager.cli.analyzer.subprocess.run")
-    @patch("qgis_manager.cli.commands.security.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_security_success(self, mock_find, mock_run):
         mock_find.return_value = Path(tempfile.mkdtemp())
         mock_run.return_value.returncode = 0
@@ -88,7 +88,7 @@ class TestSecurityCommand(_CommandTestBase):
         self.assertIn("--deep", last_call)
 
     @patch("qgis_manager.cli.analyzer.subprocess.run")
-    @patch("qgis_manager.cli.commands.security.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_security_failure(self, mock_find, mock_run):
         mock_find.return_value = Path(tempfile.mkdtemp())
         mock_run.return_value.returncode = 1
@@ -125,7 +125,7 @@ class TestValidateCommand(_CommandTestBase):
             "\n".join(fields) + "\n", encoding="utf-8"
         )
 
-    @patch("qgis_manager.cli.commands.validate.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_validate_success(self, mock_find):
         root = self._make_project()
         self._write_metadata(root)
@@ -135,7 +135,7 @@ class TestValidateCommand(_CommandTestBase):
         self.assertEqual(exit_code, 0)
         self.assertIn("passed", output)
 
-    @patch("qgis_manager.cli.commands.validate.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_validate_strict_fails_on_warnings(self, mock_find):
         root = self._make_project()
         self._write_metadata(root, include_recommended=False)
@@ -144,7 +144,7 @@ class TestValidateCommand(_CommandTestBase):
         exit_code, _, _ = self._invoke(["validate", "--strict"])
         self.assertEqual(exit_code, 1)
 
-    @patch("qgis_manager.cli.commands.validate.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_validate_missing_init_py(self, mock_find):
         root = Path(tempfile.mkdtemp())
         self._write_metadata(root)
@@ -153,7 +153,7 @@ class TestValidateCommand(_CommandTestBase):
         exit_code, _, _ = self._invoke(["validate"])
         self.assertEqual(exit_code, 1)
 
-    @patch("qgis_manager.cli.commands.validate.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_validate_repo_flag(self, mock_find):
         root = self._make_project()
         self._write_metadata(root)
@@ -165,7 +165,7 @@ class TestValidateCommand(_CommandTestBase):
 
 class TestCompileCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.compile.compile_qt_resources", return_value=False)
-    @patch("qgis_manager.cli.commands.compile.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_compile_failure_returns_nonzero(self, mock_find, _mock_compile):
         mock_find.return_value = Path(tempfile.mkdtemp())
 
@@ -178,7 +178,7 @@ class TestCompileCommand(_CommandTestBase):
 class TestPackageCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.package.install_external_libs")
     @patch("qgis_manager.cli.commands.package.create_plugin_package")
-    @patch("qgis_manager.cli.commands.package.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_package_success(self, mock_find, mock_package, mock_install):
         root = Path(tempfile.mkdtemp())
         (root / "metadata.txt").write_text(
@@ -194,7 +194,7 @@ class TestPackageCommand(_CommandTestBase):
 
     @patch("qgis_manager.cli.commands.package.install_external_libs")
     @patch("qgis_manager.cli.commands.package.create_plugin_package")
-    @patch("qgis_manager.cli.commands.package.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_package_sync_version(self, mock_find, mock_package, mock_install):
         root = Path(tempfile.mkdtemp())
         (root / "pyproject.toml").write_text(
@@ -213,7 +213,7 @@ class TestPackageCommand(_CommandTestBase):
     @patch("qgis_manager.validation.validate_project_structure")
     @patch("qgis_manager.validation.validate_official_compliance")
     @patch("qgis_manager.validation.validate_metadata")
-    @patch("qgis_manager.cli.commands.package.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_package_repo_check_fails(
         self, mock_find, mock_meta, mock_repo, mock_struct
     ):
@@ -232,7 +232,7 @@ class TestPackageCommand(_CommandTestBase):
     @patch("qgis_manager.validation.validate_metadata")
     @patch("qgis_manager.cli.commands.package.install_external_libs")
     @patch("qgis_manager.cli.commands.package.create_plugin_package")
-    @patch("qgis_manager.cli.commands.package.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_package_repo_check_passes(
         self, mock_find, mock_package, mock_install, mock_meta, mock_repo, mock_struct
     ):
@@ -249,7 +249,7 @@ class TestPackageCommand(_CommandTestBase):
     @patch(
         "qgis_manager.cli.commands.package.install_external_libs", return_value=False
     )
-    @patch("qgis_manager.cli.commands.package.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_package_fails_when_dependency_install_fails(
         self, mock_find, _mock_install
     ):
@@ -265,7 +265,7 @@ class TestPackageCommand(_CommandTestBase):
     @patch("qgis_manager.validation.validate_metadata")
     @patch("qgis_manager.cli.commands.package.install_external_libs")
     @patch("qgis_manager.cli.commands.package.create_plugin_package")
-    @patch("qgis_manager.cli.commands.package.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_package_installs_before_compliance(
         self, mock_find, mock_package, mock_install, mock_meta, mock_repo, mock_struct
     ):
@@ -287,14 +287,14 @@ class TestPackageCommand(_CommandTestBase):
 
 
 class TestHooksCommand(_CommandTestBase):
-    @patch("qgis_manager.cli.commands.hooks.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_hooks_list_empty(self, mock_find):
         mock_find.return_value = Path(tempfile.mkdtemp())
         exit_code, output, _ = self._invoke(["hooks", "list"])
         self.assertEqual(exit_code, 0)
         self.assertIn("No hooks found", output)
 
-    @patch("qgis_manager.cli.commands.hooks.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_hooks_init(self, mock_find):
         root = Path(tempfile.mkdtemp())
         mock_find.return_value = root
@@ -302,7 +302,7 @@ class TestHooksCommand(_CommandTestBase):
         self.assertEqual(exit_code, 0)
         self.assertTrue((root / "plugin_hooks.py").exists())
 
-    @patch("qgis_manager.cli.commands.hooks.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_hooks_test(self, mock_find):
         root = Path(tempfile.mkdtemp())
         (root / "plugin_hooks.py").write_text(
@@ -313,7 +313,7 @@ class TestHooksCommand(_CommandTestBase):
         self.assertEqual(exit_code, 0)
         self.assertIn("executed successfully", output)
 
-    @patch("qgis_manager.cli.commands.hooks.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_hooks_test_failure(self, mock_find):
         root = Path(tempfile.mkdtemp())
         (root / "plugin_hooks.py").write_text(
@@ -323,7 +323,7 @@ class TestHooksCommand(_CommandTestBase):
         exit_code, _, _ = self._invoke(["hooks", "test", "pre_deploy"])
         self.assertEqual(exit_code, 1)
 
-    @patch("qgis_manager.cli.commands.hooks.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_hooks_list_with_native_hooks(self, mock_find):
         root = Path(tempfile.mkdtemp())
         (root / "plugin_hooks.py").write_text(
@@ -334,7 +334,7 @@ class TestHooksCommand(_CommandTestBase):
         self.assertEqual(exit_code, 0)
         self.assertIn("pre_deploy", output)
 
-    @patch("qgis_manager.cli.commands.hooks.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_hooks_list_with_toml_hooks(self, mock_find):
         root = Path(tempfile.mkdtemp())
         (root / "pyproject.toml").write_text(
@@ -346,7 +346,7 @@ class TestHooksCommand(_CommandTestBase):
         self.assertIn("post_deploy", output)
 
     @patch("qgis_manager.cli.commands.hooks.click.confirm")
-    @patch("qgis_manager.cli.commands.hooks.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_hooks_init_overwrite(self, mock_find, mock_confirm):
         root = Path(tempfile.mkdtemp())
         (root / "plugin_hooks.py").write_text("original\n", encoding="utf-8")
@@ -361,7 +361,7 @@ class TestHooksCommand(_CommandTestBase):
         )
 
     @patch("qgis_manager.cli.commands.hooks.click.confirm")
-    @patch("qgis_manager.cli.commands.hooks.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_hooks_init_declined(self, mock_find, mock_confirm):
         root = Path(tempfile.mkdtemp())
         (root / "plugin_hooks.py").write_text("original\n", encoding="utf-8")
@@ -391,7 +391,7 @@ class TestDeployCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
     @patch("qgis_manager.cli.commands.deploy.load_project_config")
     @patch("qgis_manager.cli.commands.deploy.load_config")
-    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_deploy_success(
         self,
         mock_find,
@@ -418,7 +418,7 @@ class TestDeployCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
     @patch("qgis_manager.cli.commands.deploy.load_project_config")
     @patch("qgis_manager.cli.commands.deploy.load_config")
-    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_deploy_uses_configured_profile(
         self,
         mock_find,
@@ -446,7 +446,7 @@ class TestDeployCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
     @patch("qgis_manager.cli.commands.deploy.load_project_config")
     @patch("qgis_manager.cli.commands.deploy.load_config")
-    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_deploy_cli_profile_overrides_config(
         self,
         mock_find,
@@ -474,7 +474,7 @@ class TestDeployCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
     @patch("qgis_manager.cli.commands.deploy.load_project_config")
     @patch("qgis_manager.cli.commands.deploy.load_config")
-    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_deploy_no_backup(
         self,
         mock_find,
@@ -493,7 +493,7 @@ class TestDeployCommand(_CommandTestBase):
         self.assertEqual(exit_code, 0)
         self.assertTrue(mock_deploy.call_args.kwargs["no_backup"])
 
-    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_deploy_no_project(self, mock_find):
         mock_find.side_effect = FileNotFoundError("No project found")
         exit_code, _, _ = self._invoke(["deploy"])
@@ -506,7 +506,7 @@ class TestDeployCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
     @patch("qgis_manager.cli.commands.deploy.load_project_config")
     @patch("qgis_manager.cli.commands.deploy.load_config")
-    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_deploy_aborts_when_compile_fails(
         self,
         mock_find,
@@ -536,7 +536,7 @@ class TestDeployCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
     @patch("qgis_manager.cli.commands.deploy.load_project_config")
     @patch("qgis_manager.cli.commands.deploy.load_config")
-    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_deploy_purge_backups(
         self,
         mock_find,
@@ -567,7 +567,7 @@ class TestDeployCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
     @patch("qgis_manager.cli.commands.deploy.load_project_config")
     @patch("qgis_manager.cli.commands.deploy.load_config")
-    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_deploy_purge_backups_abort(
         self,
         mock_find,
@@ -594,7 +594,7 @@ class TestDeployCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
     @patch("qgis_manager.cli.commands.deploy.load_project_config")
     @patch("qgis_manager.cli.commands.deploy.load_config")
-    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_deploy_creates_missing_target_dir(
         self,
         mock_find,
@@ -624,7 +624,7 @@ class TestDeployCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
     @patch("qgis_manager.cli.commands.deploy.load_project_config")
     @patch("qgis_manager.cli.commands.deploy.load_config")
-    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_deploy_manual_path(
         self,
         mock_find,
@@ -656,7 +656,7 @@ class TestDeployCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
     @patch("qgis_manager.cli.commands.deploy.load_project_config")
     @patch("qgis_manager.cli.commands.deploy.load_config")
-    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_deploy_abort_no_manual_path(
         self,
         mock_find,
@@ -686,7 +686,7 @@ class TestDeployCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
     @patch("qgis_manager.cli.commands.deploy.load_project_config")
     @patch("qgis_manager.cli.commands.deploy.load_config")
-    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_deploy_runs_hooks(
         self,
         mock_find,
@@ -721,7 +721,7 @@ class TestDeployCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
     @patch("qgis_manager.cli.commands.deploy.load_project_config")
     @patch("qgis_manager.cli.commands.deploy.load_config")
-    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_deploy_pre_hook_failure(
         self,
         mock_find,
@@ -751,7 +751,7 @@ class TestDCleanCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.dclean.uninstall_plugin")
     @patch("qgis_manager.cli.commands.dclean.load_project_config")
     @patch("qgis_manager.cli.commands.dclean.load_config")
-    @patch("qgis_manager.cli.commands.dclean.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_dclean_success(
         self, mock_find, mock_load_config, mock_load_project, mock_uninstall
     ):
@@ -770,7 +770,7 @@ class TestDCleanCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.dclean.uninstall_plugin")
     @patch("qgis_manager.cli.commands.dclean.load_project_config")
     @patch("qgis_manager.cli.commands.dclean.load_config")
-    @patch("qgis_manager.cli.commands.dclean.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_dclean_not_deployed(
         self, mock_find, mock_load_config, mock_load_project, mock_uninstall
     ):

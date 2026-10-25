@@ -7,7 +7,6 @@ import click
 
 from ...core import create_plugin_package
 from ...dependencies import get_dependencies, install_external_libs
-from ...discovery import find_project_root
 from ...metadata import sync_metadata_version
 from ...toml_utils import get_project_version
 from ..base import BaseCommand
@@ -66,7 +65,7 @@ class PackageCommand(BaseCommand):
         )
 
     def execute(self, args: argparse.Namespace) -> int:
-        root = find_project_root(Path(args.path))
+        root = self.project_root(args)
         self._sync_version(root, args)
         if not self._install_dependencies(root, args):
             return 1

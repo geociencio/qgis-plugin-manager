@@ -23,7 +23,7 @@ def test_package_trust_allows_dependency_install(tmp_path: Path) -> None:
     output = tmp_path / "dist" / "demo.zip"
     with (
         patch(
-            "qgis_manager.cli.commands.package.find_project_root",
+            "qgis_manager.cli.base.find_project_root",
             return_value=tmp_path,
         ),
         patch(

@@ -2,8 +2,11 @@
 
 import argparse
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 import click
+
+from ..discovery import find_project_root
 
 
 class BaseCommand(ABC):
@@ -32,6 +35,10 @@ class BaseCommand(ABC):
     @abstractmethod
     def execute(self, args: argparse.Namespace) -> int:
         """Execute the command."""
+
+    def project_root(self, args: argparse.Namespace) -> Path:
+        """Resolve the project root from the common ``path`` argument."""
+        return find_project_root(Path(args.path))
 
     def run(self, args: argparse.Namespace) -> int:
         """Run the command, mapping unexpected errors to a CLI exit code."""

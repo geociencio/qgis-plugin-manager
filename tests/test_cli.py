@@ -51,21 +51,21 @@ class TestCLI(unittest.TestCase):
                 mock_init.assert_called_once()
 
     def test_cli_package_no_project(self):
-        with patch("qgis_manager.cli.commands.package.find_project_root") as mock_find:
+        with patch("qgis_manager.cli.base.find_project_root") as mock_find:
             mock_find.side_effect = FileNotFoundError("No project found")
             exit_code, output, error = self._invoke(["package"])
             self.assertEqual(exit_code, 1)
             self.assertIn("Error:", output + error)
 
     def test_cli_validate_no_project(self):
-        with patch("qgis_manager.cli.commands.validate.find_project_root") as mock_find:
+        with patch("qgis_manager.cli.base.find_project_root") as mock_find:
             mock_find.side_effect = FileNotFoundError("No project found")
             exit_code, output, error = self._invoke(["validate"])
             self.assertEqual(exit_code, 1)
             self.assertIn("Error:", output + error)
 
     @patch("qgis_manager.cli.commands.compile.compile_qt_resources")
-    @patch("qgis_manager.cli.commands.compile.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_cli_compile_docs(self, mock_find_root, mock_compile):
         tmp_path = Path("/tmp/fake_root")
         mock_find_root.return_value = tmp_path
@@ -109,7 +109,7 @@ class TestCLI(unittest.TestCase):
         CLIApp()
         self.assertEqual(mock_init.call_count, 1)
 
-    @patch("qgis_manager.cli.commands.deploy.find_project_root")
+    @patch("qgis_manager.cli.base.find_project_root")
     def test_cli_verbose(self, mock_find):
         mock_find.side_effect = FileNotFoundError("No project found")
         exit_code, _, _ = self._invoke(["--verbose", "deploy"])

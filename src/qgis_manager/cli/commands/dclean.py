@@ -1,13 +1,11 @@
 """Remove deployed plugin command implementation."""
 
 import argparse
-from pathlib import Path
 
 import click
 
 from ...config import load_config, load_project_config
 from ...core import uninstall_plugin
-from ...discovery import find_project_root
 from ..base import BaseCommand
 
 
@@ -44,7 +42,7 @@ class DCleanCommand(BaseCommand):
         )
 
     def execute(self, args: argparse.Namespace) -> int:
-        root = find_project_root(Path(args.path))
+        root = self.project_root(args)
 
         settings = load_config()
         settings = load_project_config(root, settings)

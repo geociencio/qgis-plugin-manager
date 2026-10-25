@@ -6,7 +6,6 @@ from pathlib import Path
 
 import click
 
-from ...discovery import find_project_root
 from ...metadata import (
     get_plugin_metadata,
     save_plugin_metadata,
@@ -69,7 +68,7 @@ class BumpCommand(BaseCommand):
         Returns:
             Exit code (0 for success, 1 for failure).
         """
-        root = find_project_root(Path(args.path))
+        root = self.project_root(args)
 
         if args.subcommand in ["major", "minor", "patch"]:
             return self._bump_version(root, args.subcommand)

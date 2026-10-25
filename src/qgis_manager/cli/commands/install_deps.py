@@ -1,12 +1,10 @@
 """Install-deps command implementation."""
 
 import argparse
-from pathlib import Path
 
 import click
 
 from ...dependencies import install_external_libs
-from ...discovery import find_project_root
 from ..base import BaseCommand
 
 
@@ -35,7 +33,7 @@ class InstallDepsCommand(BaseCommand):
         )
 
     def execute(self, args: argparse.Namespace) -> int:
-        root = find_project_root(Path(args.path))
+        root = self.project_root(args)
         if install_external_libs(root, args.target):
             click.echo("✨ Dependencies ready.")
             return 0

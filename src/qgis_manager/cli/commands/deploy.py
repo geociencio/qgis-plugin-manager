@@ -13,7 +13,6 @@ from ...core import (
     deploy_plugin,
     get_qgis_plugin_dir,
 )
-from ...discovery import find_project_root
 from ...hooks import run_hook
 from ...metadata import get_plugin_metadata
 from ...naming import validate_slug
@@ -76,7 +75,7 @@ class DeployCommand(BaseCommand):
         )
 
     def execute(self, args: argparse.Namespace) -> int:
-        root = find_project_root(Path(args.path))
+        root = self.project_root(args)
         settings = load_project_config(root, load_config())
 
         target_profile = args.profile or settings.profile

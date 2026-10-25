@@ -1,11 +1,9 @@
 """Security audit command implementation."""
 
 import argparse
-from pathlib import Path
 
 import click
 
-from ...discovery import find_project_root
 from ..analyzer import run_qgis_analyzer
 from ..base import BaseCommand
 
@@ -42,7 +40,7 @@ class SecurityCommand(BaseCommand):
         )
 
     def execute(self, args: argparse.Namespace) -> int:
-        root = find_project_root(Path(args.path))
+        root = self.project_root(args)
         click.echo(f"🔒 Running security scan on {root}...")
 
         analyzer_args = ["--deep"]

@@ -1,12 +1,10 @@
 """Clean command implementation."""
 
 import argparse
-from pathlib import Path
 
 import click
 
 from ...core import clean_artifacts
-from ...discovery import find_project_root
 from ..base import BaseCommand
 
 
@@ -27,7 +25,7 @@ class CleanCommand(BaseCommand):
         self.add_common_args(parser, include_profile=False)
 
     def execute(self, args: argparse.Namespace) -> int:
-        root = find_project_root(Path(args.path))
+        root = self.project_root(args)
         clean_artifacts(root)
         click.echo(click.style("✨ Cleanup complete!", fg="green", bold=True))
         return 0

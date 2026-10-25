@@ -1,12 +1,10 @@
 """Compile command implementation."""
 
 import argparse
-from pathlib import Path
 
 import click
 
 from ...core import compile_qt_resources, count_compile_steps
-from ...discovery import find_project_root
 from ..base import BaseCommand
 from ..progress import make_compile_callback
 
@@ -40,7 +38,7 @@ class CompileCommand(BaseCommand):
         )
 
     def execute(self, args: argparse.Namespace) -> int:
-        root = find_project_root(Path(args.path))
+        root = self.project_root(args)
 
         if args.res_type in ["docs", "all"]:
             total_steps = count_compile_steps(root, args.res_type)

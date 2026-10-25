@@ -5,7 +5,6 @@ from pathlib import Path
 
 import click
 
-from ...discovery import find_project_root
 from ...hooks import execute_python_hook
 from ..base import BaseCommand
 
@@ -53,7 +52,7 @@ class HooksCommand(BaseCommand):
         )
 
     def execute(self, args: argparse.Namespace) -> int:
-        root = find_project_root(Path(args.path))
+        root = self.project_root(args)
 
         if args.subcommand == "list":
             return self._hooks_list(root)
