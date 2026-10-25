@@ -2,7 +2,7 @@
 
 This document provides the essential guidelines for agentic coding agents working on the **qgis-plugin-manager** codebase — a modern CLI tool for managing QGIS plugin development (lifecycle, versioning, scaffolding, deployment, and testing). It covers build commands, code style, architectural principles, and development workflows.
 
-This is the **single source of truth** for agent configuration (roles, skills, and workflows) at the repository root. The re-usable framework (`agentic-forge`) is mounted as a git submodule at `.agent/`; project-owned state and overlay skills live under `.agent-state/`.
+This file is the **single source of truth for this project's agent configuration** (roles, build/test commands, architecture, quality gates and project overlay skills). The re-usable framework (`agentic-forge`) is mounted as a git submodule at `.agent/`; its generic defaults live in [`.agent/AGENTS.md`](.agent/AGENTS.md) and [`.agent/QUICK_REFERENCE.md`](.agent/QUICK_REFERENCE.md) and are **referenced, not duplicated, here**. Project-owned state and overlay skills live under `.agent-state/`.
 
 ---
 
@@ -35,25 +35,13 @@ The agent adopts one of three roles depending on the task. Roles are registered 
 
 ## 🧭 Workflow Commands (slash commands)
 
-When the user types `/name` (e.g. `/start-session`), read the corresponding `.agent/workflows/name.md` file and execute its steps. Do NOT treat them as unknown commands.
+When the user types `/name`, read the corresponding `.agent/workflows/name.md`
+(or `.agent-state/workflows/name.md` for a project overlay) and execute its steps.
+Do NOT treat slash commands as unknown.
 
-| Command | Workflow file | Purpose |
-| :--- | :--- | :--- |
-| `/start-session` | `.agent/workflows/start-session.md` | Start a "Local First" development session with synced context. |
-| `/close-session` | `.agent/workflows/close-session.md` | End a work session, update logs, archive results, commit. |
-| `/start-phase` | `.agent/workflows/start-phase.md` | Start a major development phase with planning. |
-| `/close-phase` | `.agent/workflows/close-phase.md` | Close a phase with metrics and retro. |
-| `/build-feature` | `.agent/workflows/build-feature.md` | Autonomous AI Developer Pipeline sequence for a new feature. |
-| `/refactor-code` | `.agent/workflows/refactor-code.md` | Guided refactoring with complexity validation. |
-| `/create-commit` | `.agent/workflows/create-commit.md` | Commit changes cleanly with quality validation (handling hooks). |
-| `/run-tests` | `.agent/workflows/run-tests.md` | Run unit tests reliably with interpretation. |
-| `/fix-linting` | `.agent/workflows/fix-linting.md` | Automatically correct linting and formatting issues. |
-| `/ia-critic` | `.agent/workflows/ia-critic.md` | Critical review of implementation plans by the Agent Auditor. |
-| `/verify-standards` | `.agent/workflows/verify-standards.md` | Audit the agentic system (skills/workflows) for consistency. |
-| `/release-package` | `.agent/workflows/release-package.md` | Unified release workflow for the Python package (PyPI). |
-| `/audit-package` | `.agent/workflows/audit-package.md` | Self-audit of this codebase. |
-
-Full index: `.agent/workflows/index.md`
+The canonical command list, agent/skill mapping and purposes live in the framework
+index: [`.agent/workflows/index.md`](.agent/workflows/index.md). Do not duplicate that
+table here; this project currently has no workflow overlay.
 
 ---
 
@@ -99,20 +87,22 @@ uv build && uvx twine check dist/*
 The manager is a **CLI tool** that generates and manages QGIS plugins. It must keep two concerns strictly separated:
 
 1. **The CLI** (`src/qgis_manager/`): command parsing (click), dispatch, and business logic. No template content lives here.
-2. **The templates** (`scaffold/`): blueprint content (QGIS skills/workflows, mining logic) that the CLI injects into *target* QGIS plugin projects.
+2. **Runtime templates** (`src/qgis_manager/templates/`): the files `init` renders for a new plugin (`default`, `processing`, `dockwidget`).
+3. **Domain blueprints**: project-owned mining skills live in `scaffold/mining/`;
+   the QGIS pack is framework-only at `.agent/scaffold/qgis/`.
 
 #### NEVER do this:
 ```python
 # ❌ FORBIDDEN - template content hard-coded in the CLI
 def create_plugin(name: str):
-    template = "class Plugin: ..."   # this belongs in scaffold/, not the CLI
+    template = "class Plugin: ..."   # belongs in templates/, not the CLI
 ```
 
 #### ALWAYS do this:
 ```python
-# ✅ CORRECT - load template content from scaffold/
-def create_plugin(name: str):
-    content = (SCAFFOLD_DIR / "base" / "plugin.py.tmpl").read_text()
+# ✅ CORRECT - load runtime template content from src/qgis_manager/templates/
+def create_plugin(name: str, template: str = "default"):
+    content = (TEMPLATES_DIR / template / "plugin.py.tmpl").read_text()
     return content.format(name=name)
 ```
 
@@ -154,21 +144,10 @@ def discover(root: Path) -> list[Path]:
 
 ## 🛠️ Agent Skills
 
-Skills live in `.agent/skills/*/SKILL.md` (framework) and `.agent-state/skills/*/SKILL.md` (project overlay). Read the relevant `SKILL.md` on demand; do not pre-load all of them.
-
-### Framework skills (generic)
-
-| Skill | Description |
-| :--- | :--- |
-| [agentic-memory](.agent/skills/agentic-memory/SKILL.md) | Manages semantic memory (lessons, patterns, user preferences). |
-| [changelog-generator](.agent/skills/changelog-generator/SKILL.md) | Creates user-facing changelogs from git commits. |
-| [coding-standards](.agent/skills/coding-standards/SKILL.md) | Project coding standards (pathlib, Google docstrings, strict typing). |
-| [commit-standards](.agent/skills/commit-standards/SKILL.md) | Clean, conventional commits with quality validation. |
-| [documentation-standards](.agent/skills/documentation-standards/SKILL.md) | Standards for technical logs, session records, and project history. |
-| [i18n-standards](.agent/skills/i18n-standards/SKILL.md) | Internationalization standards. |
-| [qa-docker](.agent/skills/qa-docker/SKILL.md) | **Deprecated alias** for `testing-standards` (removed in the next major release). |
-| [release-management](.agent/skills/release-management/SKILL.md) | Python package release process. |
-| [testing-standards](.agent/skills/testing-standards/SKILL.md) | Automated testing, CI/CD, and Mock usage. |
+Framework skills are defined and indexed in
+[`.agent/QUICK_REFERENCE.md`](.agent/QUICK_REFERENCE.md)
+and [`.agent/AGENTS.md`](.agent/AGENTS.md). Read the linked `SKILL.md` on demand;
+do not pre-load all of them or duplicate the framework table here.
 
 ### Project overlay skills (manager-specific)
 
@@ -178,8 +157,9 @@ Skills live in `.agent/skills/*/SKILL.md` (framework) and `.agent-state/skills/*
 | [project-context](.agent-state/skills/project-context/SKILL.md) | Purpose, architecture, and structure of qgis-plugin-manager. |
 
 > QGIS-domain skills/workflows (`qgis-core`, `qgis-migration-4x`, `ui-framework`,
-> `release-plugin`, ...) live in the framework's `scaffold/qgis/` and in this
-> project's `scaffold/qgis/` (generator blueprints for target plugins).
+> `release-plugin`, ...) live only in the framework's
+> [`.agent/scaffold/qgis/`](.agent/scaffold/qgis/README.md). This project keeps no
+> duplicate QGIS pack; overlay the files you need.
 
 ---
 
@@ -195,14 +175,14 @@ This project enforces:
 - **Conventional Commits**: `type(scope): description` in English.
 
 ### Agent system validation
+Framework tooling, generic gates and their full command list are documented in
+[`.agent/QUICK_REFERENCE.md`](.agent/QUICK_REFERENCE.md). Project-owned
+validation:
+
 ```bash
-uv run bash .agent/scripts/ci.sh                 # framework lint/type/tests/validators
-uv run python scripts/sync_metrics.py            # refresh agent_metrics.json
-uv run python .agent/tools/forge.py validate    # skills/workflows/links/state
-uv run python .agent/tools/forge.py validate --graph   # dependency graph
+uv run bash .agent/scripts/ci.sh        # framework lint/format/mypy/tests/validators
+uv run python scripts/sync_metrics.py   # refresh agent_metrics.json
 uv run python .agent/tools/forge.py metrics validate   # metric consistency
-uv run python .agent/tools/forge.py memory prune       # dry-run; add --apply
-uv run pytest .agent/tests -q                   # framework tooling tests
 ```
 
 ---
@@ -227,8 +207,9 @@ Policy: `.agent-state/memory/memory_policy.md`. Lessons older than 90 days that 
 
 ## 📚 Key Resources
 
-- **Agent Configuration**: this file (root `AGENTS.md`) — canonical
-- **Framework**: `.agent/` (submodule) — `README.md`, `QUICK_REFERENCE.md`
+- **Agent Configuration**: this file (root `AGENTS.md`) — canonical for this project
+- **Framework defaults**: [`.agent/AGENTS.md`](.agent/AGENTS.md) and
+  [`.agent/QUICK_REFERENCE.md`](.agent/QUICK_REFERENCE.md)
 - **Skills**: `.agent/skills/*/SKILL.md` + `.agent-state/skills/*/SKILL.md`
 - **Workflows**: `.agent/workflows/*.md` (index: `.agent/workflows/index.md`)
 - **Development log**: `docs/DEVELOPMENT_LOG.md`
@@ -237,7 +218,8 @@ Policy: `.agent-state/memory/memory_policy.md`. Lessons older than 90 days that 
 
 ## ⚠️ Critical Reminders
 
-1. **NEVER** hard-code template content in the CLI — it belongs in `scaffold/`.
+1. **NEVER** hard-code template content in the CLI — runtime templates belong in
+   `src/qgis_manager/templates/`; domain blueprints live in `scaffold/` or `.agent/`.
 2. **ALWAYS** keep the click layer thin (parse → dispatch).
 3. **USE** type annotations and Google docstrings everywhere.
 4. **RUN** `ruff check . && mypy src && pytest` before committing.

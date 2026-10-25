@@ -319,9 +319,10 @@ Retained project-owned changes:
 
 - Framework CI (`uv run bash .agent/scripts/ci.sh`): **37 tests**, ruff/format/mypy
   clean, validate/graph/conflicts/memory check pass.
-- `forge.py validate`: **19 skills, 14 workflows, 6 templates**, no issues (strict).
-- `forge.py metrics validate` / `report`: pass (217 tests, 90.48 %).
-- Project gates: **217 tests**, **90.48 %** line coverage, ruff/format/mypy clean.
+- `forge.py validate`: **15 skills, 14 workflows, 3 templates**, no issues (strict);
+  the count dropped after removing the duplicate root QGIS pack.
+- `forge.py metrics validate` / `report`: pass (221 tests, 90.48 %).
+- Project gates: **221 tests**, **90.48 %** line coverage, ruff/format/mypy clean.
 
 **Sibling compatibility (v1.4.2):** `sec_interp`, `qgis-plugin-analyzer` and
 `ai-context-core` pass validate/metrics/memory/graph/conflicts in temporary copies,
@@ -329,5 +330,9 @@ except `ai-context-core`'s pre-existing strict-mode broken link in its own
 `.agent-state` (`../docs/implementation_plan_improvements.md`), which is a project-content
 issue, not a framework regression.
 
-**Still open:** commit the v1.4.2 submodule pointer + project state/CI, and continue the
-P1 backlog (scaffold dedupe, end-to-end CLI tests, trust model, `py.typed`, etc.).
+**P1 progress:** root `AGENTS.md` is canonical and the unused `scaffold/qgis/` copy
+was removed; the framework pack at `.agent/scaffold/qgis/` is the single QGIS source.
+`tests/test_agent_docs.py` guards both decisions.
+
+**Still open:** end-to-end CLI tests, trust model, `py.typed`, and the remaining P1
+items in `.agent-state/next_steps.md`.

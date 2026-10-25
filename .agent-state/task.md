@@ -1,38 +1,38 @@
-# Active Task: Agent Framework P0 Hardening
+# Active Task: P1 Backlog
 
 ## Status
-- **Phase**: Closed
-- **Progress**: 100%
-- **Status**: ✅ P0 implemented and verified (2026-10-19); session closed
-  (`p0_and_forge_v1_4_2`).
+- **Phase**: P1 (2/6 complete)
+- **Progress**: 33%
+- **Status**: ✅ P1-2 QGIS domain-pack deduplication complete (2026-10-25); next item pending.
 
 ## Objectives
-1. [x] Bootstrap `.agent-state/memory/agent_metrics.json` with a real collector
-   (`scripts/sync_metrics.py`).
-2. [x] Make `forge.py memory prune` a dry-run by default (`--apply` to mutate).
-3. [x] Extend the validator to scaffolds, links, canonical agent IDs, state files
-   and trigger conflicts.
-4. [x] Adapt start/close/test/release workflows to commands that exist in the repository.
-5. [x] Dogfood the framework gates: ruff, formatting, mypy, complexity, module size and
-   tooling tests.
-6. [x] Add agent-system validation and tooling checks to CI.
+1. [x] Consolidate root `AGENTS.md` as the project source of truth; framework docs
+   are referenced instead of duplicated, with a regression test.
+2. [x] Use `.agent/scaffold/qgis/` as the only QGIS domain pack and remove the
+   unused root `scaffold/qgis/` copy.
+3. [ ] Add end-to-end tests for deploy/package.
+4. [ ] Harden CLI P1 paths: symlink traversal, Windows ZIP separators and the
+   hooks/dependency trust model.
+5. [ ] Add `py.typed` + strict mypy, remove dead `cli.py`, and fix README ignore
+   syntax / docs-Makefile drift.
+6. [ ] Decide on `// turbo` hints and the deprecated `qa-docker` alias.
 
 ## Todo
-- [x] Metrics collector + metrics/policy/AI context files.
-- [x] Safe pruning + tests.
-- [x] Validator split (`agent_links`, `workflow_graph`, `skill_conflicts`,
-  `frontmatter`) + tooling tests.
-- [x] Framework lint/type/complexity/module-size cleanup.
-- [x] CI job for `.agent` validation, lint, types and tests.
-- [x] Workflow and documentation refresh.
+- [x] Pick the first P1 item with the user.
+- [x] Write the technical plan before touching code.
+- [x] Root AGENTS consolidation + `tests/test_agent_docs.py`.
+- [x] Removed root `scaffold/qgis/`; framework pack is canonical.
+- [ ] Pick the next P1 item with the user.
 
 ## Context
-- Framework: **agentic-forge** `.agent/` submodule **v1.4.2** (upstream release
-  with the TOML mypy and metrics/cache scan fixes); state in `.agent-state/`.
-- Quality: **217 project tests**, **90.48 %** line coverage, ruff/format/mypy clean;
-  **37 framework tooling tests**; CI green across Ubuntu/Windows/macOS × Python 3.11–3.13.
-- Metrics: `agent_metrics.json` refreshed with `uv run python scripts/sync_metrics.py`.
-- Compatibility: validated against temporary copies of `sec_interp`,
-  `qgis-plugin-analyzer` and `ai-context-core` (validate, graph, conflicts, metrics,
-  memory check).
-- Next: see `.agent-state/next_steps.md` for the P1 backlog.
+- Framework: **agentic-forge** `.agent/` submodule **v1.4.2** (`b264e35`), clean.
+- Quality: **221 project tests**, **90.48 %** line coverage; **37 framework tests**;
+  ruff/format/mypy clean; `forge.py validate` and `metrics validate` pass.
+- Previous phase: P0 hardening + framework adoption, archived at
+  `.agent-state/history/tasks/task_2026-10-19_p0_framework.md`.
+- P1-1: root `AGENTS.md` is canonical; generic framework tables are linked from
+  `.agent/AGENTS.md` / `.agent/QUICK_REFERENCE.md`; `tests/test_agent_docs.py`
+  prevents drift.
+- P1-2: QGIS domain pack is framework-only at `.agent/scaffold/qgis/`;
+  `scaffold/mining/` remains project-owned; `tests/test_agent_docs.py` guards it.
+- Next: `.agent-state/next_steps.md` (P1/P2 backlog).

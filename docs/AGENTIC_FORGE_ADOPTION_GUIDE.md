@@ -100,12 +100,14 @@ metrics collector run the right thing. The manager delegates analysis to
 ### 3.4 Agent roles / prompts
 Adapt each subagent prompt to the project's architecture. Example: the manager's
 `@architect` protects the separation between the **CLI** (`src/qgis_manager/`) and the
-injected **plugin templates** (`scaffold/`); `@qa_engineer` is paranoid about **CLI
-regressions** and **template-generation edge cases**; `@auditor` is read-only.
+injected **runtime templates** (`src/qgis_manager/templates/`); `@qa_engineer` is
+paranoid about **CLI regressions** and **template-generation edge cases**; `@auditor`
+is read-only.
 
 ### 3.5 Domain scaffold
-QGIS-specific skills/workflows live in the framework's `scaffold/qgis/` and are **not**
-consumed unless the project opts in (mount the needed ones as overlay). Generic projects
+QGIS-specific skills/workflows live in the framework's `.agent/scaffold/qgis/` and are **not**
+consumed unless the project opts in (mount the needed ones as overlay). This project
+keeps no duplicate copy: the framework pack is the single source. Generic projects
 ignore `scaffold/`.
 
 ---
