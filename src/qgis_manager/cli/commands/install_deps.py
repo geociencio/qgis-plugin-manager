@@ -35,13 +35,9 @@ class InstallDepsCommand(BaseCommand):
         )
 
     def execute(self, args: argparse.Namespace) -> int:
-        try:
-            root = find_project_root(Path(args.path))
-            if install_external_libs(root, args.target):
-                click.echo("✨ Dependencies ready.")
-                return 0
-            else:
-                return 1
-        except Exception as e:
-            click.echo(f"❌ Error: {e}", err=True)
+        root = find_project_root(Path(args.path))
+        if install_external_libs(root, args.target):
+            click.echo("✨ Dependencies ready.")
+            return 0
+        else:
             return 1

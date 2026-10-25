@@ -40,34 +40,30 @@ class CompileCommand(BaseCommand):
         )
 
     def execute(self, args: argparse.Namespace) -> int:
-        try:
-            root = find_project_root(Path(args.path))
+        root = find_project_root(Path(args.path))
 
-            if args.res_type in ["docs", "all"]:
-                total_steps = count_compile_steps(root, args.res_type)
+        if args.res_type in ["docs", "all"]:
+            total_steps = count_compile_steps(root, args.res_type)
 
-                with click.progressbar(
-                    length=total_steps, label="📚 Compilando", show_pos=True
-                ) as bar:
-                    compiled = compile_qt_resources(
-                        root, args.res_type, callback=make_compile_callback(bar)
-                    )
-            else:
-                compiled = compile_qt_resources(root, args.res_type)
-
-            if not compiled:
-                click.echo(
-                    click.style(
-                        "❌ Compilation failed. Check the errors above.",
-                        fg="red",
-                        bold=True,
-                    ),
-                    err=True,
+            with click.progressbar(
+                length=total_steps, label="📚 Compilando", show_pos=True
+            ) as bar:
+                compiled = compile_qt_resources(
+                    root, args.res_type, callback=make_compile_callback(bar)
                 )
-                return 1
+        else:
+            compiled = compile_qt_resources(root, args.res_type)
 
-            click.echo(click.style("✨ Compilation complete!", fg="green", bold=True))
-            return 0
-        except Exception as e:
-            click.echo(click.style(f"❌ Error: {e}", fg="red", bold=True), err=True)
+        if not compiled:
+            click.echo(
+                click.style(
+                    "❌ Compilation failed. Check the errors above.",
+                    fg="red",
+                    bold=True,
+                ),
+                err=True,
+            )
             return 1
+
+        click.echo(click.style("✨ Compilation complete!", fg="green", bold=True))
+        return 0

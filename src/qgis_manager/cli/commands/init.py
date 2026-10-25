@@ -45,31 +45,26 @@ class InitCommand(BaseCommand):
         )
 
     def execute(self, args: argparse.Namespace) -> int:
-        try:
-            # Handle interactive prompts if information is missing
-            author = args.author
-            if not author:
-                author = click.prompt("Author name")
+        author = args.author
+        if not author:
+            author = click.prompt("Author name")
 
-            email = args.email
-            if not email:
-                email = click.prompt("Author email")
+        email = args.email
+        if not email:
+            email = click.prompt("Author email")
 
-            init_plugin_project(
-                Path(args.path),
-                args.name,
-                author,
-                email,
-                args.description,
-                args.template,
-            )
-            msg = click.style(
-                f"✅ Plugin '{args.name}' initialized successfully.",
-                fg="green",
-                bold=True,
-            )
-            click.echo(msg)
-            return 0
-        except Exception as e:
-            click.echo(click.style(f"❌ Error: {e}", fg="red", bold=True), err=True)
-            return 1
+        init_plugin_project(
+            Path(args.path),
+            args.name,
+            author,
+            email,
+            args.description,
+            args.template,
+        )
+        msg = click.style(
+            f"✅ Plugin '{args.name}' initialized successfully.",
+            fg="green",
+            bold=True,
+        )
+        click.echo(msg)
+        return 0

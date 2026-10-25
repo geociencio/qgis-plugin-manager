@@ -73,156 +73,149 @@ class DeployCommand(BaseCommand):
         )
 
     def execute(self, args: argparse.Namespace) -> int:
-        try:
-            root = find_project_root(Path(args.path))
+        root = find_project_root(Path(args.path))
 
-            # Load config
-            settings = load_config()
-            settings = load_project_config(root, settings)
+        # Load config
+        settings = load_config()
+        settings = load_project_config(root, settings)
 
-            # Defaults
-            target_profile = args.profile or settings.profile
-            qgis_version = args.qgis_version or settings.qgis_version
-            use_backup = settings.backup if not args.no_backup else False
+        # Defaults
+        target_profile = args.profile or settings.profile
+        qgis_version = args.qgis_version or settings.qgis_version
+        use_backup = settings.backup if not args.no_backup else False
 
-            # Pre-info
-            metadata = get_plugin_metadata(root)
-            slug = validate_slug(str(metadata["slug"]), source="plugin metadata")
+        # Pre-info
+        metadata = get_plugin_metadata(root)
+        slug = validate_slug(str(metadata["slug"]), source="plugin metadata")
 
-            # Destination determination (before purge so absolute paths are honored)
-            absolute_profile = bool(args.profile and Path(args.profile).is_absolute())
-            if absolute_profile:
-                target_dir = Path(args.profile)
+        # Destination determination (before purge so absolute paths are honored)
+        absolute_profile = bool(args.profile and Path(args.profile).is_absolute())
+        if absolute_profile:
+            target_dir = Path(args.profile)
+        else:
+            target_dir = get_qgis_plugin_dir(target_profile, version=qgis_version)
+
+        # Handle --purge-backups
+        if args.purge_backups:
+            msg = f"🗑️  Purge all backups for '{slug}' in profile '{target_profile}'?"
+            if click.confirm(msg):
+                from ...core import purge_backups
+
+                removed = purge_backups(target_dir, slug)
+                click.echo(f"✨ Backups purged ({removed}).")
+
+            if not click.confirm("Proceed with deployment?"):
+                return 0
+
+        # Interactive check for directory existence (named profiles only)
+        if not absolute_profile and not target_dir.exists():
+            click.echo(
+                click.style(
+                    f"⚠️  Target directory does not exist: {target_dir}",
+                    fg="yellow",
+                )
+            )
+            if not click.confirm("Do you want to create it?"):
+                manual_path = click.prompt(
+                    "Please enter the absolute path to the plugins directory "
+                    "(or press Enter to abort)",
+                    default="",
+                )
+                if not manual_path:
+                    click.echo("Aborted.")
+                    return 1
+                target_dir = Path(manual_path)
             else:
-                target_dir = get_qgis_plugin_dir(target_profile, version=qgis_version)
+                target_dir.mkdir(parents=True)
 
-            # Handle --purge-backups
-            if args.purge_backups:
-                msg = (
-                    f"🗑️  Purge all backups for '{slug}' in profile '{target_profile}'?"
-                )
-                if click.confirm(msg):
-                    from ...core import purge_backups
+        target_path = target_dir / slug
 
-                    removed = purge_backups(target_dir, slug)
-                    click.echo(f"✨ Backups purged ({removed}).")
+        # Pre-deploy hook
+        pre_hook = settings.hooks.get("pre_deploy")
+        # Build context for native hooks
+        hook_ctx = {
+            "project_root": root,
+            "metadata": metadata,
+            "profile": target_profile,
+            "qgis_version": qgis_version,
+            "target_path": target_path,
+            "args": vars(args),
+        }
 
-                if not click.confirm("Proceed with deployment?"):
-                    return 0
-
-            # Interactive check for directory existence (named profiles only)
-            if not absolute_profile and not target_dir.exists():
+        if pre_hook or (root / "plugin_hooks.py").exists():
+            if not args.trust:
                 click.echo(
-                    click.style(
-                        f"⚠️  Target directory does not exist: {target_dir}",
-                        fg="yellow",
-                    )
+                    "⚠️  Skipping pre-deploy hooks: project is untrusted "
+                    "(pass --trust).",
+                    err=True,
                 )
-                if not click.confirm("Do you want to create it?"):
-                    manual_path = click.prompt(
-                        "Please enter the absolute path to the plugins directory "
-                        "(or press Enter to abort)",
-                        default="",
-                    )
-                    if not manual_path:
-                        click.echo("Aborted.")
-                        return 1
-                    target_dir = Path(manual_path)
-                else:
-                    target_dir.mkdir(parents=True)
+            else:
+                if args.interactive:
+                    if not click.confirm("🪝  Execute pre-deploy hook?"):
+                        click.echo("⏭️  Skipping hook.")
+                        pre_hook = None
 
-            target_path = target_dir / slug
-
-            # Pre-deploy hook
-            pre_hook = settings.hooks.get("pre_deploy")
-            # Build context for native hooks
-            hook_ctx = {
-                "project_root": root,
-                "metadata": metadata,
-                "profile": target_profile,
-                "qgis_version": qgis_version,
-                "target_path": target_path,
-                "args": vars(args),
-            }
-
-            if pre_hook or (root / "plugin_hooks.py").exists():
-                if not args.trust:
-                    click.echo(
-                        "⚠️  Skipping pre-deploy hooks: project is untrusted "
-                        "(pass --trust).",
-                        err=True,
-                    )
-                else:
-                    if args.interactive:
-                        if not click.confirm("🪝  Execute pre-deploy hook?"):
-                            click.echo("⏭️  Skipping hook.")
-                            pre_hook = None
-
-                    if not run_hook("pre_deploy", pre_hook, root, context=hook_ctx):
-                        return 1
-
-            if args.interactive:
-                if not click.confirm(
-                    f"🚀 Deploy to profile '{target_profile}' (QGIS {qgis_version})?"
-                ):
-                    click.echo("Aborted by user.")
+                if not run_hook("pre_deploy", pre_hook, root, context=hook_ctx):
                     return 1
 
-            if not args.no_compile and settings.auto_compile:
-                total_steps = count_compile_steps(root, "all")
+        if args.interactive:
+            if not click.confirm(
+                f"🚀 Deploy to profile '{target_profile}' (QGIS {qgis_version})?"
+            ):
+                click.echo("Aborted by user.")
+                return 1
 
-                if total_steps > 0:
-                    with click.progressbar(
-                        length=total_steps,
-                        label="📚 Compiling resources and docs",
-                        show_pos=True,
-                    ) as bar:
-                        compiled = compile_qt_resources(
-                            root, "all", callback=make_compile_callback(bar)
-                        )
-                    if not compiled:
-                        click.echo(
-                            click.style(
-                                "❌ Compilation failed; aborting deployment.",
-                                fg="red",
-                                bold=True,
-                            ),
-                            err=True,
-                        )
-                        return 1
+        if not args.no_compile and settings.auto_compile:
+            total_steps = count_compile_steps(root, "all")
 
-            click.echo(f"🚀 Deploying '{metadata['name']}' ({slug}) to {target_path}")
-
-            # Deployment
-            deploy_plugin(
-                root,
-                dest_dir=target_dir,
-                no_backup=not use_backup,
-                profile=target_profile,
-                qgis_version=qgis_version,
-                max_backups=settings.max_backups,
-            )
-
-            # Post-deploy hook
-            post_hook = settings.hooks.get("post_deploy")
-            if post_hook or (root / "plugin_hooks.py").exists():
-                if not args.trust:
+            if total_steps > 0:
+                with click.progressbar(
+                    length=total_steps,
+                    label="📚 Compiling resources and docs",
+                    show_pos=True,
+                ) as bar:
+                    compiled = compile_qt_resources(
+                        root, "all", callback=make_compile_callback(bar)
+                    )
+                if not compiled:
                     click.echo(
-                        "⚠️  Skipping post-deploy hooks: project is untrusted "
-                        "(pass --trust).",
+                        click.style(
+                            "❌ Compilation failed; aborting deployment.",
+                            fg="red",
+                            bold=True,
+                        ),
                         err=True,
                     )
-                else:
-                    if args.interactive:
-                        if not click.confirm("🪝  Execute post-deploy hook?"):
-                            click.echo("⏭️  Skipping hook.")
-                            post_hook = None
+                    return 1
 
-                    run_hook("post_deploy", post_hook, root, context=hook_ctx)
+        click.echo(f"🚀 Deploying '{metadata['name']}' ({slug}) to {target_path}")
 
-            click.echo(click.style("✨ Deployment complete!", fg="green", bold=True))
-            return 0
+        # Deployment
+        deploy_plugin(
+            root,
+            dest_dir=target_dir,
+            no_backup=not use_backup,
+            profile=target_profile,
+            qgis_version=qgis_version,
+            max_backups=settings.max_backups,
+        )
 
-        except Exception as e:
-            click.echo(click.style(f"❌ Error: {e}", fg="red", bold=True), err=True)
-            return 1
+        # Post-deploy hook
+        post_hook = settings.hooks.get("post_deploy")
+        if post_hook or (root / "plugin_hooks.py").exists():
+            if not args.trust:
+                click.echo(
+                    "⚠️  Skipping post-deploy hooks: project is untrusted "
+                    "(pass --trust).",
+                    err=True,
+                )
+            else:
+                if args.interactive:
+                    if not click.confirm("🪝  Execute post-deploy hook?"):
+                        click.echo("⏭️  Skipping hook.")
+                        post_hook = None
+
+                run_hook("post_deploy", post_hook, root, context=hook_ctx)
+
+        click.echo(click.style("✨ Deployment complete!", fg="green", bold=True))
+        return 0

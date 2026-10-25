@@ -27,11 +27,7 @@ class CleanCommand(BaseCommand):
         self.add_common_args(parser, include_profile=False)
 
     def execute(self, args: argparse.Namespace) -> int:
-        try:
-            root = find_project_root(Path(args.path))
-            clean_artifacts(root)
-            click.echo(click.style("✨ Cleanup complete!", fg="green", bold=True))
-            return 0
-        except Exception as e:
-            click.echo(click.style(f"❌ Error: {e}", fg="red", bold=True), err=True)
-            return 1
+        root = find_project_root(Path(args.path))
+        clean_artifacts(root)
+        click.echo(click.style("✨ Cleanup complete!", fg="green", bold=True))
+        return 0

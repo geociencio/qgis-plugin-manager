@@ -27,17 +27,12 @@ class AnalyzeCommand(BaseCommand):
         self.add_common_args(parser, include_profile=False)
 
     def execute(self, args: argparse.Namespace) -> int:
-        try:
-            root = find_project_root(Path(args.path))
-            click.echo(f"🔍 Analyzing project at {root}...")
+        root = find_project_root(Path(args.path))
+        click.echo(f"🔍 Analyzing project at {root}...")
 
-            code = run_qgis_analyzer(root, "analyze")
-            if code != 0:
-                click.echo("❌ Analysis failed.")
-                return code
+        code = run_qgis_analyzer(root, "analyze")
+        if code != 0:
+            click.echo("❌ Analysis failed.")
+            return code
 
-            return 0
-
-        except Exception as e:
-            click.echo(f"❌ Error: {e}", err=True)
-            return 1
+        return 0

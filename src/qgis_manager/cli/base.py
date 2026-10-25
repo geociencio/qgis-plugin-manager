@@ -3,6 +3,8 @@
 import argparse
 from abc import ABC, abstractmethod
 
+import click
+
 
 class BaseCommand(ABC):
     """Abstract base class for CLI commands.
@@ -30,6 +32,16 @@ class BaseCommand(ABC):
     @abstractmethod
     def execute(self, args: argparse.Namespace) -> int:
         """Execute the command."""
+
+    def run(self, args: argparse.Namespace) -> int:
+        """Run the command, mapping unexpected errors to a CLI exit code."""
+        try:
+            return self.execute(args)
+        except KeyboardInterrupt:
+            raise
+        except Exception as exc:
+            click.echo(click.style(f"❌ Error: {exc}", fg="red", bold=True), err=True)
+            return 1
 
     def add_common_args(
         self,

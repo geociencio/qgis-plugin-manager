@@ -69,23 +69,18 @@ class BumpCommand(BaseCommand):
         Returns:
             Exit code (0 for success, 1 for failure).
         """
-        try:
-            root = find_project_root(Path(args.path))
+        root = find_project_root(Path(args.path))
 
-            if args.subcommand in ["major", "minor", "patch"]:
-                return self._bump_version(root, args.subcommand)
-            elif args.subcommand == "sync":
-                return self._sync_versions(root)
-            else:
-                click.echo(
-                    click.style(
-                        "❌ No subcommand specified. Use --help for usage.", fg="red"
-                    )
+        if args.subcommand in ["major", "minor", "patch"]:
+            return self._bump_version(root, args.subcommand)
+        elif args.subcommand == "sync":
+            return self._sync_versions(root)
+        else:
+            click.echo(
+                click.style(
+                    "❌ No subcommand specified. Use --help for usage.", fg="red"
                 )
-                return 1
-        except Exception as e:
-            logger.error(f"Execution error in bump: {e}")
-            click.echo(click.style(f"❌ Error: {e}", fg="red"), err=True)
+            )
             return 1
 
     def _bump_version(self, root: Path, part: str) -> int:

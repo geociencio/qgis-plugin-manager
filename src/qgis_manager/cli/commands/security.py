@@ -42,23 +42,18 @@ class SecurityCommand(BaseCommand):
         )
 
     def execute(self, args: argparse.Namespace) -> int:
-        try:
-            root = find_project_root(Path(args.path))
-            click.echo(f"🔒 Running security scan on {root}...")
+        root = find_project_root(Path(args.path))
+        click.echo(f"🔒 Running security scan on {root}...")
 
-            analyzer_args = ["--deep"]
-            if args.strict:
-                analyzer_args.append("--strict")
-            if args.output:
-                analyzer_args += ["-o", args.output]
+        analyzer_args = ["--deep"]
+        if args.strict:
+            analyzer_args.append("--strict")
+        if args.output:
+            analyzer_args += ["-o", args.output]
 
-            code = run_qgis_analyzer(root, "security", *analyzer_args)
-            if code != 0:
-                click.echo("❌ Security scan found issues.")
-                return code
+        code = run_qgis_analyzer(root, "security", *analyzer_args)
+        if code != 0:
+            click.echo("❌ Security scan found issues.")
+            return code
 
-            return 0
-
-        except Exception as e:
-            click.echo(f"❌ Error: {e}", err=True)
-            return 1
+        return 0

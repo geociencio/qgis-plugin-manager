@@ -53,26 +53,21 @@ class HooksCommand(BaseCommand):
         )
 
     def execute(self, args: argparse.Namespace) -> int:
-        try:
-            root = find_project_root(Path(args.path))
+        root = find_project_root(Path(args.path))
 
-            if args.subcommand == "list":
-                return self._hooks_list(root)
-            elif args.subcommand == "init":
-                return self._hooks_init(root)
-            elif args.subcommand == "test":
-                return self._hooks_test(root, args.hook_name)
-            else:
-                # If no subcommand, show help
-                click.echo(
-                    click.style(
-                        "❌ No subcommand specified. Use --help for usage.", fg="red"
-                    )
+        if args.subcommand == "list":
+            return self._hooks_list(root)
+        elif args.subcommand == "init":
+            return self._hooks_init(root)
+        elif args.subcommand == "test":
+            return self._hooks_test(root, args.hook_name)
+        else:
+            # If no subcommand, show help
+            click.echo(
+                click.style(
+                    "❌ No subcommand specified. Use --help for usage.", fg="red"
                 )
-                return 1
-
-        except Exception as e:
-            click.echo(click.style(f"❌ Error: {e}", fg="red"), err=True)
+            )
             return 1
 
     def _hooks_list(self, root: Path) -> int:

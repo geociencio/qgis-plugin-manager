@@ -165,7 +165,7 @@ class CLIApp:
 
             self._setup_logging(args)
             command = self.commands[args.command]
-            return command.execute(args)
+            return command.run(args)
 
         except KeyboardInterrupt:
             logger.info("Interrupted by user.")

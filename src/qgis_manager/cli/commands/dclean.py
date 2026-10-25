@@ -44,31 +44,27 @@ class DCleanCommand(BaseCommand):
         )
 
     def execute(self, args: argparse.Namespace) -> int:
-        try:
-            root = find_project_root(Path(args.path))
+        root = find_project_root(Path(args.path))
 
-            settings = load_config()
-            settings = load_project_config(root, settings)
+        settings = load_config()
+        settings = load_project_config(root, settings)
 
-            target_profile = args.profile or settings.profile
-            qgis_version = args.qgis_version or settings.qgis_version
+        target_profile = args.profile or settings.profile
+        qgis_version = args.qgis_version or settings.qgis_version
 
-            if not args.yes and not click.confirm(
-                f"🗑️  Remove the deployed plugin from profile "
-                f"'{target_profile}' (QGIS {qgis_version})?"
-            ):
-                click.echo("Aborted.")
-                return 0
-
-            removed = uninstall_plugin(
-                root, profile=target_profile, qgis_version=qgis_version
-            )
-
-            if removed:
-                click.echo(click.style(f"🗑️  Removed {removed}", fg="green"))
-            else:
-                click.echo("Plugin not deployed. Nothing to remove.")
+        if not args.yes and not click.confirm(
+            f"🗑️  Remove the deployed plugin from profile "
+            f"'{target_profile}' (QGIS {qgis_version})?"
+        ):
+            click.echo("Aborted.")
             return 0
-        except Exception as e:
-            click.echo(click.style(f"❌ Error: {e}", fg="red", bold=True), err=True)
-            return 1
+
+        removed = uninstall_plugin(
+            root, profile=target_profile, qgis_version=qgis_version
+        )
+
+        if removed:
+            click.echo(click.style(f"🗑️  Removed {removed}", fg="green"))
+        else:
+            click.echo("Plugin not deployed. Nothing to remove.")
+        return 0
