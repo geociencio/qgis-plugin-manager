@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from qgis_manager.ignore import IgnoreMatcher, load_ignore_patterns
+from qgis_manager.ignore import IgnoreMatcher
 
 
 class TestIgnoreSystem(unittest.TestCase):
@@ -18,8 +18,7 @@ class TestIgnoreSystem(unittest.TestCase):
             shutil.rmtree(self.test_root)
 
     def test_gitignore_patterns(self):
-        spec = load_ignore_patterns(self.test_root)
-        matcher = IgnoreMatcher(self.test_root, spec)
+        matcher = IgnoreMatcher(self.test_root)
 
         # Should ignore by extension
         self.assertTrue(matcher.should_exclude(self.test_root / "test.tmp"))
@@ -39,8 +38,7 @@ ignore = ["*.ignored_by_tool", "custom_dir/"]
 """
         (self.test_root / "pyproject.toml").write_bytes(pyproject_content.encode())
 
-        spec = load_ignore_patterns(self.test_root)
-        matcher = IgnoreMatcher(self.test_root, spec)
+        matcher = IgnoreMatcher(self.test_root)
 
         # Files
         self.assertTrue(matcher.should_exclude(self.test_root / "test.ignored_by_tool"))

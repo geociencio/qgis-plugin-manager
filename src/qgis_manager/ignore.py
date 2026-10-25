@@ -31,9 +31,39 @@ from .constants import DEFAULT_EXCLUDE_PATTERNS
 from .toml_utils import load_toml
 
 
+def _load_ignore_file(project_root: Path) -> list[str]:
+    """Load the first available ignore file (.qgisignore or .gitignore)."""
+    for ignore_name in (".qgisignore", ".gitignore"):
+        ignore_file = project_root / ignore_name
+        if not ignore_file.exists():
+            continue
+        try:
+            with open(ignore_file, encoding="utf-8") as handle:
+                return [
+                    line
+                    for raw in handle
+                    if (line := raw.strip()) and not line.startswith("#")
+                ]
+        except OSError:
+            continue
+    return []
+
+
+def _load_pyproject_ignores(project_root: Path) -> list[str]:
+    """Load ``[tool.qgis-manager].ignore`` from pyproject.toml."""
+    pyproject = project_root / "pyproject.toml"
+    if not pyproject.exists():
+        return []
+    data = load_toml(pyproject)
+    tool_config = data.get("tool", {}).get("qgis-manager", {})
+    custom_ignores = tool_config.get("ignore", [])
+    if not isinstance(custom_ignores, list):
+        return []
+    return [str(item) for item in custom_ignores]
+
+
 def load_ignore_patterns(project_root: Path, include_dev: bool = False) -> list[str]:
-    """
-    Load ignore patterns from .gitignore and pyproject.toml.
+    """Load default, ignore-file and pyproject patterns.
 
     Args:
         project_root: The root directory of the project.
@@ -43,42 +73,14 @@ def load_ignore_patterns(project_root: Path, include_dev: bool = False) -> list[
         A list of patterns.
     """
     patterns = list(DEFAULT_EXCLUDE_PATTERNS)
-
     if not include_dev:
         from .constants import DEV_DIRECTORIES
 
-        for d in DEV_DIRECTORIES:
-            # Root-level only dev dirs
-            patterns.append(f"/{d}")
-            patterns.append(f"/{d}/**/*")
-
-    # 1. Try to load from .gitignore or .qgisignore
-    ignore_loaded = False
-    for ignore_name in [".qgisignore", ".gitignore"]:
-        if ignore_loaded:
-            break
-
-        ignore_file = project_root / ignore_name
-        if ignore_file.exists():
-            try:
-                with open(ignore_file, encoding="utf-8") as f:
-                    for line in f:
-                        line = line.strip()
-                        if line and not line.startswith("#"):
-                            patterns.append(line)
-                ignore_loaded = True
-            except Exception:
-                pass
-
-    # 2. Try to load from pyproject.toml
-    pyproject = project_root / "pyproject.toml"
-    if pyproject.exists():
-        data = load_toml(pyproject)
-        tool_config = data.get("tool", {}).get("qgis-manager", {})
-        custom_ignores = tool_config.get("ignore", [])
-        if isinstance(custom_ignores, list):
-            patterns.extend(custom_ignores)
-
+        for directory in DEV_DIRECTORIES:
+            patterns.append(f"/{directory}")
+            patterns.append(f"/{directory}/**/*")
+    patterns.extend(_load_ignore_file(project_root))
+    patterns.extend(_load_pyproject_ignores(project_root))
     return patterns
 
 
