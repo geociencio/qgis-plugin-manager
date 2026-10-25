@@ -12,9 +12,9 @@ strict mypy clean, framework v1.4.2.
 
 **Status**: the P0 batch was implemented on 2026-10-25 (CLI single instantiation,
 BaseCommand error wrapper, deploy/package extraction, compile timeouts + ignore-aware
-scan, dead helper removal). Result after P0 remediation + coverage: **331 tests, 95.33 % combined coverage**
-(96.55 % statements / 91.47 % branches), C901 = 0. The 95/90 gates are enforced
-separately; P1/P2 remain.
+scan, dead helper removal). Result after P1: **340 tests, 94.67 % combined coverage** (96.01 % statements /
+90.42 % branches), C901 = 0. Pruned repo scans, deploy manifest, reflink backups
+and compile freshness are implemented; P2 remains.
 
 ---
 

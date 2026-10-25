@@ -1,32 +1,25 @@
-# Active Task: P0 Remediation (0.10.1)
+# Active Task: P1 Performance
 
 ## Status
-- **Phase**: P0 (5/5 fixes complete)
+- **Phase**: P1 (4/4 workstreams complete)
 - **Progress**: 100%
-- **Status**: ✅ P0 implemented and 0.10.1 prepared locally (2026-10-25);
+- **Status**: ✅ P1 implemented and 0.11.0 prepared locally (2026-10-25);
   push/tag/publication pending.
 
-## Fixes
-1. [x] Collision-safe deploy backups (microseconds + suffix).
-2. [x] Repeatable `compile --type`.
-3. [x] `package --release-version` consistency validation.
-4. [x] `deploy --yes` for non-interactive purge/create/deploy.
-5. [x] `clean --dry-run` and `--keep-generated` protection.
-
-## Coverage
-- [x] Risk-weighted test coverage: 331 tests, 96.55 % statements,
-  91.47 % branches, gates raised to 95/90.
-- [x] E2E contracts for the P0 fixes.
+## Completed
+1. [x] Prune ignored/symlinked dirs before `--repo-check` binary scan.
+2. [x] Add per-target deploy manifest with `--no-manifest`.
+3. [x] Reflink backups with safe `copytree` fallback.
+4. [x] Compile UI/QRC to temp outputs and skip fresh `.qm`.
 
 ## Next
-- Review/publish 0.10.1.
-- P1: repo-check pruning, deploy manifest, reflink backups, compiled-output
-  freshness.
-- P2: JSON, ignore explain, max-cc, dry-run, profiles, require-docs, shell=False.
+- Publish 0.11.0.
+- P2: JSON output, ignore explain, max-cc passthrough, deploy dry-run,
+  profiles list, require-docs and shell=False default.
 
 ## Context
 - Framework: **agentic-forge** `.agent/` submodule **v1.4.2** (`b264e35`), clean.
-- Quality: **279 project tests**, **90.80 %** combined coverage; branch gate 90 %;
-  **37 framework tests**; ruff/format/strict mypy clean; C901 = 0.
-- Previous phase: P3 complete, archived at
-  `.agent-state/history/tasks/task_2026-10-25_p3_platform.md`.
+- Quality: **340 project tests**, **96.01 % statements / 90.42 % branches**
+  (94.67 % combined), gates 95/90; **37 framework tests**; C901 = 0.
+- Previous phase: P0, archived at
+  `.agent-state/history/tasks/task_2026-10-25_p0_remediation.md`.
