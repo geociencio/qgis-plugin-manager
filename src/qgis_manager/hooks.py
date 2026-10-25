@@ -1,12 +1,42 @@
 import importlib.util
 import logging
 import os
+import shlex
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+_HOOK_ENV_ALLOWLIST = (
+    "PATH",
+    "HOME",
+    "USERPROFILE",
+    "SYSTEMROOT",
+    "TEMP",
+    "TMP",
+)
+
+
+@dataclass(frozen=True)
+class HookPolicy:
+    """Execution limits for project-controlled hook commands."""
+
+    timeout: int = 300
+    shell: bool = True
+    inherit_env: bool = False
+
+    def environment(self, project_root: Path) -> dict[str, str]:
+        source = (
+            os.environ
+            if self.inherit_env
+            else {
+                key: os.environ[key] for key in _HOOK_ENV_ALLOWLIST if key in os.environ
+            }
+        )
+        return {**source, "QGIS_PROJECT_ROOT": str(project_root)}
 
 
 def execute_python_hook(
@@ -72,6 +102,7 @@ def run_hook(
     command: str | None,
     project_root: Path,
     context: dict[str, Any] | None = None,
+    policy: HookPolicy | None = None,
 ) -> bool:
     """
     Run a hook, prioritizing native Python hooks then falling back to command.
@@ -85,12 +116,12 @@ def run_hook(
     if not command:
         return True
 
+    policy = policy or HookPolicy()
     logger.info(f"🪝 Running configured hook command: {name} ({command})")
 
     # Check if command is a python script (legacy script execution)
     is_python = command.strip().endswith(".py")
-    env = os.environ.copy()
-    env["QGIS_PROJECT_ROOT"] = str(project_root)
+    env = policy.environment(project_root)
 
     full_cmd: str | list[str]
     try:
@@ -98,9 +129,12 @@ def run_hook(
             # Run via current python interpreter
             full_cmd = [sys.executable, command]
             is_shell = False
-        else:
+        elif policy.shell:
             full_cmd = command
             is_shell = True
+        else:
+            full_cmd = shlex.split(command)
+            is_shell = False
 
         result = subprocess.run(
             full_cmd,
@@ -110,6 +144,7 @@ def run_hook(
             text=True,
             check=False,
             env=env,
+            timeout=policy.timeout,
         )
 
         if result.returncode != 0:

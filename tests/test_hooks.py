@@ -1,8 +1,10 @@
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
-from qgis_manager.hooks import run_hook
+from qgis_manager.hooks import HookPolicy, run_hook
 
 
 class TestHooks(unittest.TestCase):
@@ -37,6 +39,17 @@ class TestHooks(unittest.TestCase):
 
             # Verify
             self.assertFalse(result)
+
+    @patch(
+        "qgis_manager.hooks.subprocess.run",
+        side_effect=subprocess.TimeoutExpired("hook", 1),
+    )
+    def test_run_hook_timeout(self, _mock_run):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            result = run_hook(
+                "slow", "sleep 10", Path(tmp_dir), policy=HookPolicy(timeout=1)
+            )
+        self.assertFalse(result)
 
     def test_run_hook_empty(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
