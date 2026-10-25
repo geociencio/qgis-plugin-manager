@@ -158,3 +158,24 @@ class TestCoreDeploy(unittest.TestCase):
             (parent / "plugin.bak.1").mkdir()
             rotate_backups(parent, "plugin", 0)
             self.assertTrue((parent / "plugin.bak.1").exists())
+
+    @patch(
+        "qgis_manager.core.deploy.get_plugin_metadata",
+        return_value={"name": "Test", "slug": "test_plugin"},
+    )
+    def test_deploy_twice_creates_distinct_backups(self, _mock_meta):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir) / "project"
+            root.mkdir()
+            (root / "plugin.py").write_text("print('x')\n", encoding="utf-8")
+            dest = Path(tmp_dir) / "plugins"
+            dest.mkdir()
+            (dest / "test_plugin").mkdir()
+            (dest / "test_plugin" / "old.py").write_text("old\n", encoding="utf-8")
+
+            deploy_plugin(root, dest_dir=dest)
+            deploy_plugin(root, dest_dir=dest)
+
+            backups = sorted(dest.glob("test_plugin.bak.*"))
+            self.assertGreaterEqual(len(backups), 2)
+            self.assertTrue((dest / "test_plugin" / "plugin.py").exists())

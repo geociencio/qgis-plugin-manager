@@ -177,6 +177,17 @@ def sync_directory(src: Path, dst: Path, matcher: IgnoreMatcher) -> None:
     _cleanup_destination(src, dst, matcher)
 
 
+def _backup_path(parent_dir: Path, slug: str) -> Path:
+    """Return a unique backup path with microsecond precision."""
+    stamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    candidate = parent_dir / f"{slug}.bak.{stamp}"
+    counter = 1
+    while candidate.exists():
+        candidate = parent_dir / f"{slug}.bak.{stamp}-{counter}"
+        counter += 1
+    return candidate
+
+
 def deploy_plugin(
     project_root: Path,
     dest_dir: Path | None = None,
@@ -208,8 +219,7 @@ def deploy_plugin(
 
     # Pre-deployment backup
     if target_path.exists() and not no_backup:
-        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        backup_path = target_path.parent / f"{slug}.bak.{timestamp}"
+        backup_path = _backup_path(target_path.parent, slug)
         logger.info(f"📦 Creating backup at: {backup_path.name}")
         shutil.copytree(target_path, backup_path, symlinks=True)
 
