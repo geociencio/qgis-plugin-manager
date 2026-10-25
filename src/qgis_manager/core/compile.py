@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -314,23 +315,44 @@ def patch_ui_file(py_file: Path) -> bool:
     return False
 
 
+@dataclass(frozen=True)
+class CompileContext:
+    """Shared state for bounded external compiler invocations."""
+
+    project_root: Path
+    callback: Callable[[str], Any] | None = None
+    timeout: int = COMPILE_TIMEOUT_SECONDS
+
+    def emit(self, message: str) -> None:
+        if self.callback:
+            self.callback(message)
+
+    def run(self, command: list[str], label: str) -> bool:
+        try:
+            subprocess.run(
+                command,
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=self.timeout,
+            )
+            return True
+        except FileNotFoundError:
+            logger.error(f"  ❌ Tool not found: {command[0]}")
+        except (
+            subprocess.CalledProcessError,
+            subprocess.TimeoutExpired,
+            OSError,
+        ) as exc:
+            logger.error(f"  ❌ Error compiling {label}: {exc}")
+        return False
+
+
 def compile_ui_files(
     project_root: Path,
     callback: Callable[[str], Any] | None = None,
 ) -> bool:
-    """Compile .ui files to Python using pyuic (PyQt5/PyQt6/PySide).
-
-    Only files whose source changed (mtime/size) since the last compilation
-    are recompiled.
-
-    Args:
-        project_root: Root directory of the plugin project.
-        callback: Optional progress callback.
-
-    Returns:
-        True if there was nothing to compile or every file compiled, False when
-        a tool is missing or a compilation failed.
-    """
+    """Compile .ui files to Python using pyuic (PyQt5/PyQt6/PySide)."""
     ui_files = _iter_compile_sources(project_root, "*.ui")
     if not ui_files:
         return True
@@ -342,75 +364,42 @@ def compile_ui_files(
         )
         return False
 
+    context = CompileContext(project_root, callback)
     success = True
     for ui in ui_files:
         py_file = ui.with_suffix(".py")
         rel_ui = ui.relative_to(project_root)
-        if callback:
-            callback(f"START:UI {rel_ui.name}")
-
+        context.emit(f"START:UI {rel_ui.name}")
         if not _is_stale(ui, py_file):
             logger.debug(f"  ⏭️  {rel_ui.name} up to date")
         else:
             logger.debug(
                 f"🎨 Compiling UI: {rel_ui} -> {py_file.name} using {uic_tool}"
             )
-            try:
-                subprocess.run(
-                    [uic_tool, "-o", str(py_file), str(ui)],
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                    timeout=COMPILE_TIMEOUT_SECONDS,
-                )
+            if context.run([uic_tool, "-o", str(py_file), str(ui)], ui.name):
                 patch_ui_file(py_file)
-            except (
-                subprocess.CalledProcessError,
-                subprocess.TimeoutExpired,
-                OSError,
-            ) as e:
-                logger.error(f"  ❌ Error compiling {ui.name}: {e}")
+            else:
                 success = False
-
-        if callback:
-            callback(f"DONE:UI {rel_ui.name}")
-
+        context.emit(f"DONE:UI {rel_ui.name}")
     return success
 
 
 def _compile_single_qrc(
     qrc: Path,
-    project_root: Path,
+    context: CompileContext,
     rcc_tool: str,
-    callback: Callable[[str], Any] | None,
 ) -> bool:
     """Compile a single .qrc file and patch the generated module."""
     py_file = qrc.with_suffix(".py")
-    rel_qrc = qrc.relative_to(project_root)
-    if callback:
-        callback(f"START:Resource {rel_qrc.name}")
+    rel_qrc = qrc.relative_to(context.project_root)
+    context.emit(f"START:Resource {rel_qrc.name}")
     logger.debug(f"🔨 Compiling resource: {rel_qrc} -> {py_file.name} using {rcc_tool}")
-
-    try:
-        subprocess.run(
-            [rcc_tool, "-o", str(py_file), str(qrc)],
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=COMPILE_TIMEOUT_SECONDS,
-        )
-        patch_resource_file(py_file)
-        if callback:
-            callback(f"DONE:Resource {rel_qrc.name}")
-        logger.debug("  ✅ Done.")
-        return True
-    except (
-        subprocess.CalledProcessError,
-        subprocess.TimeoutExpired,
-        OSError,
-    ) as e:
-        logger.error(f"  ❌ Error compiling {qrc.name}: {e}")
+    if not context.run([rcc_tool, "-o", str(py_file), str(qrc)], qrc.name):
         return False
+    patch_resource_file(py_file)
+    context.emit(f"DONE:Resource {rel_qrc.name}")
+    logger.debug("  ✅ Done.")
+    return True
 
 
 def _compile_qrc_files(
@@ -420,57 +409,38 @@ def _compile_qrc_files(
     qrc_files = _iter_compile_sources(project_root, "*.qrc")
     if not qrc_files:
         return True
-
     rcc_tool = get_rcc_tool()
     if not rcc_tool:
         logger.error("  ❌ No RCC tool found (pyside6-rcc, pyside2-rcc, pyrcc5).")
         return False
-
+    context = CompileContext(project_root, callback)
     success = True
     for qrc in qrc_files:
-        if not _compile_single_qrc(qrc, project_root, rcc_tool, callback):
+        if not _compile_single_qrc(qrc, context, rcc_tool):
             success = False
     return success
 
 
-def _compile_single_ts(
-    ts: Path,
-    project_root: Path,
-    callback: Callable[[str], Any] | None,
-) -> bool:
+def _compile_single_ts(ts: Path, context: CompileContext) -> bool:
     """Compile a single .ts translation file with lrelease."""
-    rel_ts = ts.relative_to(project_root)
-    if callback:
-        callback(f"START:Translation {rel_ts.name}")
+    rel_ts = ts.relative_to(context.project_root)
+    context.emit(f"START:Translation {rel_ts.name}")
     logger.debug(f"🌍 Compiling translation: {rel_ts}")
-
-    try:
-        subprocess.run(
-            ["lrelease", str(ts)],
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=COMPILE_TIMEOUT_SECONDS,
-        )
-        if callback:
-            callback(f"DONE:Translation {rel_ts.name}")
-        logger.debug("  ✅ Done.")
-        return True
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
-        logger.error(f"  ❌ Error compiling {ts.name}: {e}")
+    if not context.run(["lrelease", str(ts)], ts.name):
         return False
-    except FileNotFoundError:
-        logger.error("  ❌ lrelease not found. Is it installed?")
-        return False
+    context.emit(f"DONE:Translation {rel_ts.name}")
+    logger.debug("  ✅ Done.")
+    return True
 
 
 def _compile_ts_files(
     project_root: Path, callback: Callable[[str], Any] | None
 ) -> bool:
     """Compile every .ts translation file in the project."""
+    context = CompileContext(project_root, callback)
     success = True
     for ts in _iter_compile_sources(project_root, "*.ts"):
-        if not _compile_single_ts(ts, project_root, callback):
+        if not _compile_single_ts(ts, context):
             success = False
     return success
 
