@@ -82,3 +82,15 @@ class TestCompileCommand(_CommandTestBase):
 
         self.assertEqual(exit_code, 1)
         self.assertIn("Compilation failed", stderr)
+
+    @patch("qgis_manager.cli.commands.compile.compile_qt_resources", return_value=True)
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_compile_repeated_types(self, mock_find, mock_compile):
+        mock_find.return_value = Path(tempfile.mkdtemp())
+
+        exit_code, _, _ = self._invoke(
+            ["compile", "--type", "resources", "--type", "translations"]
+        )
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(mock_compile.call_args.args[1], ["resources", "translations"])

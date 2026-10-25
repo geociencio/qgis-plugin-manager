@@ -8,7 +8,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
@@ -208,7 +208,15 @@ def _is_stale(source: Path, target: Path) -> bool:
         return True
 
 
-def count_compile_steps(project_root: Path, res_type: str) -> int:
+def _normalize_compile_types(res_type: str | Sequence[str]) -> tuple[str, ...]:
+    """Return a deduplicated tuple of compile families."""
+    values = (res_type,) if isinstance(res_type, str) else tuple(res_type)
+    if "all" in values:
+        return ("resources", "translations", "docs")
+    return tuple(dict.fromkeys(values))
+
+
+def count_compile_steps(project_root: Path, res_type: str | Sequence[str]) -> int:
     """Count the number of compilation steps for a resource type.
 
     Args:
@@ -219,12 +227,13 @@ def count_compile_steps(project_root: Path, res_type: str) -> int:
         Total number of steps to compile.
     """
     total = 0
-    if res_type in ["resources", "all"]:
+    types = _normalize_compile_types(res_type)
+    if "resources" in types:
         total += len(_iter_compile_sources(project_root, "*.qrc"))
         total += len(_iter_compile_sources(project_root, "*.ui"))
-    if res_type in ["translations", "all"]:
+    if "translations" in types:
         total += len(_iter_compile_sources(project_root, "*.ts"))
-    if res_type in ["docs", "all"]:
+    if "docs" in types:
         if (project_root / "docs" / "source" / "conf.py").exists():
             total += 1
     return total
@@ -469,7 +478,7 @@ def _compile_ts_files(
 
 def compile_qt_resources(
     project_root: Path,
-    res_type: str = "all",
+    res_type: str | Sequence[str] = "all",
     callback: Callable[[str], Any] | None = None,
     jobs: int = 1,
 ) -> bool:
@@ -485,18 +494,19 @@ def compile_qt_resources(
         False if any step failed.
     """
     success = True
+    types = _normalize_compile_types(res_type)
 
-    if res_type in ["resources", "all"]:
+    if "resources" in types:
         # Compile .ui files to Python (pyuic) and .qrc resources to Python (rcc)
         success = (
             compile_ui_files(project_root, callback=callback, jobs=jobs) and success
         )
         success = _compile_qrc_files(project_root, callback, jobs) and success
 
-    if res_type in ["translations", "all"]:
+    if "translations" in types:
         success = _compile_ts_files(project_root, callback, jobs) and success
 
-    if res_type in ["docs", "all"]:
+    if "docs" in types:
         success = compile_docs(project_root, callback=callback) and success
 
     return success

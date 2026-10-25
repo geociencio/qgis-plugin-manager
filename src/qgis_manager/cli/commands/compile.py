@@ -38,28 +38,31 @@ class CompileCommand(BaseCommand):
         parser.add_argument(
             "--type",
             dest="res_type",
+            action="append",
             choices=["resources", "translations", "docs", "all"],
-            default="all",
-            help="Type of resources to compile (default: all)",
+            help="Type of resources to compile; may be repeated (default: all)",
         )
 
     def execute(self, args: argparse.Namespace) -> int:
         root = self.project_root(args)
+        requested = args.res_type or ["all"]
+        selected = ["all"] if "all" in requested else list(dict.fromkeys(requested))
+        compile_arg = selected[0] if len(selected) == 1 else selected
 
-        if args.res_type in ["docs", "all"]:
-            total_steps = count_compile_steps(root, args.res_type)
+        if any(item in ("docs", "all") for item in selected):
+            total_steps = count_compile_steps(root, selected)
 
             with click.progressbar(
                 length=total_steps, label="📚 Compilando", show_pos=True
             ) as bar:
                 compiled = compile_qt_resources(
                     root,
-                    args.res_type,
+                    compile_arg,
                     callback=make_compile_callback(bar),
                     jobs=args.jobs,
                 )
         else:
-            compiled = compile_qt_resources(root, args.res_type, jobs=args.jobs)
+            compiled = compile_qt_resources(root, compile_arg, jobs=args.jobs)
 
         if not compiled:
             click.echo(
