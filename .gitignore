@@ -53,3 +53,6 @@ agentic_framework_guide.md
 agentic_framework_skeleton.zip
 bootstrap.py
 metadata.txt
+
+# Coverage JSON report (CI/local)
+coverage.json

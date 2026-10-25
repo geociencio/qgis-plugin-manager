@@ -55,6 +55,6 @@ jobs:
         run: uv run qgis-analyzer analyze .
 
       - name: Test with pytest
-        run: >
-          uv run pytest -q
-          --cov=qgis_manager --cov-branch --cov-report=term-missing --cov-fail-under=90
+        run: |
+          uv run pytest -q --cov=qgis_manager --cov-branch             --cov-report=term-missing --cov-report=json:coverage.json             --cov-fail-under=90
+          uv run python scripts/check_coverage.py
