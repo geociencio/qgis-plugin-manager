@@ -66,17 +66,24 @@ class PackageCommand(BaseCommand):
 
     def execute(self, args: argparse.Namespace) -> int:
         root = find_project_root(Path(args.path))
+        self._sync_version(root, args)
+        if not self._install_dependencies(root, args):
+            return 1
+        if not self._check_compliance(root, args):
+            return 1
+        zip_path = self._build_package(root, args)
+        click.echo(click.style(f"✅ Package created: {zip_path}", fg="green"))
+        return 0
 
-        # 1. Version Sync (Optional)
-        if getattr(args, "sync_version", False):
-            py_version = get_project_version(root / "pyproject.toml")
-            if py_version:
-                click.echo(f"🔄 Syncing version to {py_version}...")
-                sync_metadata_version(root)
+    def _sync_version(self, root: Path, args: argparse.Namespace) -> None:
+        if not args.sync_version:
+            return
+        py_version = get_project_version(root / "pyproject.toml")
+        if py_version:
+            click.echo(f"🔄 Syncing version to {py_version}...")
+            sync_metadata_version(root)
 
-        # 2. Install dependencies before validating so the packaged file set
-        #    is the one that compliance rules inspect. Installation executes
-        #    project-controlled package specs, so require explicit trust.
+    def _install_dependencies(self, root: Path, args: argparse.Namespace) -> bool:
         dependencies = get_dependencies(root)
         if dependencies and not args.trust:
             click.echo(
@@ -88,7 +95,7 @@ class PackageCommand(BaseCommand):
                 ),
                 err=True,
             )
-            return 1
+            return False
         if not install_external_libs(root):
             click.echo(
                 click.style(
@@ -98,32 +105,33 @@ class PackageCommand(BaseCommand):
                 ),
                 err=True,
             )
-            return 1
+            return False
+        return True
 
-        # 3. Compliance Check (Optional)
-        if getattr(args, "repo_check", False):
-            from ...discovery import get_plugin_metadata as fetch_metadata
-            from ...validation import (
-                validate_metadata,
-                validate_official_compliance,
-                validate_project_structure,
-            )
+    def _check_compliance(self, root: Path, args: argparse.Namespace) -> bool:
+        if not args.repo_check:
+            return True
+        from ...discovery import get_plugin_metadata as fetch_metadata
+        from ...validation import (
+            validate_metadata,
+            validate_official_compliance,
+            validate_project_structure,
+        )
 
-            click.echo("🔍 Running official repository compliance check...")
-            metadata = fetch_metadata(root)
-            meta_res = validate_metadata(metadata)
-            repo_res = validate_official_compliance(root, metadata)
-            struct_res = validate_project_structure(root, metadata)
-
-            if not (meta_res.is_valid and repo_res.is_valid and struct_res.is_valid):
-                click.echo(
-                    click.style("❌ Package compliance failed:", fg="red", bold=True)
-                )
-                for err in meta_res.errors + repo_res.errors + struct_res.errors:
-                    click.echo(f"  • {err}")
-                return 1
+        click.echo("🔍 Running official repository compliance check...")
+        metadata = fetch_metadata(root)
+        meta_res = validate_metadata(metadata)
+        repo_res = validate_official_compliance(root, metadata)
+        struct_res = validate_project_structure(root, metadata)
+        if meta_res.is_valid and repo_res.is_valid and struct_res.is_valid:
             click.echo(click.style("✅ Compliance check passed!", fg="green"))
+            return True
+        click.echo(click.style("❌ Package compliance failed:", fg="red", bold=True))
+        for err in meta_res.errors + repo_res.errors + struct_res.errors:
+            click.echo(f"  • {err}")
+        return False
 
+    def _build_package(self, root: Path, args: argparse.Namespace) -> Path:
         with click.progressbar(
             length=100,
             label="📦 Packaging files",
@@ -139,14 +147,11 @@ class PackageCommand(BaseCommand):
                 else:
                     bar.update(n)
 
-            zip_path = create_plugin_package(
+            return create_plugin_package(
                 root,
                 output_dir=Path(args.output) if args.output else None,
                 include_dev=args.dev,
                 callback=update_bar,
-                stamp=getattr(args, "stamp", False),
-                release_version=getattr(args, "release_version", None),
+                stamp=args.stamp,
+                release_version=args.release_version,
             )
-
-        click.echo(click.style(f"✅ Package created: {zip_path}", fg="green"))
-        return 0
