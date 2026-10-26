@@ -1,9 +1,9 @@
-# Release: v0.14.0 Configurable Artifact Gates
+# Feature: Portal Security (0.15.0 candidate)
 
 ## Status
-- **Phase**: 0.14.0 prepared locally (2026-10-25); push/tag/publication pending.
-- **Feature**: configurable artifact gates (`docs_entry`, size, icon, permissions), QGIS4/config checks and SOURCE_DATE_EPOCH.
-- **Quality**: 401 tests, 96.32 % statements, 90.07 % branches, 94.79 % combined, C901 = 0.
+- **Phase**: portal security implemented (2026-10-25); release not prepared.
+- **Feature**: `security --portal` on analyzer 1.18, scoped excludes and JSON envelope.
+- **Quality**: 405 tests, 96.11 % statements, 90.11 % branches, 94.65 % combined, C901 = 0.
 
 ## Completed
 0. [x] 0.13.0 artifact validation implemented.
