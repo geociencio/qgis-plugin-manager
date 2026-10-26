@@ -1,5 +1,14 @@
 # Development Log: qgis-manage
 
+## [2026-10-25] Release v0.14.0 — Configurable Artifact Gates
+- **Achievement**: Made the artifact validator configurable and added QGIS 4/config/reproducibility guidance.
+- **Changes**:
+    - `docs_entry`, `max_package_size_mb`, `icon_min_px`, `normalize_permissions` settings.
+    - `ARTIFACT_QGIS4` and `ARTIFACT_CONFIG`; `validate --zip` size/icon options.
+    - `SOURCE_DATE_EPOCH` timestamps; `--require-docs` glob support.
+- **Quality**: 401 tests (+13 subtests), 96.32 % statements, 90.07 % branches, 94.79 % combined, C901 = 0.
+- **Release**: `v0.14.0` published on GitHub and PyPI.
+
 ## [2026-10-25] Release v0.13.0 — Artifact Validation
 - **Achievement**: Added built-ZIP auditing to qgis-manage and closed the manager P0 from the upstream gate integration design.
 - **Changes**:
