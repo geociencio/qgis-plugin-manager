@@ -1,7 +1,7 @@
 # qgis-manage analyze
 
 ```text
-qgis-manage analyze v0.14.0
+qgis-manage analyze v0.15.0
 Run QGIS Plugin Analyzer on the project
 
 Usage: qgis-manage analyze [-h] [--json] [--max-cc MAX_CC] [path]

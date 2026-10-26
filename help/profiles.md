@@ -1,7 +1,7 @@
 # qgis-manage profiles
 
 ```text
-qgis-manage profiles v0.14.0
+qgis-manage profiles v0.15.0
 List QGIS profiles and plugin counts
 
 Usage: qgis-manage profiles [-h] [--qgis-version QGIS_VERSION] ACTION ...

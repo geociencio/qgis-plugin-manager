@@ -1,5 +1,14 @@
 # Development Log: qgis-manage
 
+## [2026-10-25] Release v0.15.0 — Portal Security
+- **Achievement**: Connected qgis-manage to analyzer 1.18 and shipped portal security orchestration.
+- **Changes**:
+    - `security --portal` with native/Bandit/detect-secrets/Flake8.
+    - Repeatable `--exclude`, JSON envelope and `--fail-on` gate.
+    - Minimum analyzer bumped to 1.18.0; README/help/research updated.
+- **Quality**: 405 tests (+13 subtests), 96.11 % statements, 90.11 % branches, 94.65 % combined, C901 = 0.
+- **Release**: `v0.15.0` published on GitHub and PyPI.
+
 ## [2026-10-25] Release v0.14.0 — Configurable Artifact Gates
 - **Achievement**: Made the artifact validator configurable and added QGIS 4/config/reproducibility guidance.
 - **Changes**:
