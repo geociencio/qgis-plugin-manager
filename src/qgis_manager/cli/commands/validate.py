@@ -2,11 +2,13 @@
 
 import argparse
 import logging
+from pathlib import Path
 
 import click
 
 from ...metadata import get_plugin_metadata
 from ...validation import validate_metadata, validate_project_structure
+from ...validation.artifact import ArtifactError, validate_artifact
 from ..base import BaseCommand
 from ..json_output import emit_json
 
@@ -42,6 +44,17 @@ class ValidateCommand(BaseCommand):
             parser: Argument parser to configure.
         """
         self.add_common_args(parser, include_profile=False)
+        parser.add_argument(
+            "--zip",
+            type=Path,
+            default=None,
+            help="Validate a built ZIP artifact instead of a project tree",
+        )
+        parser.add_argument(
+            "--strict-permissions",
+            action="store_true",
+            help="Treat non-portal ZIP permissions as errors",
+        )
         parser.add_argument("--strict", action="store_true", help="Fail on warnings")
         parser.add_argument(
             "--json",
@@ -53,6 +66,40 @@ class ValidateCommand(BaseCommand):
             action="store_true",
             help="Check compliance with official QGIS repository",
         )
+
+    def _validate_zip(self, args: argparse.Namespace) -> int:
+        if args.path not in (".", ""):
+            click.echo("❌ --zip and a project path are mutually exclusive.", err=True)
+            return 2
+        try:
+            result = validate_artifact(
+                args.zip, strict_permissions=args.strict_permissions
+            )
+        except ArtifactError as exc:
+            click.echo(f"❌ {exc}", err=True)
+            return 2
+        if args.json:
+            success = result.is_valid and not (args.strict and result.warnings)
+            emit_json(
+                "validate",
+                success,
+                errors=result.errors,
+                warnings=result.warnings,
+                data={"mode": "zip", **result.to_dict()},
+            )
+            return 0 if success else 1
+        if result.errors:
+            click.echo(
+                click.style("❌ Artifact validation failed:", fg="red"), err=True
+            )
+            for error in result.errors:
+                click.echo(f"  • {error}", err=True)
+        for warning in result.warnings:
+            click.echo(click.style(f"⚠️  {warning}", fg="yellow"))
+        if result.is_valid and not (args.strict and result.warnings):
+            click.echo(click.style("✅ Artifact validation passed!", fg="green"))
+            return 0
+        return 1
 
     def _emit_validation(
         self,
@@ -115,6 +162,8 @@ class ValidateCommand(BaseCommand):
         Returns:
             Exit code (0 for success, 1 for failure).
         """
+        if args.zip is not None:
+            return self._validate_zip(args)
         root = self.project_root(args)
         metadata = get_plugin_metadata(root)
 

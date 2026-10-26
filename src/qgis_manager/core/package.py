@@ -154,11 +154,23 @@ def _write_zip(
     metadata_path: Path,
     metadata_content: str | None,
     callback: Callable[[int], Any] | None,
+    normalize_permissions: bool = False,
 ) -> None:
     """Write the package ZIP, injecting stamped metadata when provided."""
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         for item, arcname in items:
-            if metadata_content is not None and item == metadata_path:
+            if normalize_permissions:
+                mode = 0o755 if item.stat().st_mode & 0o100 else 0o644
+                info = zipfile.ZipInfo(arcname, date_time=(1980, 1, 1, 0, 0, 0))
+                info.external_attr = (0o100000 | mode) << 16
+                info.compress_type = zipfile.ZIP_DEFLATED
+                data = (
+                    metadata_content.encode("utf-8")
+                    if metadata_content is not None and item == metadata_path
+                    else item.read_bytes()
+                )
+                zipf.writestr(info, data)
+            elif metadata_content is not None and item == metadata_path:
                 zipf.writestr(arcname, metadata_content)
             else:
                 zipf.write(item, arcname)
@@ -187,6 +199,7 @@ def create_plugin_package(
     callback: Callable[[int], Any] | None = None,
     stamp: bool = False,
     release_version: str | None = None,
+    normalize_permissions: bool = False,
 ) -> Path:
     """
     Create a distributable ZIP package for the plugin.
@@ -198,6 +211,7 @@ def create_plugin_package(
         stamp: Inject build metadata (version, git SHA, datetime, experimental)
             into the packaged metadata.txt without modifying the source file
         release_version: Override the version used for the ZIP name and stamping
+        normalize_permissions: Normalize ZIP modes to 0644/0755 and timestamps
 
     Returns:
         Path to the created ZIP file
@@ -228,7 +242,14 @@ def create_plugin_package(
         callback(len(items_to_zip))
 
     metadata_path = project_root / "metadata.txt"
-    _write_zip(zip_path, items_to_zip, metadata_path, metadata_content, callback)
+    _write_zip(
+        zip_path,
+        items_to_zip,
+        metadata_path,
+        metadata_content,
+        callback,
+        normalize_permissions=normalize_permissions,
+    )
 
     checksum_file = output_dir / f"{zip_filename}.sha256"
     checksum = _write_checksum(zip_path, checksum_file, zip_filename)

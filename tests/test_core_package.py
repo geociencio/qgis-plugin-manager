@@ -150,3 +150,38 @@ class TestCorePackage(unittest.TestCase):
             )
             with self.assertRaises(ValueError):
                 create_plugin_package(root, release_version="..")
+
+    def test_normalized_permissions_and_timestamps(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "metadata.txt").write_text(
+                "[general]\nname=Demo Plugin\nversion=1.0.0\n", encoding="utf-8"
+            )
+            (root / "plugin.py").write_text("x=1\n", encoding="utf-8")
+            zip_path = create_plugin_package(
+                root,
+                output_dir=root / "out",
+                normalize_permissions=True,
+            )
+            with zipfile.ZipFile(zip_path) as archive:
+                for info in archive.infolist():
+                    self.assertEqual(
+                        (info.external_attr >> 16) & 0o777, 0o644, info.filename
+                    )
+                    self.assertEqual(info.date_time, (1980, 1, 1, 0, 0, 0))
+
+    def test_normalized_executable_mode(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "metadata.txt").write_text(
+                "[general]\nname=Demo Plugin\nversion=1.0.0\n", encoding="utf-8"
+            )
+            script = root / "run.py"
+            script.write_text("print('x')\n", encoding="utf-8")
+            script.chmod(0o755)
+            zip_path = create_plugin_package(
+                root, output_dir=root / "out", normalize_permissions=True
+            )
+            with zipfile.ZipFile(zip_path) as archive:
+                info = archive.getinfo("demo_plugin/run.py")
+            self.assertEqual((info.external_attr >> 16) & 0o777, 0o755)

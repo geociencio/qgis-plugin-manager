@@ -9,6 +9,7 @@ from ...core import create_plugin_package
 from ...dependencies import get_dependencies, install_external_libs
 from ...metadata import get_plugin_metadata, sync_metadata_version
 from ...toml_utils import get_project_version
+from ...validation.artifact import ArtifactError, validate_artifact
 from ..base import BaseCommand
 from ..json_output import emit_json
 
@@ -87,6 +88,8 @@ class PackageCommand(BaseCommand):
         if not self._check_compliance(root, args):
             return 1
         zip_path = self._build_package(root, args)
+        if args.repo_check and not self._audit_artifact(zip_path):
+            return 1
         if args.json:
             emit_json(
                 "package",
@@ -186,6 +189,21 @@ class PackageCommand(BaseCommand):
             click.echo(f"  • {err}")
         return False
 
+    def _audit_artifact(self, zip_path: Path) -> bool:
+        try:
+            artifact = validate_artifact(zip_path)
+        except ArtifactError as exc:
+            click.echo(f"❌ Built artifact is invalid: {exc}", err=True)
+            return False
+        for warning in artifact.warnings:
+            click.echo(f"⚠️  {warning}", err=True)
+        if artifact.is_valid:
+            return True
+        click.echo(click.style("❌ Built artifact failed checks:", fg="red"), err=True)
+        for error in artifact.errors:
+            click.echo(f"  • {error}", err=True)
+        return False
+
     def _build_package(self, root: Path, args: argparse.Namespace) -> Path:
         options = {
             "output_dir": Path(args.output) if args.output else None,
@@ -217,4 +235,5 @@ class PackageCommand(BaseCommand):
                 callback=update_bar,
                 stamp=args.stamp,
                 release_version=args.release_version,
+                normalize_permissions=args.repo_check,
             )

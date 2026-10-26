@@ -1,6 +1,6 @@
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from qgis_manager.validation import ValidationResult
 
@@ -62,11 +62,19 @@ class TestPackageCommand(_CommandTestBase):
     @patch("qgis_manager.validation.validate_project_structure")
     @patch("qgis_manager.validation.validate_official_compliance")
     @patch("qgis_manager.validation.validate_metadata")
+    @patch("qgis_manager.cli.commands.package.validate_artifact")
     @patch("qgis_manager.cli.commands.package.install_external_libs")
     @patch("qgis_manager.cli.commands.package.create_plugin_package")
     @patch("qgis_manager.cli.base.find_project_root")
     def test_package_repo_check_passes(
-        self, mock_find, mock_package, mock_install, mock_meta, mock_repo, mock_struct
+        self,
+        mock_find,
+        mock_package,
+        mock_install,
+        mock_artifact,
+        mock_meta,
+        mock_repo,
+        mock_struct,
     ):
         root = Path(tempfile.mkdtemp())
         mock_find.return_value = root
@@ -74,6 +82,7 @@ class TestPackageCommand(_CommandTestBase):
         mock_repo.return_value = ValidationResult(True, [], [])
         mock_struct.return_value = ValidationResult(True, [], [])
         mock_package.return_value = root / "dist" / "demo.zip"
+        mock_artifact.return_value = Mock(warnings=[], errors=[], is_valid=True)
 
         exit_code, _, _ = self._invoke(["package", "--repo-check"])
         self.assertEqual(exit_code, 0)
@@ -92,6 +101,7 @@ class TestPackageCommand(_CommandTestBase):
         self.assertEqual(exit_code, 1)
         self.assertIn("Dependency installation failed", stderr)
 
+    @patch("qgis_manager.cli.commands.package.validate_artifact")
     @patch("qgis_manager.validation.validate_project_structure")
     @patch("qgis_manager.validation.validate_official_compliance")
     @patch("qgis_manager.validation.validate_metadata")
@@ -99,7 +109,14 @@ class TestPackageCommand(_CommandTestBase):
     @patch("qgis_manager.cli.commands.package.create_plugin_package")
     @patch("qgis_manager.cli.base.find_project_root")
     def test_package_installs_before_compliance(
-        self, mock_find, mock_package, mock_install, mock_meta, mock_repo, mock_struct
+        self,
+        mock_find,
+        mock_package,
+        mock_install,
+        mock_meta,
+        mock_repo,
+        mock_struct,
+        mock_artifact,
     ):
         root = Path(tempfile.mkdtemp())
         mock_find.return_value = root
@@ -111,6 +128,7 @@ class TestPackageCommand(_CommandTestBase):
         mock_meta.return_value = ValidationResult(True, [], [])
         mock_struct.return_value = ValidationResult(True, [], [])
         mock_package.return_value = root / "dist" / "demo.zip"
+        mock_artifact.return_value = Mock(warnings=[], errors=[], is_valid=True)
 
         exit_code, _, _ = self._invoke(["package", "--repo-check"])
 
@@ -295,3 +313,30 @@ class TestHooksCommand(_CommandTestBase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(mock_package.call_args.kwargs["release_version"], "9.9.9")
         self.assertIn("version=1.0.0", metadata.read_text(encoding="utf-8"))
+
+    @patch(
+        "qgis_manager.cli.commands.package.PackageCommand._check_compliance",
+        return_value=True,
+    )
+    @patch("qgis_manager.cli.commands.package.validate_artifact")
+    @patch("qgis_manager.cli.commands.package.install_external_libs")
+    @patch("qgis_manager.cli.commands.package.create_plugin_package")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_package_repo_check_normalizes_permissions(
+        self,
+        mock_find,
+        mock_package,
+        _mock_install,
+        mock_artifact,
+        _mock_compliance,
+    ):
+        root = Path(tempfile.mkdtemp())
+        (root / "metadata.txt").write_text(
+            "[general]\nname=Demo\nversion=1.0.0\n", encoding="utf-8"
+        )
+        mock_find.return_value = root
+        mock_package.return_value = root / "dist" / "demo.zip"
+        mock_artifact.return_value = Mock(warnings=[], errors=[], is_valid=True)
+        exit_code, _, _ = self._invoke(["package", "--repo-check"])
+        self.assertEqual(exit_code, 0)
+        self.assertTrue(mock_package.call_args.kwargs["normalize_permissions"])
