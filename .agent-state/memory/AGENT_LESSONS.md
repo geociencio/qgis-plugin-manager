@@ -11,6 +11,16 @@ system; see `memory_policy.md` for retention and promotion rules.
 ```yaml
 lessons:
   - date: 2026-10-25
+    category: TOOLING
+    topic: Portal security depends on analyzer extras and explicit scope
+    lesson: >-
+      qgis-plugin-analyzer 1.18 adds --tools/--json/--exclude, but portal mode
+      needs the [portal] extras and project-specific excludes; the manager cannot
+      infer which dev directories the user wants excluded.
+    action: >-
+      Document qgis-plugin-analyzer[portal], pass repeatable --exclude from
+      qgis-manage, and surface analyzer exit code 2 when tools are missing.
+  - date: 2026-10-25
     category: TESTING
     topic: Tests after the __main__ guard are silently uncollected
     lesson: >-

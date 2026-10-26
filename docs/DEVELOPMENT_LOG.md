@@ -1,5 +1,14 @@
 # Development Log: qgis-manage
 
+## [2026-10-25] Close Session — Portal Security
+- **Achievement**: Closed the artifact/config/portal cycle and published 0.13.0, 0.14.0 and 0.15.0.
+- **Changes**:
+    - Built-ZIP artifact validation and configurable gates.
+    - QGIS4/config/SOURCE_DATE_EPOCH support.
+    - `security --portal` on analyzer 1.18 with scoped excludes/JSON.
+- **Quality**: 405 tests, 96.11 % statements, 90.11 % branches, 94.65 % combined, C901 = 0.
+- **Maintenance**: [session_2026-10-25_portal_security.md](maintenance/session_2026-10-25_portal_security.md).
+
 ## [2026-10-25] Release v0.15.0 — Portal Security
 - **Achievement**: Connected qgis-manage to analyzer 1.18 and shipped portal security orchestration.
 - **Changes**:
