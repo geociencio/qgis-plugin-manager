@@ -321,8 +321,8 @@ Retained project-owned changes:
   clean, validate/graph/conflicts/memory check pass.
 - `forge.py validate`: **15 skills, 14 workflows, 3 templates**, no issues (strict);
   the count dropped after removing the duplicate root QGIS pack.
-- `forge.py metrics validate` / `report`: pass (373 tests, 95.32 %).
-- Project gates: **373 tests**, **95.32 %** line coverage, ruff/format/mypy clean.
+- `forge.py metrics validate` / `report`: pass (395 tests, 94.92 %).
+- Project gates: **395 tests**, **94.92 %** line coverage, ruff/format/mypy clean.
 
 **Sibling compatibility (v1.4.2):** `sec_interp`, `qgis-plugin-analyzer` and
 `ai-context-core` pass validate/metrics/memory/graph/conflicts in temporary copies,

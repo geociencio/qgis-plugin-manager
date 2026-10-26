@@ -1,24 +1,24 @@
 {
     "schema_version": 1,
-    "generated_at": "2026-10-25T14:06:43+00:00",
+    "generated_at": "2026-10-26T00:48:28+00:00",
     "summary": {
-        "test_count": 373,
-        "tests_ok": 373,
-        "coverage_percent": 95.32,
-        "quality_score_latest": 95.32,
+        "test_count": 395,
+        "tests_ok": 395,
+        "coverage_percent": 94.92,
+        "quality_score_latest": 94.92,
         "maintainability_score": null,
         "security_score": null,
         "cyclomatic_complexity_gate": "PASS",
         "i18n_hygiene_gate": "N/A",
         "total_issues": 0,
         "task_completion_rate": 1.0,
-        "total_sessions": 1
+        "total_sessions": 2
     },
     "last_session": {
         "date": "2026-10-25",
         "topic": "p0_p2_platform_release",
-        "tests_ok": 373,
-        "quality_score": 95.32,
+        "tests_ok": 395,
+        "quality_score": 94.92,
         "task_completion_rate": 1.0,
         "retries": 0,
         "stop_conditions_triggered": 0,
@@ -51,21 +51,21 @@
     ],
     "ground_truth_sources": {
         "pytest": {
-            "date": "2026-10-25",
+            "date": "2026-10-26",
             "command": "pytest -q --cov=qgis_manager",
             "result": "PASS"
         },
         "coverage": {
-            "date": "2026-10-25",
-            "percent": 95.32
+            "date": "2026-10-26",
+            "percent": 94.92
         },
         "ruff": {
-            "date": "2026-10-25",
+            "date": "2026-10-26",
             "command": "ruff check .",
             "result": "PASS"
         },
         "mypy": {
-            "date": "2026-10-25",
+            "date": "2026-10-26",
             "command": "mypy src",
             "result": "PASS"
         }

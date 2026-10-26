@@ -2,9 +2,9 @@
 
 **Date**: 2026-10-25
 **Last session**: `p0_p2_platform_release` (closed; 0.10.1, 0.11.0, 0.12.0 published)
-**Current session**: closed 2026-10-25; 0.10.1, 0.11.0 and 0.12.0 published.
-**Context**: P0, coverage, P1 and P2 are complete. Project: **373 tests**,
-**95.32 %** combined coverage; framework v1.4.2.
+**Current session**: 0.13.0 artifact validation prepared (2026-10-25); push/tag/publication pending.
+**Context**: 0.13.0 adds built-ZIP validation. Project: **395 tests**, **94.92 %**
+combined coverage; framework v1.4.2.
 
 **Completed (this cycle):**
 - [x] Adopted Agentic Forge **v1.4.1** (upstream P0).
@@ -49,12 +49,11 @@
 - [x] P1-1..P1-4: pruned repo scan, deploy manifest, reflink backups and
       compile freshness (see the 0.11.0 release notes for its baseline).
 - [x] P2-1..P2-7: JSON, ignore explain, max-cc, deploy dry-run, profiles,
-      require-docs and non-shell hooks. Project tests: 373, statements
-      96.77 %, branches 90.73 %.
+      require-docs and non-shell hooks (baseline in the 0.12.0 notes).
 
 **Pending:**
-- No active project items. Post-0.12 backlog: hook sandboxing, config-file shell
-  policy, global Git excludes and formal benchmarks.
+- Push `main`, tag `v0.13.0`, publish GitHub release and PyPI.
+- Then start the analyzer P0 (Flake8/Bandit/detect-secrets/profile) and SecInterp migration.
 
 **Command to resume:**
 `/start-session` (it now refreshes metrics and runs the validators).
