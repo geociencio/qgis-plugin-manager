@@ -1,7 +1,7 @@
-# Feature: Portal Security (0.15.0 candidate)
+# Release: v0.15.0 Portal Security
 
 ## Status
-- **Phase**: portal security implemented (2026-10-25); release not prepared.
+- **Phase**: 0.15.0 prepared locally (2026-10-25); push/tag/publication pending.
 - **Feature**: `security --portal` on analyzer 1.18, scoped excludes and JSON envelope.
 - **Quality**: 405 tests, 96.11 % statements, 90.11 % branches, 94.65 % combined, C901 = 0.
 

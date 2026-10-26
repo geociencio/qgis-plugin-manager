@@ -2,7 +2,7 @@
 
 **Date**: 2026-10-25
 **Last session**: `p0_p2_platform_release` (closed; 0.10.1, 0.11.0, 0.12.0 published)
-**Current session**: portal security implemented (2026-10-25); 0.15.0 not prepared.
+**Current session**: 0.15.0 portal security prepared (2026-10-25); push/tag/publication pending.
 **Context**: portal security is implemented. Project: **405 tests**, **94.65 %**
 combined coverage; framework v1.4.2.
 
@@ -52,7 +52,7 @@ combined coverage; framework v1.4.2.
       require-docs and non-shell hooks (baseline in the 0.12.0 notes).
 
 **Pending:**
-- Prepare/release 0.15.0 when requested; `main` already has 0.14.0.
+- Push `main`, tag `v0.15.0`, publish GitHub release and PyPI.
 - Then start the analyzer P0 (Flake8/Bandit/detect-secrets/profile) and SecInterp migration.
 
 **Command to resume:**
