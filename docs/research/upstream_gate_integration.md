@@ -1,12 +1,11 @@
 # Upstream Gate Integration — qgis-manage & qgis-analyzer
 
 > **Date**: 2026-10-25
-> **Status**: partially implemented — qgis-manage P0/P1 artifact/config work is
-> available in 0.14.0; qgis-analyzer adapters and the SecInterp migration remain
-> pending.
+> **Status**: manager portal and analyzer 1.18.0 are available; SecInterp migration
+> remains pending.
 > **Scope**: move SecInterp's portal gates into the two reusable tools, without
 > duplicating responsibilities.
-> **Baseline**: `qgis-manage 0.14.0`, `qgis-plugin-analyzer 1.16.0`.
+> **Baseline**: `qgis-manage 0.14.0+`, `qgis-plugin-analyzer 1.18.0`.
 
 > **Implementation update (0.14.0)**: `validation/artifact.py`, `validate --zip`,
 > post-build `package --repo-check`, the 25 MB ZIP limit, 0644/0755 modes,

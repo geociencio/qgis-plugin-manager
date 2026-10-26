@@ -262,7 +262,7 @@ qgis-manage clean
 qgis-manage dclean
 ```
 
-> **Note**: `analyze` and `security` rely on [qgis-plugin-analyzer](https://pypi.org/project/qgis-plugin-analyzer/), available via the `dev` extra (`uv add --group dev qgis-plugin-analyzer`).
+> **Note**: `analyze` and `security` rely on [qgis-plugin-analyzer](https://pypi.org/project/qgis-plugin-analyzer/) **>=1.18.0**, available via the `dev` extra. `security --portal` needs the analyzer `[portal]` extras (Bandit, detect-secrets, Flake8).
 
 ---
 

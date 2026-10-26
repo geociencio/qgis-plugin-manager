@@ -233,3 +233,15 @@ class TestCLI(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+    @patch("qgis_manager.cli.analyzer.subprocess.run")
+    def test_analyzer_output_falls_back_to_uv(self, mock_run):
+        from qgis_manager.cli.analyzer import run_qgis_analyzer_output
+
+        mock_run.side_effect = [
+            FileNotFoundError(),
+            unittest.mock.Mock(returncode=0, stdout="{}"),
+        ]
+        code, output = run_qgis_analyzer_output(Path("."), "security")
+        self.assertEqual(code, 0)
+        self.assertEqual(output, "{}")

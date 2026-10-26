@@ -25,3 +25,16 @@ def run_qgis_analyzer(
 
     result = subprocess.run(cmd, check=False, capture_output=capture, text=capture)
     return result.returncode
+
+
+def run_qgis_analyzer_output(
+    root: Path, subcommand: str, *args: str
+) -> tuple[int, str]:
+    """Run the analyzer and return ``(exit_code, stdout)``."""
+    try:
+        subprocess.run(["qgis-analyzer", "--version"], capture_output=True, check=True)
+        cmd = ["qgis-analyzer", subcommand, *args, str(root)]
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        cmd = ["uv", "run", "qgis-analyzer", subcommand, *args, str(root)]
+    result = subprocess.run(cmd, check=False, capture_output=True, text=True)
+    return result.returncode, result.stdout
