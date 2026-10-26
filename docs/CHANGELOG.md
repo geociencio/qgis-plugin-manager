@@ -8,10 +8,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.13.0] - 2026-10-25
 
-### Documentation
-- Closed-session maintenance log and handover updated; no runtime changes.
+### Added
+- **Artifact audit**: `validate --zip PATH` opens the built ZIP and checks root layout, embedded metadata, LICENSE, size, prohibited binaries, dev files, permissions, icon and README.
+- **Package gate**: `package --repo-check` audits the built ZIP after writing it and normalizes modes to 0644/0755 with deterministic timestamps.
+- **Strict permissions**: `validate --zip --strict-permissions` upgrades non-portal modes to errors.
+- **JSON artifact report**: `validate --zip --json` emits stable `ARTIFACT_*` checks.
+
+### Changed
+- The artifact size limit is **25 MB on the ZIP**, not the source project directory.
+- `--repo-check` keeps an invalid ZIP for diagnosis but returns exit code 1.
 
 ## [0.12.0] - 2026-10-25
 

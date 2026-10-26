@@ -1,5 +1,16 @@
 # Development Log: qgis-manage
 
+## [2026-10-25] Release v0.13.0 — Artifact Validation
+- **Achievement**: Added built-ZIP auditing to qgis-manage and closed the manager P0 from the upstream gate integration design.
+- **Changes**:
+    - `validation/artifact.py` with stable `ARTIFACT_*` checks and 25 MB ZIP limit.
+    - `validate --zip PATH`, JSON report and strict permissions.
+    - `package --repo-check` audits the written ZIP and normalizes modes to 0644/0755.
+    - Icon/README warnings, deterministic timestamps and post-build failure handling.
+- **Quality**: 395 tests (+13 subtests), 96.47 % statements, 90.09 % branches, 94.92 % combined, C901 = 0.
+- **Release**: `v0.13.0` published on GitHub and PyPI.
+- **Maintenance**: [upstream_gate_integration.md](research/upstream_gate_integration.md).
+
 ## [2026-10-25] P0/P1/P2 Platform Releases
 - **Achievement**: Closed the 0.10.0 analysis remediation across 0.10.1, 0.11.0 and 0.12.0, including a risk-weighted coverage initiative.
 - **Changes**:

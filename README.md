@@ -122,7 +122,7 @@ Every command provides a structured `--help` output with usage, options, and exa
 ```text
 $ qgis-manage --help
 
-qgis-manage v0.12.0
+qgis-manage v0.13.0
 QGIS Plugin Manager - Modern CLI for plugin development.
 
 Usage: qgis-manage [-h] ... SUBCOMMAND ...
@@ -224,8 +224,12 @@ Prepare for the Official QGIS Plugin Repository.
 # Create a "Repo-Ready" ZIP package
 qgis-manage package
 
-# Package with strict compliance check (fails if binaries or errors found)
+# Package with strict compliance check and post-build ZIP audit
 qgis-manage package --repo-check --sync-version
+
+# Validate an already-built ZIP (root, metadata, LICENSE, size, modes)
+qgis-manage validate --zip dist/demo_plugin.1.0.0.zip --strict-permissions
+qgis-manage validate --zip dist/demo_plugin.1.0.0.zip --json
 
 # Allow declared dependencies to be installed while packaging
 qgis-manage package --trust
@@ -263,7 +267,7 @@ qgis-manage dclean
 
 ## ⚙️ Configuration (`pyproject.toml`)
 
-Leverage YOUR existing configuration. No new files needed. Current project version: **0.12.0** (Python 3.11+).
+Leverage YOUR existing configuration. No new files needed. Current project version: **0.13.0** (Python 3.11+).
 
 ```toml
 [tool.qgis-manager]

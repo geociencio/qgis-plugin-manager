@@ -1,7 +1,7 @@
 # qgis-manage ignore
 
 ```text
-qgis-manage ignore v0.12.0
+qgis-manage ignore v0.13.0
 Check ignore rules for a path
 
 Usage: qgis-manage ignore [-h] [--project PATH] ACTION ...
