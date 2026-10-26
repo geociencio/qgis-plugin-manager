@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Artifact configuration**: `docs_entry`, `max_package_size_mb`, `icon_min_px` and `normalize_permissions` in `[tool.qgis-manager]`.
+- **QGIS 4 advisory**: `ARTIFACT_QGIS4` warns on `qgisMaximumVersion < 4.0` and deprecated `supportsQt6`.
+- **Config detection**: `ARTIFACT_CONFIG` reports recognized `.bandit`/`.flake8`/`.secrets.baseline` files.
+- **Reproducible ZIPs**: `SOURCE_DATE_EPOCH` now controls normalized ZIP timestamps.
+
 ## [0.13.0] - 2026-10-25
 
 ### Added

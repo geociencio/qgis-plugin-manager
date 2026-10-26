@@ -229,6 +229,7 @@ qgis-manage package --repo-check --sync-version
 
 # Validate an already-built ZIP (root, metadata, LICENSE, size, modes)
 qgis-manage validate --zip dist/demo_plugin.1.0.0.zip --strict-permissions
+qgis-manage validate --zip dist/demo_plugin.1.0.0.zip --max-size-mb 25 --icon-min-px 32
 qgis-manage validate --zip dist/demo_plugin.1.0.0.zip --json
 
 # Allow declared dependencies to be installed while packaging
@@ -274,6 +275,10 @@ Leverage YOUR existing configuration. No new files needed. Current project versi
 qgis_version = 4  # Target QGIS 4 by default
 max_backups = 5   # Control backup rotation
 profile = "default"
+docs_entry = "help/html/index.html"  # or "help/html/*/index.html"
+max_package_size_mb = 25
+icon_min_px = 32
+normalize_permissions = true
 
 ignore = [
     "data/*.csv",

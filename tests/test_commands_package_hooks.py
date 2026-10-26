@@ -184,6 +184,48 @@ class TestPackageCommand(_CommandTestBase):
         self.assertEqual(payload["command"], "package")
         self.assertTrue(payload["success"])
 
+    @patch("qgis_manager.cli.commands.package.install_external_libs")
+    @patch("qgis_manager.cli.commands.package.create_plugin_package")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_package_require_docs_uses_config_glob(
+        self, mock_find, mock_package, _mock_install
+    ):
+        root = Path(tempfile.mkdtemp())
+        (root / "metadata.txt").write_text(
+            "[general]\nname=Demo\nversion=1.0.0\n", encoding="utf-8"
+        )
+        (root / "pyproject.toml").write_text(
+            '[tool.qgis-manager]\ndocs_entry = "help/html/*/index.html"\n',
+            encoding="utf-8",
+        )
+        docs = root / "help" / "html" / "es"
+        docs.mkdir(parents=True)
+        (docs / "index.html").write_text("docs", encoding="utf-8")
+        mock_find.return_value = root
+        mock_package.return_value = root / "dist" / "demo.zip"
+        exit_code, _, _ = self._invoke(["package", "--require-docs"])
+        self.assertEqual(exit_code, 0)
+
+    @patch("qgis_manager.cli.commands.package.install_external_libs")
+    @patch("qgis_manager.cli.commands.package.create_plugin_package")
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_package_normalizes_from_config(
+        self, mock_find, mock_package, _mock_install
+    ):
+        root = Path(tempfile.mkdtemp())
+        (root / "metadata.txt").write_text(
+            "[general]\nname=Demo\nversion=1.0.0\n", encoding="utf-8"
+        )
+        (root / "pyproject.toml").write_text(
+            "[tool.qgis-manager]\nnormalize_permissions = true\n",
+            encoding="utf-8",
+        )
+        mock_find.return_value = root
+        mock_package.return_value = root / "dist" / "demo.zip"
+        exit_code, _, _ = self._invoke(["package"])
+        self.assertEqual(exit_code, 0)
+        self.assertTrue(mock_package.call_args.kwargs["normalize_permissions"])
+
 
 class TestHooksCommand(_CommandTestBase):
     @patch("qgis_manager.cli.base.find_project_root")

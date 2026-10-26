@@ -148,6 +148,27 @@ def _collect_zip_items(
     return items
 
 
+def _zip_date_time() -> tuple[int, int, int, int, int, int]:
+    """Return a deterministic ZIP timestamp, honoring SOURCE_DATE_EPOCH."""
+    raw = os.environ.get("SOURCE_DATE_EPOCH")
+    if raw:
+        try:
+            stamp = datetime.fromtimestamp(int(raw), tz=timezone.utc)  # noqa: UP017
+        except (ValueError, OSError, OverflowError):
+            pass
+        else:
+            if stamp.year >= 1980:
+                return (
+                    stamp.year,
+                    stamp.month,
+                    stamp.day,
+                    stamp.hour,
+                    stamp.minute,
+                    stamp.second,
+                )
+    return (1980, 1, 1, 0, 0, 0)
+
+
 def _write_zip(
     zip_path: Path,
     items: list[tuple[Path, str]],
@@ -161,7 +182,7 @@ def _write_zip(
         for item, arcname in items:
             if normalize_permissions:
                 mode = 0o755 if item.stat().st_mode & 0o100 else 0o644
-                info = zipfile.ZipInfo(arcname, date_time=(1980, 1, 1, 0, 0, 0))
+                info = zipfile.ZipInfo(arcname, date_time=_zip_date_time())
                 info.external_attr = (0o100000 | mode) << 16
                 info.compress_type = zipfile.ZIP_DEFLATED
                 data = (

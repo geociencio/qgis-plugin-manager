@@ -88,6 +88,25 @@ pre_deploy = "echo 1"
             Path("/home/tester/AppData/Roaming/qgis-manager/config.toml"),
         )
 
+    def test_project_package_settings(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "pyproject.toml").write_text(
+                "[tool.qgis-manager]\n"
+                'docs_entry = "help/html/*/index.html"\n'
+                "max_package_size_mb = 12.5\n"
+                "icon_min_px = 64\n"
+                "normalize_permissions = true\n",
+                encoding="utf-8",
+            )
+            settings = load_project_config(root, Settings())
+        self.assertEqual(settings.docs_entry, "help/html/*/index.html")
+        self.assertEqual(settings.max_package_size_mb, 12.5)
+        self.assertEqual(settings.icon_min_px, 64)
+        self.assertTrue(settings.normalize_permissions)
+
 
 if __name__ == "__main__":
     unittest.main()

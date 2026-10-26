@@ -199,6 +199,49 @@ def _check_content(result: ArtifactResult, names: list[str], root: str) -> None:
             result.add("ARTIFACT_DEV_FILE", "error", f"Hidden file: {name}")
 
 
+def _check_qgis4(result: ArtifactResult, metadata: dict[str, str] | None) -> None:
+    if metadata is None:
+        return
+    maximum = metadata.get("qgisMaximumVersion")
+    if not maximum:
+        result.add(
+            "ARTIFACT_QGIS4",
+            "warning",
+            "qgisMaximumVersion is missing; expected at least 4.0",
+        )
+    else:
+        parts = maximum.split(".")
+        try:
+            if (int(parts[0]), int(parts[1]) if len(parts) > 1 else 0) < (4, 0):
+                result.add(
+                    "ARTIFACT_QGIS4",
+                    "warning",
+                    f"qgisMaximumVersion is {maximum}; expected at least 4.0",
+                )
+        except ValueError:
+            result.add("ARTIFACT_QGIS4", "warning", "Invalid qgisMaximumVersion")
+    if metadata.get("supportsQt6"):
+        result.add(
+            "ARTIFACT_QGIS4",
+            "warning",
+            "supportsQt6 is deprecated for QGIS 4",
+        )
+
+
+def _check_config_files(result: ArtifactResult, names: list[str], root: str) -> None:
+    found = [
+        name
+        for name in names
+        if name in {f"{root}/{config}" for config in _CONFIG_FILES}
+    ]
+    if found:
+        result.add(
+            "ARTIFACT_CONFIG",
+            "info",
+            f"Validated (configured): {', '.join(found)}",
+        )
+
+
 def _check_permissions(
     result: ArtifactResult, zf: zipfile.ZipFile, strict: bool
 ) -> None:
@@ -288,4 +331,6 @@ def validate_artifact(
             _check_content(result, names, result.root)
             _check_icon(result, zf, metadata, result.root, icon_min_px)
             _check_readme(result, names, result.root)
+            _check_qgis4(result, metadata)
+            _check_config_files(result, names, result.root)
     return result

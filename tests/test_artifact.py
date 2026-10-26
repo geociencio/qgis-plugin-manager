@@ -16,6 +16,7 @@ description=Demo
 about=Demo plugin
 version=1.0.0
 qgisMinimumVersion=3.0
+qgisMaximumVersion=4.0
 author=Tester
 email=test@example.com
 repository=https://example.com/repo
@@ -183,3 +184,21 @@ def test_hidden_file_and_directory_entry(tmp_path: Path) -> None:
         archive.writestr(directory, b"")
     result = validate_artifact(path)
     assert any("Hidden file" in error for error in result.errors)
+
+
+def test_qgis4_and_config_warnings(tmp_path: Path) -> None:
+    metadata = METADATA.replace(
+        "qgisMaximumVersion=4.0", "qgisMaximumVersion=3.0"
+    ).replace("qgisMinimumVersion=3.0", "qgisMinimumVersion=3.0\nsupportsQt6=True")
+    result = validate_artifact(
+        _make_zip(
+            tmp_path,
+            metadata=metadata,
+            icon=_png(),
+            extra={"demo/.flake8": b"[flake8]\n"},
+        )
+    )
+    warnings = " ".join(result.warnings)
+    assert "ARTIFACT_QGIS4" in warnings
+    assert "supportsQt6" in warnings
+    assert any(check.id == "ARTIFACT_CONFIG" for check in result.checks)

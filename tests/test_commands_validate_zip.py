@@ -87,3 +87,26 @@ class TestPackageArtifactAudit(_CommandTestBase):
 
         self.assertEqual(exit_code, 1)
         self.assertIn("built artifact", stderr.lower())
+
+    @patch("qgis_manager.cli.commands.validate.validate_artifact")
+    def test_validate_zip_size_and_icon_options(self, mock_validate):
+        mock_validate.return_value = Mock(
+            is_valid=True,
+            warnings=[],
+            errors=[],
+            to_dict=lambda: {"root": "demo", "checks": []},
+        )
+        exit_code, _, _ = self._invoke(
+            [
+                "validate",
+                "--zip",
+                "demo.zip",
+                "--max-size-mb",
+                "10",
+                "--icon-min-px",
+                "64",
+            ]
+        )
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(mock_validate.call_args.kwargs["max_size_mb"], 10.0)
+        self.assertEqual(mock_validate.call_args.kwargs["icon_min_px"], 64)

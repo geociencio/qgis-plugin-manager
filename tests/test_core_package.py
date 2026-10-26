@@ -185,3 +185,18 @@ class TestCorePackage(unittest.TestCase):
             with zipfile.ZipFile(zip_path) as archive:
                 info = archive.getinfo("demo_plugin/run.py")
             self.assertEqual((info.external_attr >> 16) & 0o777, 0o755)
+
+    def test_source_date_epoch_controls_zip_timestamp(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "metadata.txt").write_text(
+                "[general]\nname=Demo Plugin\nversion=1.0.0\n", encoding="utf-8"
+            )
+            (root / "plugin.py").write_text("x=1\n", encoding="utf-8")
+            with patch.dict("os.environ", {"SOURCE_DATE_EPOCH": "1700000000"}):
+                zip_path = create_plugin_package(
+                    root, output_dir=root / "out", normalize_permissions=True
+                )
+            with zipfile.ZipFile(zip_path) as archive:
+                date = archive.getinfo("demo_plugin/plugin.py").date_time
+        self.assertEqual(date, (2023, 11, 14, 22, 13, 20))

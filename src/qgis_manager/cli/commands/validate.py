@@ -55,6 +55,18 @@ class ValidateCommand(BaseCommand):
             action="store_true",
             help="Treat non-portal ZIP permissions as errors",
         )
+        parser.add_argument(
+            "--max-size-mb",
+            type=float,
+            default=25.0,
+            help="Maximum ZIP size in MB (default: 25)",
+        )
+        parser.add_argument(
+            "--icon-min-px",
+            type=int,
+            default=32,
+            help="Minimum icon dimension in pixels (default: 32)",
+        )
         parser.add_argument("--strict", action="store_true", help="Fail on warnings")
         parser.add_argument(
             "--json",
@@ -73,7 +85,10 @@ class ValidateCommand(BaseCommand):
             return 2
         try:
             result = validate_artifact(
-                args.zip, strict_permissions=args.strict_permissions
+                args.zip,
+                max_size_mb=args.max_size_mb,
+                icon_min_px=args.icon_min_px,
+                strict_permissions=args.strict_permissions,
             )
         except ArtifactError as exc:
             click.echo(f"❌ {exc}", err=True)

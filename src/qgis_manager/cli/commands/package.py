@@ -5,6 +5,7 @@ from pathlib import Path
 
 import click
 
+from ...config import Settings, load_config, load_project_config
 from ...core import create_plugin_package
 from ...dependencies import get_dependencies, install_external_libs
 from ...metadata import get_plugin_metadata, sync_metadata_version
@@ -78,17 +79,18 @@ class PackageCommand(BaseCommand):
 
     def execute(self, args: argparse.Namespace) -> int:
         root = self.project_root(args)
+        settings = load_project_config(root, load_config())
         self._sync_version(root, args)
         if not self._validate_release_version(root, args):
             return 1
-        if not self._require_docs(root, args):
+        if not self._require_docs(root, args, settings):
             return 1
         if not self._install_dependencies(root, args):
             return 1
         if not self._check_compliance(root, args):
             return 1
-        zip_path = self._build_package(root, args)
-        if args.repo_check and not self._audit_artifact(zip_path):
+        zip_path = self._build_package(root, args, settings)
+        if args.repo_check and not self._audit_artifact(zip_path, settings):
             return 1
         if args.json:
             emit_json(
@@ -126,14 +128,24 @@ class PackageCommand(BaseCommand):
         )
         return False
 
-    def _require_docs(self, root: Path, args: argparse.Namespace) -> bool:
+    def _require_docs(
+        self, root: Path, args: argparse.Namespace, settings: Settings
+    ) -> bool:
         if not args.require_docs:
             return True
-        if (root / "help" / "html" / "index.html").is_file():
+        entry = settings.docs_entry
+        path = Path(entry)
+        if path.is_absolute():
+            found = path.is_file()
+        elif any(char in entry for char in "*?["):
+            found = any(root.glob(entry))
+        else:
+            found = (root / entry).is_file()
+        if found:
             return True
         click.echo(
             click.style(
-                "❌ --require-docs: help/html/index.html is missing.",
+                f"❌ --require-docs: configured docs entry '{entry}' is missing.",
                 fg="red",
                 bold=True,
             ),
@@ -189,9 +201,13 @@ class PackageCommand(BaseCommand):
             click.echo(f"  • {err}")
         return False
 
-    def _audit_artifact(self, zip_path: Path) -> bool:
+    def _audit_artifact(self, zip_path: Path, settings: Settings) -> bool:
         try:
-            artifact = validate_artifact(zip_path)
+            artifact = validate_artifact(
+                zip_path,
+                max_size_mb=settings.max_package_size_mb,
+                icon_min_px=settings.icon_min_px,
+            )
         except ArtifactError as exc:
             click.echo(f"❌ Built artifact is invalid: {exc}", err=True)
             return False
@@ -204,7 +220,9 @@ class PackageCommand(BaseCommand):
             click.echo(f"  • {error}", err=True)
         return False
 
-    def _build_package(self, root: Path, args: argparse.Namespace) -> Path:
+    def _build_package(
+        self, root: Path, args: argparse.Namespace, settings: Settings
+    ) -> Path:
         options = {
             "output_dir": Path(args.output) if args.output else None,
             "include_dev": args.dev,
@@ -235,5 +253,5 @@ class PackageCommand(BaseCommand):
                 callback=update_bar,
                 stamp=args.stamp,
                 release_version=args.release_version,
-                normalize_permissions=args.repo_check,
+                normalize_permissions=args.repo_check or settings.normalize_permissions,
             )

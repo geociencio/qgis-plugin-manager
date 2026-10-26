@@ -16,6 +16,10 @@ class Settings:
     max_backups: int = 3
     auto_compile: bool = True
     hooks: dict[str, str] = field(default_factory=dict)
+    docs_entry: str = "help/html/index.html"
+    max_package_size_mb: float = 25.0
+    icon_min_px: int = 32
+    normalize_permissions: bool = False
 
 
 def config_path() -> Path:
@@ -42,6 +46,14 @@ def load_config() -> Settings:
         settings.backup = defaults.get("backup", settings.backup)
         settings.max_backups = defaults.get("max_backups", settings.max_backups)
         settings.auto_compile = defaults.get("auto_compile", settings.auto_compile)
+        settings.docs_entry = defaults.get("docs_entry", settings.docs_entry)
+        settings.max_package_size_mb = defaults.get(
+            "max_package_size_mb", settings.max_package_size_mb
+        )
+        settings.icon_min_px = defaults.get("icon_min_px", settings.icon_min_px)
+        settings.normalize_permissions = defaults.get(
+            "normalize_permissions", settings.normalize_permissions
+        )
 
     return settings
 
@@ -66,5 +78,17 @@ def load_project_config(project_root: Path, base_settings: Settings) -> Settings
             "auto_compile", base_settings.auto_compile
         )
         base_settings.hooks = tool_config.get("hooks", base_settings.hooks)
+        base_settings.docs_entry = tool_config.get(
+            "docs_entry", base_settings.docs_entry
+        )
+        base_settings.max_package_size_mb = tool_config.get(
+            "max_package_size_mb", base_settings.max_package_size_mb
+        )
+        base_settings.icon_min_px = tool_config.get(
+            "icon_min_px", base_settings.icon_min_px
+        )
+        base_settings.normalize_permissions = tool_config.get(
+            "normalize_permissions", base_settings.normalize_permissions
+        )
 
     return base_settings
