@@ -1,7 +1,7 @@
 # qgis-manage bump
 
 ```text
-qgis-manage bump v0.15.0
+qgis-manage bump v0.15.1
 Automate project versioning
 
 Usage: qgis-manage bump [-h] [path] SUBCOMMAND ...

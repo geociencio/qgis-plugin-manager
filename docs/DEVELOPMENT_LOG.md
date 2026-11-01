@@ -1,5 +1,14 @@
 # Development Log: qgis-manage
 
+## [2026-10-31] Release v0.15.1 — Tool-only Distributions
+- **Achievement**: Removed non-tool files from the sdist and added a release guard.
+- **Changes**:
+    - Hatch sdist whitelist for `src/qgis_manager` plus packaging metadata.
+    - `scripts/check_distribution.py` validates wheel/sdist contents.
+    - Release workflow fails before publishing on extra files.
+- **Quality**: 405 tests, 96.11 % statements, 90.11 % branches, 94.65 % combined, C901 = 0.
+- **Release**: `v0.15.1` published on GitHub and PyPI.
+
 ## [2026-10-25] Close Session — Portal Security
 - **Achievement**: Closed the artifact/config/portal cycle and published 0.13.0, 0.14.0 and 0.15.0.
 - **Changes**:

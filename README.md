@@ -122,7 +122,7 @@ Every command provides a structured `--help` output with usage, options, and exa
 ```text
 $ qgis-manage --help
 
-qgis-manage v0.15.0
+qgis-manage v0.15.1
 QGIS Plugin Manager - Modern CLI for plugin development.
 
 Usage: qgis-manage [-h] ... SUBCOMMAND ...
@@ -296,7 +296,7 @@ qgis-manage dclean
 
 ## ⚙️ Configuration (`pyproject.toml`)
 
-Leverage YOUR existing configuration. No new files needed. Current project version: **0.15.0** (Python 3.11+).
+Leverage YOUR existing configuration. No new files needed. Current project version: **0.15.1** (Python 3.11+).
 
 ```toml
 [tool.qgis-manager]

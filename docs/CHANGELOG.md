@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Documentation
 - Close-session notes and handover refreshed; no runtime changes.
 
+## [0.15.1] - 2026-10-31
+
+### Fixed
+- **Source distribution contents**: the sdist now whitelists only `src/qgis_manager`, README, CHANGELOG, LICENSE, pyproject and standard packaging metadata. `.agent-state/`, `help/`, `docs/`, `tests/`, `scripts/`, `scaffold/` and analysis artifacts are no longer shipped.
+- **Release guard**: the release workflow verifies wheel/sdist contents before publishing.
+
 ## [0.15.0] - 2026-10-25
 
 ### Added

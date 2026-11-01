@@ -1,7 +1,7 @@
 # qgis-manage init
 
 ```text
-qgis-manage init v0.15.0
+qgis-manage init v0.15.1
 Initialize a new QGIS plugin project scaffolding
 
 Usage: qgis-manage init [-h] [--path PATH] [--author AUTHOR] [--email EMAIL]
