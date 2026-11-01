@@ -2,9 +2,9 @@
 
 **Date**: 2026-11-01
 **Last session**: `portal_security_release` (closed; 0.13.0, 0.14.0, 0.15.0 published)
-**Current session**: 0.15.1 tool-only distributions prepared (2026-10-31); push/tag/publication pending.
-**Context**: 0.15.0 released. Project: **405 tests**, **94.65 %** combined coverage;
-framework v1.4.2.
+**Current session**: 0.16.0 zero runtime dependencies prepared (2026-11-01); push/tag/publication pending.
+**Context**: 0.16.0 removes runtime dependencies. Project: **419 tests**, **94.82 %**
+combined coverage; framework v1.4.2.
 
 **Completed (this cycle):**
 - [x] Adopted Agentic Forge **v1.4.1** (upstream P0).
@@ -52,7 +52,7 @@ framework v1.4.2.
       require-docs and non-shell hooks (baseline in the 0.12.0 notes).
 
 **Pending:**
-- Push `main`, tag `v0.15.1`, publish GitHub release and PyPI.
+- Push `main`, tag `v0.16.0`, publish GitHub release and PyPI.
 - Then SecInterp migration/upstream analyzer refinements.
 
 **Command to resume:**
