@@ -179,6 +179,34 @@ qgis-manage deploy --trust
 qgis-manage deploy --purge-backups
 ```
 
+#### Fast local loop when developing qgis-manage
+
+If you are working from a checkout of **this repository**, run the local CLI
+through `uv` instead of relying on a globally installed `qgis-manage`:
+
+```bash
+uv run qgis-manage deploy --no-compile --qgis-version 4
+```
+
+What each part does:
+
+- `uv run` executes the command from this checkout's virtual environment, so you
+  are testing the current source without reinstalling the package.
+- `--no-compile` skips the automatic UI/QRC/translation/docs compilation. It is
+  the fastest loop when you only need to sync Python changes; run
+  `qgis-manage compile` explicitly when you need generated artifacts.
+- `--qgis-version 4` selects the QGIS 4 profile plugins directory instead of the
+  default QGIS 3 location.
+- Deploy still creates a backup by default. Add `--no-backup` if you want the
+  absolute fastest iteration and do not need rollback points.
+
+When using the CLI as an installed tool from a plugin repository, drop the
+`uv run` prefix:
+
+```bash
+qgis-manage deploy --no-compile --qgis-version 4
+```
+
 **💡 Smart Path Detection**: `qgis-manage` automatically detects your plugins directory across Linux, macOS, and Windows. If a profile doesn't exist, it will interactively ask if you want to create it or specify a custom location.
 
 ### 3. Resource Compilation (`compile`)
