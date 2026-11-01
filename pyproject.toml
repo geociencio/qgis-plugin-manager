@@ -58,23 +58,12 @@ qgis-manage = "qgis_manager.cli:main"
 packages = ["src/qgis_manager"]
 
 [tool.hatch.build.targets.sdist]
-exclude = [
-    "/.agent",
-    "/.github",
-    "/.vscode",
-    "/.venv",
-    "/.mypy_cache",
-    "/.ruff_cache",
-    "/.pre-commit-config.yaml",
-    "/.gitattributes",
-    "/uv.lock",
-    "/Makefile",
-    "/tests",
-    "/docs",
-    "/scaffold",
-    "/scripts",
-    "/analysis_results",
-    "/generator_export",
+only-include = [
+    "src/qgis_manager",
+    "pyproject.toml",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
 ]
 
 [tool.uv]

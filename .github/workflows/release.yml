@@ -69,6 +69,9 @@ jobs:
       - name: Build distribution
         run: uv build
 
+      - name: Verify distribution contents
+        run: python scripts/check_distribution.py dist
+
       - name: Publish to PyPI
         run: uv publish
         env:
