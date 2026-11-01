@@ -3,9 +3,8 @@
 import argparse
 from pathlib import Path
 
-import click
-
 from ...hooks import execute_python_hook
+from .. import console as click
 from ..base import BaseCommand
 
 

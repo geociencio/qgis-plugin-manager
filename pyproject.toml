@@ -28,9 +28,7 @@ classifiers = [
     "Environment :: Console",
     "Natural Language :: Spanish",
 ]
-dependencies = [
-    "click>=8.0",
-]
+dependencies = []
 
 [project.urls]
 Homepage = "https://github.com/geociencio/qgis-plugin-manager"

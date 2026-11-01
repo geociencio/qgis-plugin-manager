@@ -2,9 +2,8 @@
 
 import argparse
 
-import click
-
 from ...core import get_qgis_plugin_dir
+from .. import console as click
 from ..base import BaseCommand
 
 

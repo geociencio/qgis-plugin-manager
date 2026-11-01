@@ -4,8 +4,6 @@ import argparse
 from pathlib import Path
 from typing import Any
 
-import click
-
 from ...config import Settings, load_config, load_project_config
 from ...core import (
     compile_qt_resources,
@@ -17,6 +15,7 @@ from ...core import (
 from ...hooks import run_hook
 from ...metadata import get_plugin_metadata
 from ...naming import validate_slug
+from .. import console as click
 from ..base import BaseCommand
 from ..progress import make_compile_callback
 

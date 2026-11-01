@@ -4,8 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-import click
-
+from .. import console as click
 from ..analyzer import run_qgis_analyzer, run_qgis_analyzer_output
 from ..base import BaseCommand
 from ..json_output import emit_json

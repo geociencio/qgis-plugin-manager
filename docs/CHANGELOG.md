@@ -10,8 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Documentation
-- Close-session notes and handover refreshed; no runtime changes.
+### Added
+- **Stdlib console**: the CLI now uses an internal `console` adapter for output, styling, prompts and progress bars instead of `click`.
+
+### Changed
+- **Zero runtime dependencies**: `project.dependencies` is empty; `click` is no longer required at runtime.
+- **Dependency policy test**: runtime imports under `src/qgis_manager` are checked against the standard library, and `pyproject.toml` must keep an empty dependency list.
+
+### Removed
+- `click>=8.0` from runtime dependencies.
+
 
 ## [0.15.1] - 2026-10-31
 

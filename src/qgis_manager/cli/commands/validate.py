@@ -4,11 +4,10 @@ import argparse
 import logging
 from pathlib import Path
 
-import click
-
 from ...metadata import get_plugin_metadata
 from ...validation import validate_metadata, validate_project_structure
 from ...validation.artifact import ArtifactError, validate_artifact
+from .. import console as click
 from ..base import BaseCommand
 from ..json_output import emit_json
 

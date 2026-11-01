@@ -2,8 +2,7 @@
 
 import argparse
 
-import click
-
+from .. import console as click
 from ..analyzer import run_qgis_analyzer
 from ..base import BaseCommand
 from ..json_output import emit_json

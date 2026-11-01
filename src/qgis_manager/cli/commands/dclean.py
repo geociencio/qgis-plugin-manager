@@ -2,10 +2,9 @@
 
 import argparse
 
-import click
-
 from ...config import load_config, load_project_config
 from ...core import uninstall_plugin
+from .. import console as click
 from ..base import BaseCommand
 
 

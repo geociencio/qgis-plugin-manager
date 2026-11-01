@@ -2,9 +2,8 @@
 
 import argparse
 
-import click
-
 from ...dependencies import DependencyPolicy, install_external_libs
+from .. import console as click
 from ..base import BaseCommand
 
 

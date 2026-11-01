@@ -2,9 +2,8 @@
 
 import argparse
 
-import click
-
 from ...core import compile_qt_resources, count_compile_steps
+from .. import console as click
 from ..base import BaseCommand
 from ..progress import make_compile_callback
 

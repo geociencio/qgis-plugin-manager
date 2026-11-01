@@ -1,5 +1,14 @@
 # Development Log: qgis-manage
 
+## [2026-11-01] Zero Runtime Dependencies
+- **Achievement**: Removed `click` from runtime and replaced it with a stdlib-only console adapter.
+- **Changes**:
+    - `cli/console.py` for echo/style/confirm/prompt/progress.
+    - `project.dependencies = []`; click removed from the lock/runtime.
+    - AST policy test rejects third-party runtime imports.
+- **Quality**: 415 tests expected after console/policy tests; coverage gate 95/90.
+- **Release**: 0.16.0 pending.
+
 ## [2026-10-31] Release v0.15.1 — Tool-only Distributions
 - **Achievement**: Removed non-tool files from the sdist and added a release guard.
 - **Changes**:

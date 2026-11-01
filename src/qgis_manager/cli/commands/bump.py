@@ -4,14 +4,13 @@ import argparse
 import logging
 from pathlib import Path
 
-import click
-
 from ...metadata import (
     get_plugin_metadata,
     save_plugin_metadata,
     sync_metadata_version,
 )
 from ...toml_utils import get_project_version, set_project_version
+from .. import console as click
 from ..base import BaseCommand
 
 logger = logging.getLogger(__name__)

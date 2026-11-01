@@ -3,9 +3,8 @@
 import argparse
 from pathlib import Path
 
-import click
-
 from ...core import init_plugin_project
+from .. import console as click
 from ..base import BaseCommand
 
 

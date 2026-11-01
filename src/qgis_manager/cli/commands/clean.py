@@ -2,9 +2,8 @@
 
 import argparse
 
-import click
-
 from ...core import clean_artifacts
+from .. import console as click
 from ..base import BaseCommand
 
 

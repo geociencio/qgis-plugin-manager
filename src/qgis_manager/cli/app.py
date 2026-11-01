@@ -148,7 +148,7 @@ class CLIApp:
             return 1
         except Exception as e:
             logger.error(f"Top-level CLI error: {e}")
-            import click
+            from . import console as click
 
             click.echo(click.style(f"❌ Error: {e}", fg="red", bold=True), err=True)
             return 1

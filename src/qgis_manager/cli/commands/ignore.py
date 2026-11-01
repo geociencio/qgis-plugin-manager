@@ -3,9 +3,8 @@
 import argparse
 from pathlib import Path
 
-import click
-
 from ...ignore import IgnoreMatcher
+from .. import console as click
 from ..base import BaseCommand
 
 

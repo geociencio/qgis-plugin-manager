@@ -4,9 +4,8 @@ import argparse
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-import click
-
 from ..discovery import find_project_root
+from . import console as click
 
 
 class BaseCommand(ABC):

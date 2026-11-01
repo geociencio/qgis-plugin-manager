@@ -3,14 +3,13 @@
 import argparse
 from pathlib import Path
 
-import click
-
 from ...config import Settings, load_config, load_project_config
 from ...core import create_plugin_package
 from ...dependencies import get_dependencies, install_external_libs
 from ...metadata import get_plugin_metadata, sync_metadata_version
 from ...toml_utils import get_project_version
 from ...validation.artifact import ArtifactError, validate_artifact
+from .. import console as click
 from ..base import BaseCommand
 from ..json_output import emit_json
 

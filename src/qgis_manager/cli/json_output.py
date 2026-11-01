@@ -3,7 +3,7 @@
 import json
 from typing import Any
 
-import click
+from . import console as click
 
 
 def emit_json(
