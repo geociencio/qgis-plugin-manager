@@ -1,5 +1,15 @@
 # Development Log: qgis-manage
 
+## [2026-11-01] Release v0.16.0 — Zero Runtime Dependencies
+- **Achievement**: Removed `click` and shipped a stdlib-only CLI.
+- **Changes**:
+    - Internal `cli/console.py` for echo/style/confirm/prompt/progress.
+    - Empty runtime dependency list; no `Requires-Dist` in the wheel.
+    - AST policy test blocks third-party runtime imports.
+    - Wheel installed with `--no-deps` and `qgis-manage --version` verified.
+- **Quality**: 419 tests, 96.28 % statements, 90.29 % branches, 94.82 % combined, C901 = 0.
+- **Release**: `v0.16.0` published on GitHub and PyPI.
+
 ## [2026-11-01] Zero Runtime Dependencies
 - **Achievement**: Removed `click` from runtime and replaced it with a stdlib-only console adapter.
 - **Changes**:

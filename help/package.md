@@ -1,7 +1,7 @@
 # qgis-manage package
 
 ```text
-qgis-manage package v0.15.1
+qgis-manage package v0.16.0
 Create distributable ZIP package
 
 Usage: qgis-manage package [-h] [-o OUTPUT] [--dev] [--repo-check]
@@ -15,8 +15,7 @@ Arguments:
 
 Options:
   -h, --help            show this help message and exit
-  -o OUTPUT, --output OUTPUT
-                        Output directory for ZIP
+  -o, --output OUTPUT   Output directory for ZIP
   --dev                 Include development files in package
   --repo-check          Strictly validate official repository compliance
                         before packaging

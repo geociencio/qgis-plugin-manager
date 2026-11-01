@@ -7,7 +7,7 @@ C901 = 0.
 dependencies become an empty list; `click` moves out of the package entirely.
 
 **Status**: implemented 2026-11-01; console adapter, click removal, policy test
-and docs are in place. Release 0.16.0 pending.
+and docs are in place. Release 0.16.0 prepared/published.
 
 ## 1. Policy
 

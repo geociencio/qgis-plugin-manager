@@ -1,7 +1,7 @@
 # qgis-manage security
 
 ```text
-qgis-manage security v0.15.1
+qgis-manage security v0.16.0
 Run a security audit (secrets and PyQGIS rules)
 
 Usage: qgis-manage security [-h] [--strict] [-o OUTPUT] [--portal]
@@ -15,8 +15,7 @@ Arguments:
 Options:
   -h, --help            show this help message and exit
   --strict              Enable strict gold-standard rules
-  -o OUTPUT, --output OUTPUT
-                        Output directory for reports
+  -o, --output OUTPUT   Output directory for reports
   --portal              Run Bandit/detect-secrets/Flake8 plus native rules
   --exclude EXCLUDE     Additional analyzer exclude pattern (repeatable)
   --json                Emit a machine-readable security report
