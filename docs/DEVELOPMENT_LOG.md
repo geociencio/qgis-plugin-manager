@@ -1,5 +1,14 @@
 # Development Log: qgis-manage
 
+## [2026-11-01] Close Session — Correctness Patch
+- **Achievement**: Closed the analysis cycle with 0.16.0 (zero deps) and 0.16.1 (correctness).
+- **Changes**:
+    - Multi-target manifest, pruned clean, SemVer, README/classFactory, fresh .qrc.
+    - Stdlib console and runtime dependency policy.
+    - Regression tests for each finding.
+- **Quality**: 426 tests, 96.11 % statements, 90.33 % branches, 94.70 % combined, C901 = 0.
+- **Maintenance**: [session_2026-11-01_correctness_patch.md](maintenance/session_2026-11-01_correctness_patch.md).
+
 ## [2026-11-01] Release v0.16.1 — Correctness Patch
 - **Achievement**: Fixed the manifest, clean, SemVer, README/classFactory and .qrc findings.
 - **Changes**:

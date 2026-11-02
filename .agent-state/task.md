@@ -1,9 +1,10 @@
-# Release: v0.16.1 Correctness Patch
+# Session Closed: Correctness Patch (0.16.1)
 
 ## Status
-- **Phase**: 0.16.1 prepared locally (2026-11-01); push/tag/publication pending.
-- **Patch**: manifest targets, clean pruning, SemVer, README/classFactory, .qrc staleness.
-- **Quality**: 426 tests, 96.11 % statements, 90.33 % branches, 94.70 % combined, C901 = 0.
+- **Phase**: closed (2026-11-01)
+- **Releases**: 0.16.0 (zero runtime dependencies) and 0.16.1 (correctness).
+- **Quality**: 426 tests, 96.11 % statements, 90.33 % branches, 94.70 % combined,
+  C901 = 0; runtime dependencies = 0.
 
 ## Completed
 1. [x] Artifact audit and `validate --zip`.
@@ -15,6 +16,6 @@
 7. [x] 0.16.1 correctness findings.
 
 ## Next
-- No active phase. Remaining work is SecInterp migration and upstream analyzer
-  refinements.
+- No active phase. Remaining: B2 scaffold recursion/`pyproject.toml.tmpl`
+  (0.17.0 feature), SecInterp migration and upstream analyzer refinements.
 - Resume with `/start-session`.

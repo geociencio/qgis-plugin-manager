@@ -10,6 +10,25 @@ system; see `memory_policy.md` for retention and promotion rules.
 
 ```yaml
 lessons:
+  - date: 2026-11-01
+    category: ARCHITECTURE
+    topic: JSON caches with per-target state must merge on save
+    lesson: >-
+      DeployManifest loaded only the active target and save() wrote that target
+      alone, so deploying profile B silently erased profile A's cache.
+    action: >-
+      Keep the full targets mapping in memory, update only the active key, and
+      test a two-target round trip before releasing.
+  - date: 2026-11-01
+    category: TESTING
+    topic: Pruning os.walk dirnames also hides cache dirs from the cleaner
+    lesson: >-
+      Filtering cache directories in the shared walker made _remove_cache_dirs
+      miss __pycache__ entirely; yielding the cache names before pruning fixed
+      the cleaner without traversing into them.
+    action: >-
+      Separate "nodes to delete" from "nodes to descend into" and test clean on
+      a project containing both project caches and a .venv.
   - date: 2026-10-25
     category: TOOLING
     topic: Portal security depends on analyzer extras and explicit scope
