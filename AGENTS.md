@@ -86,7 +86,7 @@ uv build && uvx twine check dist/*
 ### CLI / Template Separation (CRITICAL)
 The manager is a **CLI tool** that generates and manages QGIS plugins. It must keep two concerns strictly separated:
 
-1. **The CLI** (`src/qgis_manager/`): command parsing (click), dispatch, and business logic. No template content lives here.
+1. **The CLI** (`src/qgis_manager/`): command parsing (argparse) and stdlib console, dispatch, and business logic. No template content lives here.
 2. **Runtime templates** (`src/qgis_manager/templates/`): the files `init` renders for a new plugin (`default`, `processing`, `dockwidget`).
 3. **Domain blueprints**: project-owned mining skills live in `scaffold/mining/`;
    the QGIS pack is framework-only at `.agent/scaffold/qgis/`.
@@ -107,8 +107,8 @@ def create_plugin(name: str, template: str = "default"):
 ```
 
 ### CLI layering
-- `cli/` (click layer) must stay thin: parse args → dispatch to services.
-- Business logic lives in `core/`-style services, never in the click command handlers.
+- `cli/` (argparse + stdlib console layer) must stay thin: parse args → dispatch to services.
+- Business logic lives in `core/`-style services, never in the CLI command handlers.
 
 ---
 
@@ -220,7 +220,7 @@ Policy: `.agent-state/memory/memory_policy.md`. Lessons older than 90 days that 
 
 1. **NEVER** hard-code template content in the CLI — runtime templates belong in
    `src/qgis_manager/templates/`; domain blueprints live in `scaffold/` or `.agent/`.
-2. **ALWAYS** keep the click layer thin (parse → dispatch).
+2. **ALWAYS** keep the CLI layer thin (parse → dispatch).
 3. **USE** type annotations and Google docstrings everywhere.
 4. **RUN** `ruff check . && mypy src && pytest` before committing.
 5. **PRESERVE** the CLI/template separation.

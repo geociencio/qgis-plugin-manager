@@ -1,7 +1,7 @@
 # qgis-manage
 
 ```text
-qgis-manage v0.16.0
+qgis-manage v0.16.1
 QGIS Plugin Manager - Modern CLI for plugin development.
 
 Usage: qgis-manage [-h] [-v] [--verbose] [--log-file LOG_FILE] SUBCOMMAND ...

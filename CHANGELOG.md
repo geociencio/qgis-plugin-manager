@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.1] - 2026-11-01
+
+### Fixed
+- **Deploy manifest**: `save()` now preserves other profile/QGIS targets instead of overwriting them.
+- **Clean**: cache/compiled-output scans prune `.venv`, `venv`, `env`, `libs`, `.git`, `node_modules`, `build` and `dist`.
+- **Bump**: accepts SemVer prerelease suffixes and extra numeric components.
+- **Artifact validation**: accepts a README file without extension.
+- **Structure validation**: detects imported and multiline `classFactory` via AST, with a regex fallback.
+- **Compile**: skips fresh `.qrc` outputs and uses the English `📚 Compiling` label.
+
 ## [0.16.0] - 2026-11-01
 
 ### Added

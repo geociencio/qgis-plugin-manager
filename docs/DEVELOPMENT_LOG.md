@@ -1,5 +1,14 @@
 # Development Log: qgis-manage
 
+## [2026-11-01] Release v0.16.1 — Correctness Patch
+- **Achievement**: Fixed the manifest, clean, SemVer, README/classFactory and .qrc findings.
+- **Changes**:
+    - Multi-target manifest persistence and pruned clean traversal.
+    - SemVer suffix parsing; AST classFactory detection; fresh .qrc skip.
+    - English compile label and regression tests.
+- **Quality**: 426 tests, 96.11 % statements, 90.33 % branches, 94.70 % combined, C901 = 0.
+- **Release**: `v0.16.1` published on GitHub and PyPI.
+
 ## [2026-11-01] Release v0.16.0 — Zero Runtime Dependencies
 - **Achievement**: Removed `click` and shipped a stdlib-only CLI.
 - **Changes**:
