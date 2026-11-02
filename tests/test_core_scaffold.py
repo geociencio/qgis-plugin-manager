@@ -160,3 +160,20 @@ class TestCoreScaffold(unittest.TestCase):
 
             self.assertTrue((root / "a.py").exists())
             self.assertTrue(any("keep a.py" in action for action in actions))
+
+    def test_clean_protects_virtualenv(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            venv_cache = root / ".venv" / "lib" / "__pycache__"
+            venv_cache.mkdir(parents=True)
+            (venv_cache / "lib.pyc").write_text("x", encoding="utf-8")
+            project_cache = root / "__pycache__"
+            project_cache.mkdir()
+            (root / "script.pyc").write_text("x", encoding="utf-8")
+
+            clean_artifacts(root)
+
+            self.assertTrue(venv_cache.exists())
+            self.assertTrue((venv_cache / "lib.pyc").exists())
+            self.assertFalse(project_cache.exists())
+            self.assertFalse((root / "script.pyc").exists())

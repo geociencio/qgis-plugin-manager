@@ -129,3 +129,26 @@ def test_manifest_record_skips_missing_target(tmp_path: Path) -> None:
     manifest = manifest_module.DeployManifest(project, tmp_path / "plugins")
     manifest.record(project / "plugin.py", tmp_path / "missing.py")
     assert manifest.entries == {}
+
+
+def test_manifest_preserves_multiple_targets(tmp_path: Path) -> None:
+    project = _project(tmp_path)
+    target_a = tmp_path / "plugins-a"
+    target_b = tmp_path / "plugins-b"
+    target_a.mkdir()
+    target_b.mkdir()
+    (target_a / "a.txt").write_text("a", encoding="utf-8")
+    (target_b / "b.txt").write_text("b", encoding="utf-8")
+
+    first = manifest_module.DeployManifest(project, target_a / "demo_plugin")
+    first.record(project / "plugin.py", target_a / "a.txt")
+    first.save()
+
+    second = manifest_module.DeployManifest(project, target_b / "demo_plugin")
+    second.record(project / "plugin.py", target_b / "b.txt")
+    second.save()
+
+    reloaded = manifest_module.DeployManifest(project, target_a / "demo_plugin")
+    assert "plugin.py" in reloaded.entries
+    data = json.loads(first.path.read_text(encoding="utf-8"))
+    assert len(data["targets"]) == 2

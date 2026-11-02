@@ -202,3 +202,15 @@ def test_qgis4_and_config_warnings(tmp_path: Path) -> None:
     assert "ARTIFACT_QGIS4" in warnings
     assert "supportsQt6" in warnings
     assert any(check.id == "ARTIFACT_CONFIG" for check in result.checks)
+
+
+def test_readme_without_extension_is_accepted(tmp_path: Path) -> None:
+    result = validate_artifact(
+        _make_zip(
+            tmp_path,
+            readme=False,
+            extra={"demo/README": b"# Demo\n"},
+            icon=_png(),
+        )
+    )
+    assert not any("ARTIFACT_README" in warning for warning in result.warnings)

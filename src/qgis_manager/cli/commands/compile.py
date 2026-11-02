@@ -52,7 +52,7 @@ class CompileCommand(BaseCommand):
             total_steps = count_compile_steps(root, selected)
 
             with click.progressbar(
-                length=total_steps, label="📚 Compilando", show_pos=True
+                length=total_steps, label="📚 Compiling", show_pos=True
             ) as bar:
                 compiled = compile_qt_resources(
                     root,

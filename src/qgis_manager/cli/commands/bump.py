@@ -2,6 +2,7 @@
 
 import argparse
 import logging
+import re
 from pathlib import Path
 
 from ...metadata import (
@@ -97,17 +98,14 @@ class BumpCommand(BaseCommand):
             click.echo(click.style("❌ Could not determine current version.", fg="red"))
             return 1
 
-        parts = current.split(".")
-        if len(parts) < 3:
-            # Pad with zeros if needed
-            parts = (parts + ["0", "0", "0"])[:3]
-
-        try:
-            major, minor, patch = map(int, parts)
-        except ValueError as e:
-            logger.error(f"Invalid version format '{current}': {e}")
+        match = re.match(r"^(\d+)(?:\.(\d+))?(?:\.(\d+))?", current.strip())
+        if match is None:
+            logger.error(f"Invalid version format '{current}'")
             click.echo(click.style(f"❌ Invalid version format: {current}", fg="red"))
             return 1
+        major = int(match.group(1))
+        minor = int(match.group(2) or 0)
+        patch = int(match.group(3) or 0)
 
         if part == "major":
             major += 1

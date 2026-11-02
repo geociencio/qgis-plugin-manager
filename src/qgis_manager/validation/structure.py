@@ -1,9 +1,27 @@
 """Physical project-structure validation."""
 
+import ast
+import re
 from pathlib import Path
 from typing import Any
 
 from .result import ValidationResult
+
+
+def _has_class_factory(content: str) -> bool:
+    """Return True when classFactory is defined or imported."""
+    try:
+        tree = ast.parse(content)
+    except SyntaxError:
+        return bool(re.search(r"(?m)^\s*(?:async\s+)?def\s+classFactory\s*\(", content))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+            if node.name == "classFactory":
+                return True
+        if isinstance(node, ast.ImportFrom):
+            if any(alias.name == "classFactory" for alias in node.names):
+                return True
+    return False
 
 
 def validate_project_structure(
@@ -29,7 +47,7 @@ def validate_project_structure(
         # Check for classFactory
         try:
             content = init_py.read_text(encoding="utf-8")
-            if "def classFactory" not in content:
+            if not _has_class_factory(content):
                 errors.append(
                     "Critical function missing in '__init__.py': 'def classFactory'"
                 )

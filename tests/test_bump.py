@@ -180,6 +180,19 @@ class TestBumpCommand(unittest.TestCase):
         self.assertEqual(exit_code, 1)
         self.assertIn("Failed to update version", output)
 
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_bump_prerelease_and_extra_components(self, mock_find):
+        for version, part, expected in (
+            ("1.0.0-rc1", "patch", "1.0.1"),
+            ("0.2.0-beta", "minor", "0.3.0"),
+            ("1.0.0.1", "patch", "1.0.1"),
+        ):
+            root = self._make_project(version)
+            mock_find.return_value = root
+            exit_code, _, _ = self._invoke(["bump", part])
+            self.assertEqual(exit_code, 0, version)
+            self.assertEqual(get_plugin_metadata(root)["version"], expected, version)
+
 
 if __name__ == "__main__":
     unittest.main()

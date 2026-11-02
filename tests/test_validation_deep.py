@@ -3,6 +3,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from qgis_manager.validation import validate_metadata, validate_project_structure
 
@@ -86,9 +87,7 @@ class TestStructuralValidation(unittest.TestCase):
 
     def test_unreadable_init_py(self):
         (self.test_dir / "__init__.py").write_text("pass\n", encoding="utf-8")
-        with unittest.mock.patch(
-            "pathlib.Path.read_text", side_effect=OSError("denied")
-        ):
+        with patch("pathlib.Path.read_text", side_effect=OSError("denied")):
             result = validate_project_structure(self.test_dir, self.metadata)
         self.assertFalse(result.is_valid)
         self.assertIn("Could not read '__init__.py'", result.errors)
@@ -100,6 +99,23 @@ class TestStructuralValidation(unittest.TestCase):
         (self.test_dir / "icon.png").touch()
         result = validate_project_structure(self.test_dir, self.metadata)
         self.assertTrue(any("very few Python files" in w for w in result.warnings))
+
+    def test_imported_class_factory_is_valid(self):
+        (self.test_dir / "__init__.py").write_text(
+            "from .main import classFactory\n", encoding="utf-8"
+        )
+        (self.test_dir / "icon.png").touch()
+        result = validate_project_structure(self.test_dir, self.metadata)
+        self.assertTrue(result.is_valid, result.errors)
+
+    def test_multiline_class_factory_is_valid(self):
+        (self.test_dir / "__init__.py").write_text(
+            "def classFactory(\n    iface,\n):\n    return None\n",
+            encoding="utf-8",
+        )
+        (self.test_dir / "icon.png").touch()
+        result = validate_project_structure(self.test_dir, self.metadata)
+        self.assertTrue(result.is_valid, result.errors)
 
 
 if __name__ == "__main__":

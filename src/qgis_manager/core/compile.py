@@ -437,6 +437,10 @@ def _compile_single_qrc(
     """Compile a single .qrc file and patch the generated module."""
     py_file = qrc.with_suffix(".py")
     rel_qrc = qrc.relative_to(context.project_root)
+    events = [f"START:Resource {rel_qrc.name}", f"DONE:Resource {rel_qrc.name}"]
+    if py_file.exists() and not _is_stale(qrc, py_file):
+        logger.debug(f"  ⏭️  {rel_qrc.name} up to date")
+        return True, events
     logger.debug(f"🔨 Compiling resource: {rel_qrc} -> {py_file.name} using {rcc_tool}")
     temp = py_file.with_name(f".{py_file.name}.tmp")
     try:
@@ -448,7 +452,7 @@ def _compile_single_qrc(
             logger.debug("  ✅ Done.")
     finally:
         temp.unlink(missing_ok=True)
-    return ok, [f"START:Resource {rel_qrc.name}", f"DONE:Resource {rel_qrc.name}"]
+    return ok, events
 
 
 def _compile_qrc_files(

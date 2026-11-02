@@ -290,7 +290,7 @@ def _check_icon(
 
 def _check_readme(result: ArtifactResult, names: list[str], root: str) -> None:
     prefix = f"{root}/README"
-    if not any(name.startswith(prefix) and len(name) > len(prefix) for name in names):
+    if not any(name == prefix or name.startswith(f"{prefix}.") for name in names):
         result.add("ARTIFACT_README", "warning", "README is missing")
 
 

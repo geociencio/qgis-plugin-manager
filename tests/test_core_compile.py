@@ -387,3 +387,20 @@ class TestCoreCompile(unittest.TestCase):
             self.assertTrue(compile_qt_resources(root, res_type="resources"))
 
             self.assertEqual(py_file.stat().st_mtime_ns, before)
+
+    @patch("qgis_manager.core.compile.subprocess.run")
+    @patch("qgis_manager.core.compile.get_rcc_tool", return_value="pyside6-rcc")
+    def test_compile_qrc_skips_fresh_output(self, mock_tool, mock_run):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            qrc = root / "resources.qrc"
+            qrc.touch()
+            py_file = root / "resources.py"
+            py_file.write_text("same", encoding="utf-8")
+            future = py_file.stat().st_mtime + 100
+            import os
+
+            os.utime(py_file, (future, future))
+
+            self.assertTrue(compile_qt_resources(root, res_type="resources"))
+            mock_run.assert_not_called()

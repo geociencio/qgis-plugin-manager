@@ -40,6 +40,7 @@ class DeployManifest:
         self.target_path = target_path
         self.path = project_root / _MANIFEST_DIR / _MANIFEST_NAME
         self._target_key = str(target_path.resolve())
+        self._all_targets: dict[str, dict[str, Any]] = {}
         self.entries: dict[str, dict[str, Any]] = {}
         self._load()
 
@@ -53,7 +54,10 @@ class DeployManifest:
         targets = data.get("targets")
         if not isinstance(targets, dict):
             return
-        entries = targets.get(self._target_key)
+        self._all_targets = {
+            str(key): value for key, value in targets.items() if isinstance(value, dict)
+        }
+        entries = self._all_targets.get(self._target_key)
         if isinstance(entries, dict):
             self.entries = {
                 key: value for key, value in entries.items() if isinstance(value, dict)
@@ -148,9 +152,10 @@ class DeployManifest:
 
     def save(self) -> None:
         """Persist the manifest atomically; failures are non-fatal."""
+        self._all_targets[self._target_key] = self.entries
         payload = {
             "version": _MANIFEST_VERSION,
-            "targets": {self._target_key: self.entries},
+            "targets": self._all_targets,
         }
         try:
             self.path.parent.mkdir(parents=True, exist_ok=True)
