@@ -1,11 +1,11 @@
 {
     "schema_version": 1,
-    "generated_at": "2026-11-01T21:45:20+00:00",
+    "generated_at": "2026-11-02T03:30:46+00:00",
     "summary": {
-        "test_count": 419,
-        "tests_ok": 419,
-        "coverage_percent": 94.82,
-        "quality_score_latest": 94.82,
+        "test_count": 426,
+        "tests_ok": 426,
+        "coverage_percent": 94.7,
+        "quality_score_latest": 94.7,
         "maintainability_score": null,
         "security_score": null,
         "cyclomatic_complexity_gate": "PASS",
@@ -17,8 +17,8 @@
     "last_session": {
         "date": "2026-10-26",
         "topic": "portal_security_release",
-        "tests_ok": 419,
-        "quality_score": 94.82,
+        "tests_ok": 426,
+        "quality_score": 94.7,
         "task_completion_rate": 1.0,
         "retries": 0,
         "stop_conditions_triggered": 0,
@@ -62,21 +62,21 @@
     ],
     "ground_truth_sources": {
         "pytest": {
-            "date": "2026-11-01",
+            "date": "2026-11-02",
             "command": "pytest -q --cov=qgis_manager",
             "result": "PASS"
         },
         "coverage": {
-            "date": "2026-11-01",
-            "percent": 94.82
+            "date": "2026-11-02",
+            "percent": 94.7
         },
         "ruff": {
-            "date": "2026-11-01",
+            "date": "2026-11-02",
             "command": "ruff check .",
             "result": "PASS"
         },
         "mypy": {
-            "date": "2026-11-01",
+            "date": "2026-11-02",
             "command": "mypy src",
             "result": "PASS"
         }
