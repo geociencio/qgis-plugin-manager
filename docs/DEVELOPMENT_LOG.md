@@ -1,5 +1,14 @@
 # Development Log: qgis-manage
 
+## [2026-11-18] Close Session — Security and Correctness
+- **Achievement**: Closed the 0.16.2 security/correctness cycle.
+- **Changes**:
+    - AST hook inspection, nested deploy guard, atomic docs swap.
+    - Absolute dclean profiles, ordered compile callbacks, sorted ZIPs.
+    - Release 0.16.2 with PyPI hashes verified.
+- **Quality**: 434 tests, 96.20 % statements, 90.39 % branches, 94.79 % combined, C901 = 0.
+- **Maintenance**: [session_2026-11-18_security_correctness.md](maintenance/session_2026-11-18_security_correctness.md).
+
 ## [2026-11-18] Release v0.16.2 — Security and Correctness
 - **Achievement**: Closed the critical findings from the manual code-smell review.
 - **Changes**:

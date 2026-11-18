@@ -10,6 +10,33 @@ system; see `memory_policy.md` for retention and promotion rules.
 
 ```yaml
 lessons:
+  - date: 2026-11-18
+    category: ARCHITECTURE
+    topic: Discovery commands must not import project code
+    lesson: >-
+      `hooks list` imported plugin_hooks.py just to inspect function names,
+      executing arbitrary project code without --trust.
+    action: >-
+      Use ast.parse for discovery; reserve dynamic import for explicit test/run
+      paths and verify with a marker file that listing does not execute.
+  - date: 2026-11-18
+    category: TESTING
+    topic: Destructive swaps need failure tests after the move starts
+    lesson: >-
+      Existing docs tests only covered Sphinx failure before deletion; a move
+      failure after removing help/html would still lose the previous docs.
+    action: >-
+      Keep a temporary backup and test a failing shutil.move, not only a failing
+      Sphinx process.
+  - date: 2026-11-18
+    category: TECHNICAL
+    topic: New guards can trip the C901 gate late
+    lesson: >-
+      Adding the nested-target and docs-backup branches raised compile_docs and
+      plan_deploy above C901 10, discovered only in the final gate.
+    action: >-
+      Extract helpers before running the full gate or check C901 on edited
+      modules immediately after adding branches.
   - date: 2026-11-01
     category: ARCHITECTURE
     topic: JSON caches with per-target state must merge on save

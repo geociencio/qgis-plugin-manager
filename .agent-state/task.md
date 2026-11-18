@@ -1,8 +1,8 @@
-# Release: v0.16.2 Security and Correctness
+# Session Closed: Security and Correctness (0.16.2)
 
 ## Status
-- **Phase**: 0.16.2 prepared locally (2026-11-18); push/tag/publication pending.
-- **Release**: 0.16.2 security/correctness patch; 0.16.0/0.16.1 released.
+- **Phase**: closed (2026-11-18)
+- **Release**: 0.16.2 published on GitHub and PyPI.
 - **Quality**: 434 tests, 96.20 % statements, 90.39 % branches, 94.79 % combined,
   C901 = 0; runtime dependencies = 0.
 
@@ -17,6 +17,7 @@
 8. [x] 0.16.2 security/correctness findings.
 
 ## Next
-- No active phase. Remaining: B2 scaffold recursion/`pyproject.toml.tmpl`
-  (0.17.0 feature), SecInterp migration and upstream analyzer refinements.
+- No active phase. Next: 0.17.0 refactor plan (PathPolicy/ProjectWalker and
+  workflows), then 0.17.x performance.
+- Cross-repo: SecInterp migration and upstream analyzer refinements.
 - Resume with `/start-session`.
