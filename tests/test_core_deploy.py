@@ -356,3 +356,45 @@ def test_resolve_profile_dir_rejects_root() -> None:
         assert "filesystem root" in str(exc)
     else:
         raise AssertionError("filesystem root must be rejected")
+
+
+def test_deploy_workflow_prepares_and_executes(tmp_path: Path) -> None:
+    from typing import Any
+
+    from qgis_manager.core.deploy import DeployRequest, DeployWorkflow
+
+    project = tmp_path / "project"
+    project.mkdir()
+    target = tmp_path / "plugins"
+    target.mkdir()
+    calls: list[dict[str, Any]] = []
+
+    def fake_deploy(*args: Any, **kwargs: Any) -> None:
+        calls.append({"args": args, "kwargs": kwargs})
+
+    workflow = DeployWorkflow(
+        metadata_reader=lambda _root: {"name": "Demo", "slug": "demo"},
+        deploy=fake_deploy,
+    )
+    plan = workflow.prepare(
+        DeployRequest(
+            project_root=project,
+            target_dir=target,
+            profile="test",
+            qgis_version=4,
+            backup=False,
+            max_backups=7,
+            use_manifest=False,
+        )
+    )
+
+    result = workflow.execute(plan)
+
+    assert plan.slug == "demo"
+    assert plan.target_path == target / "demo"
+    assert result == type(result)(target_path=target / "demo", slug="demo")
+    assert calls[0]["kwargs"]["dest_dir"] == target
+    assert calls[0]["kwargs"]["no_backup"] is True
+    assert calls[0]["kwargs"]["qgis_version"] == 4
+    assert calls[0]["kwargs"]["max_backups"] == 7
+    assert calls[0]["kwargs"]["use_manifest"] is False

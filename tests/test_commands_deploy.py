@@ -212,7 +212,7 @@ class TestDeployCommand(_CommandTestBase):
         self._patch_common(mock_find, mock_load_config, mock_load_project)
         mock_meta.return_value = {"name": "Test", "slug": "test"}
         mock_dir.return_value = Path(tempfile.mkdtemp())
-        mock_confirm.side_effect = [True, False]
+        mock_confirm.return_value = False
 
         exit_code, _, _ = self._invoke(["deploy", "--purge-backups"])
 

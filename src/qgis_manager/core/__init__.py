@@ -46,6 +46,10 @@ from .compile import (
     verify_resource_patch,
 )
 from .deploy import (
+    DeployPlan,
+    DeployRequest,
+    DeployResult,
+    DeployWorkflow,
     deploy_plugin,
     plan_deploy,
     purge_backups,
@@ -69,6 +73,10 @@ __all__ = [
     "compile_ui_files",
     "count_compile_steps",
     "create_plugin_package",
+    "DeployPlan",
+    "DeployRequest",
+    "DeployResult",
+    "DeployWorkflow",
     "deploy_plugin",
     "plan_deploy",
     "get_git_info",

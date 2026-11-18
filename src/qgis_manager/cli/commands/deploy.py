@@ -6,6 +6,9 @@ from typing import Any
 
 from ...config import Settings, load_config, load_project_config
 from ...core import (
+    DeployPlan,
+    DeployRequest,
+    DeployWorkflow,
     compile_qt_resources,
     count_compile_steps,
     deploy_plugin,
@@ -14,7 +17,6 @@ from ...core import (
 )
 from ...hooks import run_hook
 from ...metadata import get_plugin_metadata
-from ...naming import validate_slug
 from .. import console as click
 from ..base import BaseCommand
 from ..progress import make_compile_callback
@@ -95,83 +97,117 @@ class DeployCommand(BaseCommand):
             return 1
         root = self.project_root(args)
         settings = load_project_config(root, load_config())
-
         target_profile = args.profile or settings.profile
         qgis_version = args.qgis_version or settings.qgis_version
-        use_backup = settings.backup if not args.no_backup else False
-
-        metadata = get_plugin_metadata(root)
-        slug = validate_slug(str(metadata["slug"]), source="plugin metadata")
-
+        use_backup = settings.backup and not args.no_backup
         target_dir, absolute_profile = self._determine_target_dir(
             args, target_profile, qgis_version
         )
+        workflow = DeployWorkflow(
+            metadata_reader=get_plugin_metadata,
+            deploy=deploy_plugin,
+        )
+        plan = self._prepare_plan(
+            workflow,
+            root,
+            target_dir,
+            target_profile,
+            qgis_version,
+            use_backup,
+            settings,
+            args,
+        )
         if args.dry_run:
-            return self._dry_run(
-                root,
-                target_dir,
-                slug,
+            return self._dry_run(plan, settings, args)
+        return self._execute_plan(workflow, plan, settings, args)
+
+    def _execute_plan(
+        self,
+        workflow: DeployWorkflow,
+        plan: DeployPlan,
+        settings: Settings,
+        args: argparse.Namespace,
+    ) -> int:
+        target_dir = plan.request.target_dir
+        target_profile = plan.request.profile
+        if args.purge_backups and not self._purge_backups(
+            target_dir, plan.slug, target_profile, args.yes
+        ):
+            return 0
+        resolved = self._ensure_target_dir(
+            target_dir,
+            bool(args.profile and Path(args.profile).is_absolute()),
+            args.yes,
+        )
+        if resolved is None:
+            return 1
+        if resolved != target_dir:
+            plan = self._prepare_plan(
+                workflow,
+                plan.request.project_root,
+                resolved,
                 target_profile,
-                qgis_version,
+                plan.request.qgis_version,
+                plan.request.backup,
                 settings,
                 args,
             )
-        if args.purge_backups and not self._purge_backups(
-            target_dir, slug, target_profile, args.yes
-        ):
-            return 0
-
-        resolved_target = self._ensure_target_dir(
-            target_dir, absolute_profile, args.yes
-        )
-        if resolved_target is None:
-            return 1
-        target_dir = resolved_target
-        target_path = target_dir / slug
-
-        hook_ctx = self._hook_context(
-            root, metadata, target_profile, qgis_version, target_path, args
-        )
+        hook_ctx = self._hook_context(plan, args)
         if not self._run_hook(
             "pre_deploy",
             settings.hooks.get("pre_deploy"),
-            root,
+            plan.request.project_root,
             hook_ctx,
             args,
             required=True,
         ):
             return 1
-
         if args.interactive and not click.confirm(
-            f"🚀 Deploy to profile '{target_profile}' (QGIS {qgis_version})?"
+            f"🚀 Deploy to profile '{target_profile}' "
+            f"(QGIS {plan.request.qgis_version})?"
         ):
             click.echo("Aborted by user.")
             return 1
-
-        if not self._compile_if_needed(root, args, settings):
+        if not self._compile_if_needed(plan.request.project_root, args, settings):
             return 1
-
-        click.echo(f"🚀 Deploying '{metadata['name']}' ({slug}) to {target_path}")
-        deploy_plugin(
-            root,
-            dest_dir=target_dir,
-            no_backup=not use_backup,
-            profile=target_profile,
-            qgis_version=qgis_version,
-            max_backups=settings.max_backups,
-            use_manifest=not args.no_manifest,
+        click.echo(
+            f"🚀 Deploying '{plan.metadata['name']}' ({plan.slug}) to "
+            f"{plan.target_path}"
         )
-
+        workflow.execute(plan)
         self._run_hook(
             "post_deploy",
             settings.hooks.get("post_deploy"),
-            root,
+            plan.request.project_root,
             hook_ctx,
             args,
             required=False,
         )
         click.echo(click.style("✨ Deployment complete!", fg="green", bold=True))
         return 0
+
+    @staticmethod
+    def _prepare_plan(
+        workflow: DeployWorkflow,
+        root: Path,
+        target_dir: Path,
+        profile: str,
+        qgis_version: int,
+        backup: bool,
+        settings: Settings,
+        args: argparse.Namespace,
+    ) -> DeployPlan:
+        return workflow.prepare(
+            DeployRequest(
+                project_root=root,
+                target_dir=target_dir,
+                profile=profile,
+                qgis_version=qgis_version,
+                backup=backup,
+                max_backups=settings.max_backups,
+                use_manifest=not args.no_manifest,
+            )
+        )
 
     def _determine_target_dir(
         self, args: argparse.Namespace, profile: str, qgis_version: int
@@ -183,23 +219,23 @@ class DeployCommand(BaseCommand):
 
     def _dry_run(
         self,
-        root: Path,
-        target_dir: Path,
-        slug: str,
-        profile: str,
-        qgis_version: int,
+        plan: DeployPlan,
         settings: Settings,
         args: argparse.Namespace,
     ) -> int:
-        target_path = target_dir / slug
-        plan = plan_deploy(root, target_path, no_backup=not settings.backup)
+        root = plan.request.project_root
+        target_dir = plan.request.target_dir
+        target_path = plan.target_path
         backups = (
-            len(list(target_dir.glob(f"{slug}.bak.*"))) if target_dir.is_dir() else 0
+            len(list(target_dir.glob(f"{plan.slug}.bak.*")))
+            if target_dir.is_dir()
+            else 0
         )
-        click.echo(f"🧪 Dry run: {slug} -> {target_path}")
-        click.echo(f"  Files to copy: {plan['copy']}")
-        click.echo(f"  Files to delete: {plan['delete']}")
-        click.echo(f"  Backup: {'yes' if plan['backup'] else 'no'}")
+        counts = plan_deploy(root, target_path, no_backup=not settings.backup)
+        click.echo(f"🧪 Dry run: {plan.slug} -> {target_path}")
+        click.echo(f"  Files to copy: {counts['copy']}")
+        click.echo(f"  Files to delete: {counts['delete']}")
+        click.echo(f"  Backup: {'yes' if counts['backup'] else 'no'}")
         click.echo(f"  Existing backups: {backups}")
         if args.purge_backups:
             click.echo(f"  Backups to purge: {backups}")
@@ -217,12 +253,13 @@ class DeployCommand(BaseCommand):
         self, target_dir: Path, slug: str, profile: str, assume_yes: bool = False
     ) -> bool:
         msg = f"🗑️  Purge all backups for '{slug}' in profile '{profile}'?"
-        if assume_yes or click.confirm(msg):
-            from ...core import purge_backups
+        if not assume_yes and not click.confirm(msg):
+            return False
+        from ...core import purge_backups
 
-            removed = purge_backups(target_dir, slug)
-            click.echo(f"✨ Backups purged ({removed}).")
-        return True if assume_yes else click.confirm("Proceed with deployment?")
+        removed = purge_backups(target_dir, slug)
+        click.echo(f"✨ Backups purged ({removed}).")
+        return True
 
     def _ensure_target_dir(
         self,
@@ -251,20 +288,14 @@ class DeployCommand(BaseCommand):
         return Path(manual_path)
 
     def _hook_context(
-        self,
-        root: Path,
-        metadata: dict[str, Any],
-        profile: str,
-        qgis_version: int,
-        target_path: Path,
-        args: argparse.Namespace,
+        self, plan: DeployPlan, args: argparse.Namespace
     ) -> dict[str, Any]:
         return {
-            "project_root": root,
-            "metadata": metadata,
-            "profile": profile,
-            "qgis_version": qgis_version,
-            "target_path": target_path,
+            "project_root": plan.request.project_root,
+            "metadata": plan.metadata,
+            "profile": plan.request.profile,
+            "qgis_version": plan.request.qgis_version,
+            "target_path": plan.target_path,
             "args": vars(args),
         }
 

@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import sys
 from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -280,6 +281,92 @@ def _count_destination_changes(src: Path, dst: Path, matcher: IgnoreMatcher) -> 
         elif not source_item.exists() and not matcher.should_exclude(source_item):
             count += 1
     return count
+
+
+@dataclass(frozen=True)
+class DeployRequest:
+    """Inputs required to prepare a deployment."""
+
+    project_root: Path
+    target_dir: Path
+    profile: str
+    qgis_version: int
+    backup: bool = True
+    max_backups: int = 3
+    use_manifest: bool = True
+
+
+@dataclass(frozen=True)
+class DeployPlan:
+    """Validated deployment target and metadata."""
+
+    request: DeployRequest
+    metadata: dict[str, Any]
+    slug: str
+    target_path: Path
+
+
+@dataclass(frozen=True)
+class DeployResult:
+    """Outcome of a successful deployment."""
+
+    target_path: Path
+    slug: str
+
+
+def prepare_deploy(
+    request: DeployRequest,
+    metadata_reader: Callable[[Path], dict[str, Any]] = get_plugin_metadata,
+) -> DeployPlan:
+    """Validate metadata and the target path without mutating anything."""
+    metadata = metadata_reader(request.project_root)
+    slug = validate_slug(str(metadata["slug"]), source="plugin metadata")
+    target_path = request.target_dir / slug
+    if target_path.is_symlink():
+        raise ValueError(f"Refusing to deploy to symlink target: {target_path}")
+    if target_path.parent != request.target_dir:
+        raise ValueError(
+            f"Refusing to deploy outside the plugin directory: {target_path}"
+        )
+    return DeployPlan(
+        request=request,
+        metadata=metadata,
+        slug=slug,
+        target_path=target_path,
+    )
+
+
+class DeployWorkflow:
+    """Prepare and execute a deployment with injectable boundaries."""
+
+    def __init__(
+        self,
+        *,
+        metadata_reader: Callable[[Path], dict[str, Any]] = get_plugin_metadata,
+        deploy: Callable[..., None] | None = None,
+    ) -> None:
+        self.metadata_reader = metadata_reader
+        self.deploy = deploy or deploy_plugin
+
+    def prepare(self, request: DeployRequest) -> DeployPlan:
+        """Prepare a deployment plan."""
+        return prepare_deploy(request, self.metadata_reader)
+
+    def execute(
+        self, plan: DeployPlan, callback: Callable[[int], Any] | None = None
+    ) -> DeployResult:
+        """Run the deployment described by ``plan``."""
+        self.deploy(
+            plan.request.project_root,
+            dest_dir=plan.request.target_dir,
+            no_backup=not plan.request.backup,
+            profile=plan.request.profile,
+            qgis_version=plan.request.qgis_version,
+            callback=callback,
+            max_backups=plan.request.max_backups,
+            use_manifest=plan.request.use_manifest,
+        )
+        return DeployResult(target_path=plan.target_path, slug=plan.slug)
 
 
 def plan_deploy(
