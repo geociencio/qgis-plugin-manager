@@ -2,7 +2,7 @@
 
 **Date**: 2026-11-18
 **Parent plan**: `docs/plans/v0.17.0_refactor_plan.md`
-**Status**: B1–B6 implemented; B7–B8 pending.
+**Status**: B1–B7 implemented; B8 pending.
 
 Each file is the plan and execution procedure for one commit in phase B. The
 implementation and state commits are listed so the history can be audited.
@@ -15,7 +15,7 @@ implementation and state commits are listed so the history can be audited.
 | B4 | Done | `50594aa` | `2388191` | `B4_console_rename.md` |
 | B5 | Done | `156e533` | `af84b98` | `B5_error_boundary.md` |
 | B6 | Done | `a405927` | `1b8cab7` | `B6_atomic_toml.md` |
-| B7 | Planned | — | — | `B7_external_inputs.md` |
+| B7 | Done | `6177d44` | `e5de15e` | `B7_external_inputs.md` |
 | B8 | Planned | — | — | `B8_release.md` |
 
 ## Execution rules

@@ -1,7 +1,8 @@
 # B7 — External input validation
 
-**Status**: Planned
-**Implementation commit**: pending
+**Status**: Done
+**Implementation commit**: `6177d44 fix(security): validate external inputs`
+**State commit**: `e5de15e chore(agent): record B7 input hardening`
 **Parent plan**: `../v0.17.0_refactor_plan.md`
 
 ## Goal
@@ -49,3 +50,25 @@ selection, ZIP inspection, and analyzer process control.
 - `init --template ../../...`.
 - ZIP with oversized metadata/icon.
 - Analyzer timeout and single availability probe.
+
+## Execution result
+
+- `is_valid_requirement()` rejects option-shaped, newline/NUL and underspecified
+  requirement strings; valid names, extras, specifiers and markers are accepted.
+- `install_external_libs()` validates every dependency **before** probing `uv`,
+  rejects absolute/`..` targets, resolves the target inside the project, and
+  builds `pip/uv install --target <dir> -- <deps>`.
+- `_VALID_TEMPLATES` plus resolved-parent checks reject traversal and unknown
+  templates.
+- ZIP reads use `_read_member()` with a 5 MB member limit; total uncompressed
+  size is capped at 100 MB before metadata/icon/license reads.
+- Analyzer has a 300 s default timeout, returns 124 on timeout/start failure, and
+  caches the availability probe. `tests/conftest.py` resets it per test.
+- New tests: unsafe dependency, escaping target, separator, template traversal,
+  oversized ZIP metadata, analyzer timeout and cache.
+
+**Result**: 456 tests, 96.05 % statements, 90.08 % branches, 94.63 % combined;
+C901 = 0.
+
+**Files**: `dependencies.py`, `core/scaffold.py`, `validation/artifact.py`,
+`cli/analyzer.py`, `tests/conftest.py`, and the corresponding test modules.
