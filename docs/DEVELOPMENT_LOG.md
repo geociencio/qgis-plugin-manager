@@ -1,5 +1,13 @@
 # Development Log: qgis-manage
 
+## [2026-11-18] B6 — Atomic TOML Updates
+- **Achievement**: Made pyproject version updates atomic and quote-aware.
+- **Changes**:
+    - Extracted `atomic.write_text_atomic`; metadata re-exports it.
+    - `set_project_version` supports `'...'` and `"..."` and preserves comments.
+    - Failure test confirms the original file survives.
+- **Quality**: 449 tests, 96.18 % statements, 90.45 % branches, 94.82 % combined.
+
 ## [2026-11-18] B5 — Typed Error Boundary
 - **Achievement**: Separated expected CLI errors from unexpected bugs.
 - **Changes**:
