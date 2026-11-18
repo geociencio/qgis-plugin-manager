@@ -11,6 +11,8 @@ from pathlib import Path, PurePosixPath
 from .fields import validate_version
 
 _MAX_SIZE_MB = 25.0
+_MAX_MEMBER_BYTES = 5 * 1024 * 1024
+_MAX_TOTAL_UNCOMPRESSED = 100 * 1024 * 1024
 _PROHIBITED_BINARIES = (".so", ".dll", ".exe", ".dylib", ".pyd", ".pyc", ".pyo")
 _DEV_DIRS = {
     ".git",
@@ -95,11 +97,24 @@ class ArtifactResult:
         }
 
 
-def _read_metadata(zf: zipfile.ZipFile, root: str) -> dict[str, str] | None:
+def _read_member(zf: zipfile.ZipFile, name: str) -> bytes | None:
+    """Read a ZIP member only when its declared size is bounded."""
     try:
-        raw = zf.read(f"{root}/metadata.txt")
+        info = zf.getinfo(name)
+    except KeyError:
+        return None
+    if info.file_size > _MAX_MEMBER_BYTES:
+        return None
+    return zf.read(name)
+
+
+def _read_metadata(zf: zipfile.ZipFile, root: str) -> dict[str, str] | None:
+    raw = _read_member(zf, f"{root}/metadata.txt")
+    if raw is None:
+        return None
+    try:
         text = raw.decode("utf-8")
-    except (KeyError, UnicodeDecodeError):
+    except UnicodeDecodeError:
         return None
     parser = configparser.ConfigParser(interpolation=None)
     parser.optionxform = str  # type: ignore[method-assign, assignment]
@@ -172,13 +187,13 @@ def _check_metadata(
 
 
 def _check_license(result: ArtifactResult, zf: zipfile.ZipFile, root: str) -> None:
-    name = f"{root}/LICENSE"
-    try:
-        size = len(zf.read(name))
-    except KeyError:
-        result.add("ARTIFACT_LICENSE", "error", "LICENSE is missing")
+    raw = _read_member(zf, f"{root}/LICENSE")
+    if raw is None:
+        result.add(
+            "ARTIFACT_LICENSE", "error", "LICENSE is missing or exceeds the size limit"
+        )
         return
-    if size == 0:
+    if not raw:
         result.add("ARTIFACT_LICENSE", "error", "LICENSE is empty")
 
 
@@ -270,10 +285,9 @@ def _check_icon(
 ) -> None:
     icon = (metadata or {}).get("icon", "icon.png")
     name = f"{root}/{icon}"
-    try:
-        data = zf.read(name)
-    except KeyError:
-        result.add("ARTIFACT_ICON", "warning", f"Icon is missing: {icon}")
+    data = _read_member(zf, name)
+    if data is None:
+        result.add("ARTIFACT_ICON", "warning", f"Icon is missing or too large: {icon}")
         return
     if not data.startswith(b"\x89PNG\r\n\x1a\n") or len(data) < 24:
         result.add("ARTIFACT_ICON", "warning", f"Icon is not a PNG: {icon}")
@@ -292,6 +306,17 @@ def _check_readme(result: ArtifactResult, names: list[str], root: str) -> None:
     prefix = f"{root}/README"
     if not any(name == prefix or name.startswith(f"{prefix}.") for name in names):
         result.add("ARTIFACT_README", "warning", "README is missing")
+
+
+def _check_total_uncompressed(result: ArtifactResult, zf: zipfile.ZipFile) -> None:
+    total = sum(info.file_size for info in zf.infolist())
+    if total > _MAX_TOTAL_UNCOMPRESSED:
+        result.add(
+            "ARTIFACT_SIZE",
+            "error",
+            f"Uncompressed ZIP size {total / (1024 * 1024):.1f} MB exceeds "
+            f"{_MAX_TOTAL_UNCOMPRESSED // (1024 * 1024)} MB",
+        )
 
 
 def _check_size(result: ArtifactResult, zip_path: Path, max_size_mb: float) -> None:
@@ -324,6 +349,7 @@ def validate_artifact(
         names = [info.filename for info in zf.infolist()]
         result.root = _check_structure(result, names)
         _check_size(result, zip_path, max_size_mb)
+        _check_total_uncompressed(result, zf)
         _check_permissions(result, zf, strict_permissions)
         if result.root:
             metadata = _check_metadata(result, zf, result.root, zip_path)

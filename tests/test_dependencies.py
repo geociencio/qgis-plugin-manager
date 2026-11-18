@@ -115,6 +115,42 @@ class TestDependencies(unittest.TestCase):
             )
             self.assertFalse(install_external_libs(tmp_path))
 
+    @patch("qgis_manager.dependencies.subprocess.run")
+    def test_install_rejects_option_shaped_requirement(self, mock_run):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / "pyproject.toml").write_text(
+                '[tool.qgis-manager]\ndependencies = ["--index-url"]\n',
+                encoding="utf-8",
+            )
+            self.assertFalse(install_external_libs(tmp_path))
+            mock_run.assert_not_called()
+
+    @patch("qgis_manager.dependencies.subprocess.run")
+    def test_install_rejects_escaping_target(self, mock_run):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / "pyproject.toml").write_text(
+                '[tool.qgis-manager]\ndependencies = ["requests"]\n',
+                encoding="utf-8",
+            )
+            self.assertFalse(install_external_libs(tmp_path, target_dir="../outside"))
+            mock_run.assert_not_called()
+
+    @patch("qgis_manager.dependencies.subprocess.run")
+    def test_install_uses_argument_separator(self, mock_run):
+        mock_run.return_value.returncode = 0
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            (tmp_path / "pyproject.toml").write_text(
+                '[tool.qgis-manager]\ndependencies = ["requests>=2"]\n',
+                encoding="utf-8",
+            )
+            self.assertTrue(install_external_libs(tmp_path))
+            cmd = mock_run.call_args_list[-1][0][0]
+            self.assertIn("--", cmd)
+            self.assertGreater(cmd.index("--"), cmd.index("--target"))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -8,6 +8,8 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+_VALID_TEMPLATES = frozenset({"default", "processing", "dockwidget"})
+
 
 def _class_name_from(name: str) -> str:
     """Return a valid ASCII PascalCase Python identifier for a plugin name.
@@ -67,8 +69,13 @@ def init_plugin_project(
     if project_dir.exists():
         raise FileExistsError(f"Directory {project_dir} already exists.")
 
-    template_dir = Path(__file__).resolve().parent.parent / "templates" / template
-    if not template_dir.is_dir():
+    template_root = Path(__file__).resolve().parent.parent / "templates"
+    template_dir = (template_root / template).resolve()
+    if (
+        template not in _VALID_TEMPLATES
+        or template_dir.parent != template_root.resolve()
+        or not template_dir.is_dir()
+    ):
         raise ValueError(f"Unknown template: {template}")
 
     project_dir.mkdir(parents=True)

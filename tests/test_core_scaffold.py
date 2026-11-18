@@ -177,3 +177,10 @@ class TestCoreScaffold(unittest.TestCase):
             self.assertTrue((venv_cache / "lib.pyc").exists())
             self.assertFalse(project_cache.exists())
             self.assertFalse((root / "script.pyc").exists())
+
+    def test_init_plugin_project_rejects_template_traversal(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with self.assertRaises(ValueError):
+                init_plugin_project(
+                    Path(tmp_dir), "X", "A", "a@b.c", template="../templates"
+                )

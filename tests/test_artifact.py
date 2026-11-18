@@ -214,3 +214,13 @@ def test_readme_without_extension_is_accepted(tmp_path: Path) -> None:
         )
     )
     assert not any("ARTIFACT_README" in warning for warning in result.warnings)
+
+
+def test_artifact_rejects_oversized_metadata(tmp_path: Path) -> None:
+    import zipfile
+
+    zip_path = tmp_path / "oversized.zip"
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("demo/metadata.txt", b"x" * (6 * 1024 * 1024))
+    result = validate_artifact(zip_path)
+    assert any("ARTIFACT_METADATA" in error for error in result.errors)
