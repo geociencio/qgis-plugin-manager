@@ -1,7 +1,9 @@
 # B8 — Release 0.17.0
 
-**Status**: In progress (release 0.17.0)
-**Implementation commit**: pending
+**Status**: Done
+**Implementation commit**: `893b67e chore(release): prepare v0.17.0`
+**State commit**: `3a73f2c chore(agent): record v0.17.0 release`
+**Tag commit**: `e0df140` (includes Windows portability test fixes)
 **Parent plan**: `../v0.17.0_refactor_plan.md`
 
 ## Goal
@@ -39,3 +41,14 @@ Publish the structural refactor as 0.17.0 after B1–B7 are green.
 
 Do not delete a published release. If a defect appears, cut 0.17.1 with a
 changelog entry and the same verification gates.
+
+## Execution result
+
+- Bumped `0.16.2` → `0.17.0`, refreshed `uv.lock`.
+- Added changelog/release notes and regenerated help.
+- Gates: 456 tests, 96.05 % statements, 90.08 % branches, 94.63 % combined,
+  C901 = 0.
+- Wheel/sdist passed `check_distribution.py` and `twine check`.
+- Wheel installed with `--no-deps`; `qgis-manage 0.17.0` runs without click.
+- GitHub release and PyPI publication completed; wheel/sdist hashes verified.
+- Tag CI completed successfully; main CI had macOS capacity queueing only.
