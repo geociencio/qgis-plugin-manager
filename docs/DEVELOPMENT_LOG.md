@@ -1,5 +1,13 @@
 # Development Log: qgis-manage
 
+## [2026-11-18] B1 — PathPolicy and ProjectWalker
+- **Achievement**: Centralized all project tree walks behind one policy.
+- **Changes**:
+    - Added `paths/PathPolicy` and deterministic symlink-safe `ProjectWalker`.
+    - Migrated compile, package, clean, repository and discovery.
+    - Preserved root-only dev/tool exclusions (`gui/tools` remains packaged).
+- **Quality**: 441 tests, 96.24 % statements, 90.46 % branches, 94.85 % combined.
+
 ## [2026-11-18] Close Session — Security and Correctness
 - **Achievement**: Closed the 0.16.2 security/correctness cycle.
 - **Changes**:
