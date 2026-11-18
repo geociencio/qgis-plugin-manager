@@ -3,7 +3,7 @@
 import argparse
 
 from ...dependencies import DependencyPolicy, install_external_libs
-from .. import console as click
+from .. import console
 from ..base import BaseCommand
 
 
@@ -46,7 +46,7 @@ class InstallDepsCommand(BaseCommand):
         root = self.project_root(args)
         policy = DependencyPolicy(timeout=args.timeout, dry_run=args.dry_run)
         if install_external_libs(root, args.target, policy=policy):
-            click.echo("✨ Dependencies ready.")
+            console.echo("✨ Dependencies ready.")
             return 0
         else:
             return 1

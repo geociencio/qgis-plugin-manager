@@ -3,7 +3,7 @@
 import argparse
 
 from ...core import clean_artifacts
-from .. import console as click
+from .. import console
 from ..base import BaseCommand
 
 
@@ -42,11 +42,11 @@ class CleanCommand(BaseCommand):
         )
         if args.dry_run:
             for action in actions:
-                click.echo(action)
-            click.echo("Dry run: no files were removed.")
+                console.echo(action)
+            console.echo("Dry run: no files were removed.")
         else:
             for action in actions:
                 if action.startswith("warning:"):
-                    click.echo(click.style(action, fg="yellow"), err=True)
-        click.echo(click.style("✨ Cleanup complete!", fg="green", bold=True))
+                    console.echo(console.style(action, fg="yellow"), err=True)
+        console.echo(console.style("✨ Cleanup complete!", fg="green", bold=True))
         return 0

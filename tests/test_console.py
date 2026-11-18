@@ -116,3 +116,16 @@ def test_progressbar_without_position() -> None:
         with console.progressbar(2, label="work", show_pos=False) as bar:
             bar.update(1)
     assert "(1/2)" not in "".join(call.args[0] for call in mock_write.call_args_list)
+
+
+def test_no_legacy_click_alias_in_source() -> None:
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1] / "src" / "qgis_manager"
+    offenders = [
+        str(path)
+        for path in root.rglob("*.py")
+        if "console as click" in path.read_text(encoding="utf-8")
+        or "click." in path.read_text(encoding="utf-8")
+    ]
+    assert offenders == []

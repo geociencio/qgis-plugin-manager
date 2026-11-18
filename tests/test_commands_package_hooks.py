@@ -302,7 +302,7 @@ class TestHooksCommand(_CommandTestBase):
         self.assertEqual(exit_code, 0)
         self.assertIn("post_deploy", output)
 
-    @patch("qgis_manager.cli.commands.hooks.click.confirm")
+    @patch("qgis_manager.cli.commands.hooks.console.confirm")
     @patch("qgis_manager.cli.base.find_project_root")
     def test_hooks_init_overwrite(self, mock_find, mock_confirm):
         root = Path(tempfile.mkdtemp())
@@ -317,7 +317,7 @@ class TestHooksCommand(_CommandTestBase):
             "original", (root / "plugin_hooks.py").read_text(encoding="utf-8")
         )
 
-    @patch("qgis_manager.cli.commands.hooks.click.confirm")
+    @patch("qgis_manager.cli.commands.hooks.console.confirm")
     @patch("qgis_manager.cli.base.find_project_root")
     def test_hooks_init_declined(self, mock_find, mock_confirm):
         root = Path(tempfile.mkdtemp())

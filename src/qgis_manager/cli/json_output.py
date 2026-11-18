@@ -3,7 +3,7 @@
 import json
 from typing import Any
 
-from . import console as click
+from . import console
 
 
 def emit_json(
@@ -15,7 +15,7 @@ def emit_json(
     data: dict[str, Any] | None = None,
 ) -> None:
     """Print a single versioned JSON object on stdout."""
-    click.echo(
+    console.echo(
         json.dumps(
             {
                 "schema": 1,

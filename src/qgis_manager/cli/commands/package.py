@@ -9,7 +9,7 @@ from ...dependencies import get_dependencies, install_external_libs
 from ...metadata import get_plugin_metadata, sync_metadata_version
 from ...toml_utils import get_project_version
 from ...validation.artifact import ArtifactError, validate_artifact
-from .. import console as click
+from .. import console
 from ..base import BaseCommand
 from ..json_output import emit_json
 
@@ -98,7 +98,7 @@ class PackageCommand(BaseCommand):
                 data={"zip": str(zip_path)},
             )
         else:
-            click.echo(click.style(f"✅ Package created: {zip_path}", fg="green"))
+            console.echo(console.style(f"✅ Package created: {zip_path}", fg="green"))
         return 0
 
     @staticmethod
@@ -112,7 +112,7 @@ class PackageCommand(BaseCommand):
             return
         py_version = get_project_version(root / "pyproject.toml")
         if py_version:
-            click.echo(f"🔄 Syncing version to {py_version}...")
+            console.echo(f"🔄 Syncing version to {py_version}...")
             sync_metadata_version(root)
 
     def _validate_release_version(self, root: Path, args: argparse.Namespace) -> bool:
@@ -121,8 +121,8 @@ class PackageCommand(BaseCommand):
         current = get_plugin_metadata(root).get("version")
         if args.stamp or current == args.release_version:
             return True
-        click.echo(
-            click.style(
+        console.echo(
+            console.style(
                 f"❌ --release-version {args.release_version} does not match "
                 f"metadata.txt ({current or 'missing'}); use --stamp or "
                 "--sync-version.",
@@ -148,8 +148,8 @@ class PackageCommand(BaseCommand):
             found = (root / entry).is_file()
         if found:
             return True
-        click.echo(
-            click.style(
+        console.echo(
+            console.style(
                 f"❌ --require-docs: configured docs entry '{entry}' is missing.",
                 fg="red",
                 bold=True,
@@ -161,8 +161,8 @@ class PackageCommand(BaseCommand):
     def _install_dependencies(self, root: Path, args: argparse.Namespace) -> bool:
         dependencies = get_dependencies(root)
         if dependencies and not args.trust:
-            click.echo(
-                click.style(
+            console.echo(
+                console.style(
                     "❌ Project declares dependencies; re-run with --trust "
                     "to allow installation.",
                     fg="red",
@@ -172,8 +172,8 @@ class PackageCommand(BaseCommand):
             )
             return False
         if not install_external_libs(root):
-            click.echo(
-                click.style(
+            console.echo(
+                console.style(
                     "❌ Dependency installation failed; aborting package.",
                     fg="red",
                     bold=True,
@@ -193,17 +193,19 @@ class PackageCommand(BaseCommand):
             validate_project_structure,
         )
 
-        click.echo("🔍 Running official repository compliance check...")
+        console.echo("🔍 Running official repository compliance check...")
         metadata = fetch_metadata(root)
         meta_res = validate_metadata(metadata)
         repo_res = validate_official_compliance(root, metadata)
         struct_res = validate_project_structure(root, metadata)
         if meta_res.is_valid and repo_res.is_valid and struct_res.is_valid:
-            click.echo(click.style("✅ Compliance check passed!", fg="green"))
+            console.echo(console.style("✅ Compliance check passed!", fg="green"))
             return True
-        click.echo(click.style("❌ Package compliance failed:", fg="red", bold=True))
+        console.echo(
+            console.style("❌ Package compliance failed:", fg="red", bold=True)
+        )
         for err in meta_res.errors + repo_res.errors + struct_res.errors:
-            click.echo(f"  • {err}")
+            console.echo(f"  • {err}")
         return False
 
     def _audit_artifact(self, zip_path: Path, settings: Settings) -> bool:
@@ -214,15 +216,17 @@ class PackageCommand(BaseCommand):
                 icon_min_px=settings.icon_min_px,
             )
         except ArtifactError as exc:
-            click.echo(f"❌ Built artifact is invalid: {exc}", err=True)
+            console.echo(f"❌ Built artifact is invalid: {exc}", err=True)
             return False
         for warning in artifact.warnings:
-            click.echo(f"⚠️  {warning}", err=True)
+            console.echo(f"⚠️  {warning}", err=True)
         if artifact.is_valid:
             return True
-        click.echo(click.style("❌ Built artifact failed checks:", fg="red"), err=True)
+        console.echo(
+            console.style("❌ Built artifact failed checks:", fg="red"), err=True
+        )
         for error in artifact.errors:
-            click.echo(f"  • {error}", err=True)
+            console.echo(f"  • {error}", err=True)
         return False
 
     def _build_package(
@@ -239,7 +243,7 @@ class PackageCommand(BaseCommand):
         workflow = PackageWorkflow(package=create_plugin_package)
         if args.json:
             return workflow.create(request).zip_path
-        with click.progressbar(
+        with console.progressbar(
             length=100,
             label="📦 Packaging files",
             fill_char="#",

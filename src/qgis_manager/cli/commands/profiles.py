@@ -3,7 +3,7 @@
 import argparse
 
 from ...core import get_qgis_plugin_dir
-from .. import console as click
+from .. import console
 from ..base import BaseCommand
 
 
@@ -32,18 +32,18 @@ class ProfilesCommand(BaseCommand):
 
     def execute(self, args: argparse.Namespace) -> int:
         if args.action != "list":
-            click.echo("❌ Use 'profiles list'.", err=True)
+            console.echo("❌ Use 'profiles list'.", err=True)
             return 1
         plugins_dir = get_qgis_plugin_dir("default", version=args.qgis_version)
         profiles_root = plugins_dir.parents[2]
         if not profiles_root.is_dir():
-            click.echo("No QGIS profiles found.")
+            console.echo("No QGIS profiles found.")
             return 0
         profiles = sorted(path for path in profiles_root.iterdir() if path.is_dir())
         if not profiles:
-            click.echo("No QGIS profiles found.")
+            console.echo("No QGIS profiles found.")
             return 0
-        click.echo(f"Profiles for QGIS {args.qgis_version}:")
+        console.echo(f"Profiles for QGIS {args.qgis_version}:")
         for profile in profiles:
             plugins = profile / "python" / "plugins"
             count = (
@@ -51,5 +51,5 @@ class ProfilesCommand(BaseCommand):
                 if plugins.is_dir()
                 else 0
             )
-            click.echo(f"  {profile.name}\t{profile}\t{count} plugins")
+            console.echo(f"  {profile.name}\t{profile}\t{count} plugins")
         return 0

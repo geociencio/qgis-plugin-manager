@@ -4,7 +4,7 @@ import argparse
 
 from ...config import load_config, load_project_config
 from ...core import uninstall_plugin
-from .. import console as click
+from .. import console
 from ..base import BaseCommand
 
 
@@ -49,11 +49,11 @@ class DCleanCommand(BaseCommand):
         target_profile = args.profile or settings.profile
         qgis_version = args.qgis_version or settings.qgis_version
 
-        if not args.yes and not click.confirm(
+        if not args.yes and not console.confirm(
             f"🗑️  Remove the deployed plugin from profile "
             f"'{target_profile}' (QGIS {qgis_version})?"
         ):
-            click.echo("Aborted.")
+            console.echo("Aborted.")
             return 0
 
         removed = uninstall_plugin(
@@ -61,7 +61,7 @@ class DCleanCommand(BaseCommand):
         )
 
         if removed:
-            click.echo(click.style(f"🗑️  Removed {removed}", fg="green"))
+            console.echo(console.style(f"🗑️  Removed {removed}", fg="green"))
         else:
-            click.echo("Plugin not deployed. Nothing to remove.")
+            console.echo("Plugin not deployed. Nothing to remove.")
         return 0

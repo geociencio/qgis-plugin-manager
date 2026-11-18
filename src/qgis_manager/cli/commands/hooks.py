@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 from ...hooks import discover_python_hooks, execute_python_hook
-from .. import console as click
+from .. import console
 from ..base import BaseCommand
 
 
@@ -61,8 +61,8 @@ class HooksCommand(BaseCommand):
             return self._hooks_test(root, args.hook_name)
         else:
             # If no subcommand, show help
-            click.echo(
-                click.style(
+            console.echo(
+                console.style(
                     "❌ No subcommand specified. Use --help for usage.", fg="red"
                 )
             )
@@ -70,7 +70,9 @@ class HooksCommand(BaseCommand):
 
     def _hooks_list(self, root: Path) -> int:
         """List all discovered hooks."""
-        click.echo(click.style(f"🔍 Scanning for hooks in {root.name}...", bold=True))
+        console.echo(
+            console.style(f"🔍 Scanning for hooks in {root.name}...", bold=True)
+        )
 
         # 1. Inspect plugin_hooks.py without executing project code.
         py_hooks = discover_python_hooks(root)
@@ -82,28 +84,28 @@ class HooksCommand(BaseCommand):
         toml_hooks = config.hooks
 
         if not py_hooks and not toml_hooks:
-            click.echo("  (No hooks found)")
+            console.echo("  (No hooks found)")
             return 0
 
         if py_hooks:
-            click.echo(
-                click.style(
+            console.echo(
+                console.style(
                     "\n🐍 Native Python Hooks (plugin_hooks.py):", fg="blue", bold=True
                 )
             )
             for h in py_hooks:
-                click.echo(f"  • {h}")
+                console.echo(f"  • {h}")
 
         if toml_hooks:
-            click.echo(
-                click.style(
+            console.echo(
+                console.style(
                     "\n📜 Configuration Hooks (pyproject.toml):",
                     fg="magenta",
                     bold=True,
                 )
             )
             for h, cmd in toml_hooks.items():
-                click.echo(f"  • {h}: {cmd}")
+                console.echo(f"  • {h}: {cmd}")
 
         return 0
 
@@ -111,7 +113,7 @@ class HooksCommand(BaseCommand):
         """Initialize a plugin_hooks.py template."""
         hooks_file = root / "plugin_hooks.py"
         if hooks_file.exists():
-            if not click.confirm(f"⚠️  {hooks_file.name} already exists. Overwrite?"):
+            if not console.confirm(f"⚠️  {hooks_file.name} already exists. Overwrite?"):
                 return 0
 
         template = '''"""
@@ -140,12 +142,14 @@ def post_package(context: dict[str, Any]):
     pass
 '''
         hooks_file.write_text(template, encoding="utf-8")
-        click.echo(click.style(f"✅ Created {hooks_file.name} template.", fg="green"))
+        console.echo(
+            console.style(f"✅ Created {hooks_file.name} template.", fg="green")
+        )
         return 0
 
     def _hooks_test(self, root: Path, hook_name: str) -> int:
         """Execute a hook in isolation with mock context."""
-        click.echo(click.style(f"🧪 Testing hook: {hook_name}", bold=True))
+        console.echo(console.style(f"🧪 Testing hook: {hook_name}", bold=True))
 
         # Mock context
         context = {
@@ -158,13 +162,15 @@ def post_package(context: dict[str, Any]):
         success = execute_python_hook(root, hook_name, context)
 
         if success:
-            click.echo(
-                click.style(f"✅ Hook '{hook_name}' executed successfully.", fg="green")
+            console.echo(
+                console.style(
+                    f"✅ Hook '{hook_name}' executed successfully.", fg="green"
+                )
             )
             return 0
         else:
-            click.echo(
-                click.style(f"❌ Hook '{hook_name}' failed or not found.", fg="red"),
+            console.echo(
+                console.style(f"❌ Hook '{hook_name}' failed or not found.", fg="red"),
                 err=True,
             )
             return 1

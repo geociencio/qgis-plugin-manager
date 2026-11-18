@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 from ...ignore import IgnoreMatcher
-from .. import console as click
+from .. import console
 from ..base import BaseCommand
 
 
@@ -44,7 +44,7 @@ class IgnoreCommand(BaseCommand):
 
     def execute(self, args: argparse.Namespace) -> int:
         if args.action != "check":
-            click.echo("❌ Use 'ignore check <path>'.", err=True)
+            console.echo("❌ Use 'ignore check <path>'.", err=True)
             return 1
         root = self.project_root(args)
         target = Path(args.target)
@@ -53,8 +53,8 @@ class IgnoreCommand(BaseCommand):
         excluded, rule = IgnoreMatcher(root).explain(target)
         decision = "excluded" if excluded else "included"
         if args.explain:
-            click.echo(f"{decision}: {target}")
-            click.echo(f"rule: {rule or 'no matching rule'}")
+            console.echo(f"{decision}: {target}")
+            console.echo(f"rule: {rule or 'no matching rule'}")
         else:
-            click.echo(decision)
+            console.echo(decision)
         return 0 if excluded else 1

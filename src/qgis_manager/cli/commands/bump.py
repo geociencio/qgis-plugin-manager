@@ -11,7 +11,7 @@ from ...metadata import (
     sync_metadata_version,
 )
 from ...toml_utils import get_project_version, set_project_version
-from .. import console as click
+from .. import console
 from ..base import BaseCommand
 
 logger = logging.getLogger(__name__)
@@ -75,8 +75,8 @@ class BumpCommand(BaseCommand):
         elif args.subcommand == "sync":
             return self._sync_versions(root)
         else:
-            click.echo(
-                click.style(
+            console.echo(
+                console.style(
                     "❌ No subcommand specified. Use --help for usage.", fg="red"
                 )
             )
@@ -95,13 +95,17 @@ class BumpCommand(BaseCommand):
         current = self._get_version(root)
         if not current:
             logger.error(f"Could not determine current version in {root}")
-            click.echo(click.style("❌ Could not determine current version.", fg="red"))
+            console.echo(
+                console.style("❌ Could not determine current version.", fg="red")
+            )
             return 1
 
         match = re.match(r"^(\d+)(?:\.(\d+))?(?:\.(\d+))?", current.strip())
         if match is None:
             logger.error(f"Invalid version format '{current}'")
-            click.echo(click.style(f"❌ Invalid version format: {current}", fg="red"))
+            console.echo(
+                console.style(f"❌ Invalid version format: {current}", fg="red")
+            )
             return 1
         major = int(match.group(1))
         minor = int(match.group(2) or 0)
@@ -118,16 +122,20 @@ class BumpCommand(BaseCommand):
             patch += 1
 
         new_version = f"{major}.{minor}.{patch}"
-        click.echo(f"⬆️ Bumping {part}: {current} -> {new_version}")
+        console.echo(f"⬆️ Bumping {part}: {current} -> {new_version}")
 
         # Update all files
         updated = self._update_version_in_files(root, new_version)
         if updated:
-            click.echo(click.style(f"✅ Version bumped to {new_version}", fg="green"))
+            console.echo(
+                console.style(f"✅ Version bumped to {new_version}", fg="green")
+            )
             return 0
         else:
             logger.error(f"Failed to update version entries to {new_version}")
-            click.echo(click.style("❌ Failed to update version in files.", fg="red"))
+            console.echo(
+                console.style("❌ Failed to update version in files.", fg="red")
+            )
             return 1
 
     def _sync_versions(self, root: Path) -> int:
@@ -141,15 +149,17 @@ class BumpCommand(BaseCommand):
         """
         version = get_project_version(root / "pyproject.toml")
         if not version:
-            click.echo(click.style("❌ No version found in pyproject.toml", fg="red"))
+            console.echo(
+                console.style("❌ No version found in pyproject.toml", fg="red")
+            )
             return 1
 
-        click.echo(f"🔄 Syncing version {version} to metadata.txt...")
+        console.echo(f"🔄 Syncing version {version} to metadata.txt...")
         synced = sync_metadata_version(root)
         if synced:
-            click.echo(click.style("✅ metadata.txt updated.", fg="green"))
+            console.echo(console.style("✅ metadata.txt updated.", fg="green"))
         else:
-            click.echo("✅ Already in sync.")
+            console.echo("✅ Already in sync.")
 
         return 0
 
@@ -184,7 +194,7 @@ class BumpCommand(BaseCommand):
         pyproj = root / "pyproject.toml"
         if pyproj.exists():
             if set_project_version(pyproj, version):
-                click.echo("  📝 Updated pyproject.toml")
+                console.echo("  📝 Updated pyproject.toml")
             else:
                 logger.warning("Could not find version entry in pyproject.toml")
                 success = False
@@ -194,10 +204,12 @@ class BumpCommand(BaseCommand):
             metadata = get_plugin_metadata(root)
             metadata["version"] = version
             save_plugin_metadata(root, metadata)
-            click.echo("  📝 Updated metadata.txt")
+            console.echo("  📝 Updated metadata.txt")
         except (OSError, ValueError) as e:
             logger.error(f"Error updating metadata.txt: {e}")
-            click.echo(click.style(f"  ❌ Error updating metadata.txt: {e}", fg="red"))
+            console.echo(
+                console.style(f"  ❌ Error updating metadata.txt: {e}", fg="red")
+            )
             success = False
 
         return success

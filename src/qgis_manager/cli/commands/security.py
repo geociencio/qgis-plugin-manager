@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from .. import console as click
+from .. import console
 from ..analyzer import run_qgis_analyzer, run_qgis_analyzer_output
 from ..base import BaseCommand
 from ..json_output import emit_json
@@ -66,13 +66,13 @@ class SecurityCommand(BaseCommand):
     def execute(self, args: argparse.Namespace) -> int:
         root = self.project_root(args)
         if not args.json:
-            click.echo(f"🔒 Running security scan on {root}...")
+            console.echo(f"🔒 Running security scan on {root}...")
         analyzer_args = self._analyzer_args(args)
         if args.json or args.portal:
             return self._run_machine(root, args, analyzer_args)
         code = run_qgis_analyzer(root, "security", *analyzer_args)
         if code != 0:
-            click.echo("❌ Security scan found issues.")
+            console.echo("❌ Security scan found issues.")
             return code
         return 0
 
@@ -107,7 +107,7 @@ class SecurityCommand(BaseCommand):
             try:
                 payload = json.loads(output)
             except json.JSONDecodeError:
-                click.echo("❌ Analyzer returned invalid JSON.", err=True)
+                console.echo("❌ Analyzer returned invalid JSON.", err=True)
                 return 2
         if args.json:
             emit_json(
@@ -117,5 +117,5 @@ class SecurityCommand(BaseCommand):
                 data={"exit_code": code, "analyzer": payload},
             )
         elif payload is not None:
-            click.echo(json.dumps(payload, indent=2))
+            console.echo(json.dumps(payload, indent=2))
         return code

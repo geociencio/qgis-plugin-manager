@@ -16,7 +16,7 @@ def make_compile_callback(bar: Any) -> Callable[[str], None]:
     """Build a callback that drives a click progressbar from compile events.
 
     Args:
-        bar: A click.progressbar instance.
+        bar: A console.progressbar instance.
 
     Returns:
         A callback accepting a single status line, formatted as

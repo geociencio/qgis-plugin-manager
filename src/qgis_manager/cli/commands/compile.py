@@ -3,7 +3,7 @@
 import argparse
 
 from ...core import compile_qt_resources, count_compile_steps
-from .. import console as click
+from .. import console
 from ..base import BaseCommand
 from ..progress import make_compile_callback
 
@@ -51,7 +51,7 @@ class CompileCommand(BaseCommand):
         if any(item in ("docs", "all") for item in selected):
             total_steps = count_compile_steps(root, selected)
 
-            with click.progressbar(
+            with console.progressbar(
                 length=total_steps, label="📚 Compiling", show_pos=True
             ) as bar:
                 compiled = compile_qt_resources(
@@ -64,8 +64,8 @@ class CompileCommand(BaseCommand):
             compiled = compile_qt_resources(root, compile_arg, jobs=args.jobs)
 
         if not compiled:
-            click.echo(
-                click.style(
+            console.echo(
+                console.style(
                     "❌ Compilation failed. Check the errors above.",
                     fg="red",
                     bold=True,
@@ -74,5 +74,5 @@ class CompileCommand(BaseCommand):
             )
             return 1
 
-        click.echo(click.style("✨ Compilation complete!", fg="green", bold=True))
+        console.echo(console.style("✨ Compilation complete!", fg="green", bold=True))
         return 0

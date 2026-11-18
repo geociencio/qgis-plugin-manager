@@ -2,7 +2,7 @@
 
 import argparse
 
-from .. import console as click
+from .. import console
 from ..analyzer import run_qgis_analyzer
 from ..base import BaseCommand
 from ..json_output import emit_json
@@ -38,7 +38,7 @@ class AnalyzeCommand(BaseCommand):
     def execute(self, args: argparse.Namespace) -> int:
         root = self.project_root(args)
         if not args.json:
-            click.echo(f"🔍 Analyzing project at {root}...")
+            console.echo(f"🔍 Analyzing project at {root}...")
 
         analyzer_args: list[str] = []
         if args.max_cc is not None:
@@ -53,7 +53,7 @@ class AnalyzeCommand(BaseCommand):
             )
             return code
         if code != 0:
-            click.echo("❌ Analysis failed.")
+            console.echo("❌ Analysis failed.")
             return code
 
         return 0

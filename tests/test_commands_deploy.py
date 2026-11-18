@@ -161,7 +161,7 @@ class TestDeployCommand(_CommandTestBase):
         self.assertIn("Compilation failed", stderr)
 
     @patch("qgis_manager.core.purge_backups", return_value=2)
-    @patch("qgis_manager.cli.commands.deploy.click.confirm")
+    @patch("qgis_manager.cli.commands.deploy.console.confirm")
     @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
     @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
@@ -192,7 +192,7 @@ class TestDeployCommand(_CommandTestBase):
         self.assertIn("Backups purged", output)
         self.assertIn("2", output)
 
-    @patch("qgis_manager.cli.commands.deploy.click.confirm")
+    @patch("qgis_manager.cli.commands.deploy.console.confirm")
     @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
     @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
@@ -219,7 +219,7 @@ class TestDeployCommand(_CommandTestBase):
         self.assertEqual(exit_code, 0)
         mock_deploy.assert_not_called()
 
-    @patch("qgis_manager.cli.commands.deploy.click.confirm")
+    @patch("qgis_manager.cli.commands.deploy.console.confirm")
     @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
     @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
@@ -248,8 +248,8 @@ class TestDeployCommand(_CommandTestBase):
         self.assertTrue(missing.exists())
         self.assertEqual(mock_deploy.call_args.kwargs["dest_dir"], missing)
 
-    @patch("qgis_manager.cli.commands.deploy.click.prompt")
-    @patch("qgis_manager.cli.commands.deploy.click.confirm")
+    @patch("qgis_manager.cli.commands.deploy.console.prompt")
+    @patch("qgis_manager.cli.commands.deploy.console.confirm")
     @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
     @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
@@ -280,8 +280,8 @@ class TestDeployCommand(_CommandTestBase):
             mock_deploy.call_args.kwargs["dest_dir"], Path("/custom/plugins")
         )
 
-    @patch("qgis_manager.cli.commands.deploy.click.prompt")
-    @patch("qgis_manager.cli.commands.deploy.click.confirm")
+    @patch("qgis_manager.cli.commands.deploy.console.prompt")
+    @patch("qgis_manager.cli.commands.deploy.console.confirm")
     @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
     @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
@@ -311,7 +311,7 @@ class TestDeployCommand(_CommandTestBase):
         mock_deploy.assert_not_called()
 
     @patch("qgis_manager.cli.commands.deploy.run_hook")
-    @patch("qgis_manager.cli.commands.deploy.click.confirm")
+    @patch("qgis_manager.cli.commands.deploy.console.confirm")
     @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
     @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
@@ -346,7 +346,7 @@ class TestDeployCommand(_CommandTestBase):
         self.assertIn("post_deploy", hook_names)
 
     @patch("qgis_manager.cli.commands.deploy.run_hook")
-    @patch("qgis_manager.cli.commands.deploy.click.confirm")
+    @patch("qgis_manager.cli.commands.deploy.console.confirm")
     @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
     @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
@@ -378,7 +378,7 @@ class TestDeployCommand(_CommandTestBase):
         mock_deploy.assert_not_called()
 
     @patch("qgis_manager.core.purge_backups", return_value=2)
-    @patch("qgis_manager.cli.commands.deploy.click.confirm")
+    @patch("qgis_manager.cli.commands.deploy.console.confirm")
     @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
     @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")
@@ -408,7 +408,7 @@ class TestDeployCommand(_CommandTestBase):
         mock_deploy.assert_called_once()
         self.assertIn("Backups purged", output)
 
-    @patch("qgis_manager.cli.commands.deploy.click.confirm")
+    @patch("qgis_manager.cli.commands.deploy.console.confirm")
     @patch("qgis_manager.cli.commands.deploy.deploy_plugin")
     @patch("qgis_manager.cli.commands.deploy.get_qgis_plugin_dir")
     @patch("qgis_manager.cli.commands.deploy.get_plugin_metadata")

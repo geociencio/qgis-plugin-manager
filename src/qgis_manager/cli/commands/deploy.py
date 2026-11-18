@@ -17,7 +17,7 @@ from ...core import (
 )
 from ...hooks import run_hook
 from ...metadata import get_plugin_metadata
-from .. import console as click
+from .. import console
 from ..base import BaseCommand
 from ..progress import make_compile_callback
 
@@ -93,7 +93,9 @@ class DeployCommand(BaseCommand):
 
     def execute(self, args: argparse.Namespace) -> int:
         if args.interactive and args.yes:
-            click.echo("❌ --interactive and --yes cannot be used together.", err=True)
+            console.echo(
+                "❌ --interactive and --yes cannot be used together.", err=True
+            )
             return 1
         root = self.project_root(args)
         settings = load_project_config(root, load_config())
@@ -162,15 +164,15 @@ class DeployCommand(BaseCommand):
             required=True,
         ):
             return 1
-        if args.interactive and not click.confirm(
+        if args.interactive and not console.confirm(
             f"🚀 Deploy to profile '{target_profile}' "
             f"(QGIS {plan.request.qgis_version})?"
         ):
-            click.echo("Aborted by user.")
+            console.echo("Aborted by user.")
             return 1
         if not self._compile_if_needed(plan.request.project_root, args, settings):
             return 1
-        click.echo(
+        console.echo(
             f"🚀 Deploying '{plan.metadata['name']}' ({plan.slug}) to "
             f"{plan.target_path}"
         )
@@ -183,7 +185,7 @@ class DeployCommand(BaseCommand):
             args,
             required=False,
         )
-        click.echo(click.style("✨ Deployment complete!", fg="green", bold=True))
+        console.echo(console.style("✨ Deployment complete!", fg="green", bold=True))
         return 0
 
     @staticmethod
@@ -232,33 +234,33 @@ class DeployCommand(BaseCommand):
             else 0
         )
         counts = plan_deploy(root, target_path, no_backup=not settings.backup)
-        click.echo(f"🧪 Dry run: {plan.slug} -> {target_path}")
-        click.echo(f"  Files to copy: {counts['copy']}")
-        click.echo(f"  Files to delete: {counts['delete']}")
-        click.echo(f"  Backup: {'yes' if counts['backup'] else 'no'}")
-        click.echo(f"  Existing backups: {backups}")
+        console.echo(f"🧪 Dry run: {plan.slug} -> {target_path}")
+        console.echo(f"  Files to copy: {counts['copy']}")
+        console.echo(f"  Files to delete: {counts['delete']}")
+        console.echo(f"  Backup: {'yes' if counts['backup'] else 'no'}")
+        console.echo(f"  Existing backups: {backups}")
         if args.purge_backups:
-            click.echo(f"  Backups to purge: {backups}")
+            console.echo(f"  Backups to purge: {backups}")
         if settings.hooks.get("pre_deploy") or (root / "plugin_hooks.py").exists():
             message = (
                 "would run only with --trust"
                 if not args.trust
                 else "would run (pre_deploy/post_deploy)"
             )
-            click.echo(f"  Hooks: {message}")
-        click.echo("  Manifest: would be updated after a successful deploy")
+            console.echo(f"  Hooks: {message}")
+        console.echo("  Manifest: would be updated after a successful deploy")
         return 0
 
     def _purge_backups(
         self, target_dir: Path, slug: str, profile: str, assume_yes: bool = False
     ) -> bool:
         msg = f"🗑️  Purge all backups for '{slug}' in profile '{profile}'?"
-        if not assume_yes and not click.confirm(msg):
+        if not assume_yes and not console.confirm(msg):
             return False
         from ...core import purge_backups
 
         removed = purge_backups(target_dir, slug)
-        click.echo(f"✨ Backups purged ({removed}).")
+        console.echo(f"✨ Backups purged ({removed}).")
         return True
 
     def _ensure_target_dir(
@@ -269,21 +271,21 @@ class DeployCommand(BaseCommand):
     ) -> Path | None:
         if absolute_profile or target_dir.exists():
             return target_dir
-        click.echo(
-            click.style(
+        console.echo(
+            console.style(
                 f"⚠️  Target directory does not exist: {target_dir}", fg="yellow"
             )
         )
-        if assume_yes or click.confirm("Do you want to create it?"):
+        if assume_yes or console.confirm("Do you want to create it?"):
             target_dir.mkdir(parents=True)
             return target_dir
-        manual_path = click.prompt(
+        manual_path = console.prompt(
             "Please enter the absolute path to the plugins directory "
             "(or press Enter to abort)",
             default="",
         )
         if not manual_path:
-            click.echo("Aborted.")
+            console.echo("Aborted.")
             return None
         return Path(manual_path)
 
@@ -312,14 +314,14 @@ class DeployCommand(BaseCommand):
         if not (command or (root / "plugin_hooks.py").exists()):
             return True
         if not args.trust:
-            click.echo(
+            console.echo(
                 f"⚠️  Skipping {name.replace('_', '-')} hooks: project is untrusted "
                 "(pass --trust).",
                 err=True,
             )
             return True
-        if args.interactive and not click.confirm(f"🪝  Execute {name} hook?"):
-            click.echo("⏭️  Skipping hook.")
+        if args.interactive and not console.confirm(f"🪝  Execute {name} hook?"):
+            console.echo("⏭️  Skipping hook.")
             command = None
         ok = run_hook(name, command, root, context=context)
         return ok if required else True
@@ -332,7 +334,7 @@ class DeployCommand(BaseCommand):
         total_steps = count_compile_steps(root, "all")
         if total_steps <= 0:
             return True
-        with click.progressbar(
+        with console.progressbar(
             length=total_steps,
             label="📚 Compiling resources and docs",
             show_pos=True,
@@ -342,8 +344,8 @@ class DeployCommand(BaseCommand):
             )
         if compiled:
             return True
-        click.echo(
-            click.style(
+        console.echo(
+            console.style(
                 "❌ Compilation failed; aborting deployment.",
                 fg="red",
                 bold=True,

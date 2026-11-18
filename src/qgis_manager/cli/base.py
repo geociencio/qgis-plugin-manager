@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from ..discovery import find_project_root
-from . import console as click
+from . import console
 
 
 class BaseCommand(ABC):
@@ -46,7 +46,9 @@ class BaseCommand(ABC):
         except KeyboardInterrupt:
             raise
         except Exception as exc:
-            click.echo(click.style(f"❌ Error: {exc}", fg="red", bold=True), err=True)
+            console.echo(
+                console.style(f"❌ Error: {exc}", fg="red", bold=True), err=True
+            )
             return 1
 
     def add_common_args(

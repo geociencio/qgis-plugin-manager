@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 from ...core import init_plugin_project
-from .. import console as click
+from .. import console
 from ..base import BaseCommand
 
 
@@ -46,11 +46,11 @@ class InitCommand(BaseCommand):
     def execute(self, args: argparse.Namespace) -> int:
         author = args.author
         if not author:
-            author = click.prompt("Author name")
+            author = console.prompt("Author name")
 
         email = args.email
         if not email:
-            email = click.prompt("Author email")
+            email = console.prompt("Author email")
 
         init_plugin_project(
             Path(args.path),
@@ -60,10 +60,10 @@ class InitCommand(BaseCommand):
             args.description,
             args.template,
         )
-        msg = click.style(
+        msg = console.style(
             f"✅ Plugin '{args.name}' initialized successfully.",
             fg="green",
             bold=True,
         )
-        click.echo(msg)
+        console.echo(msg)
         return 0
