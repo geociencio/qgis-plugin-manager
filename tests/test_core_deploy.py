@@ -313,3 +313,46 @@ class TestCoreDeploy(unittest.TestCase):
 
             self.assertEqual((dst / "file.txt").read_text(encoding="utf-8"), "data")
             self.assertEqual(mock_run.call_count, 1)
+
+
+def test_plan_deploy_skips_nested_target(tmp_path: Path) -> None:
+    project = tmp_path / "project"
+    project.mkdir()
+    (project / "plugin.py").write_text("print('x')\n", encoding="utf-8")
+    target = project / "deploy"
+    target.mkdir()
+    (target / "deployed.py").write_text("print('deployed')\n", encoding="utf-8")
+
+    from qgis_manager.core.deploy import plan_deploy
+
+    plan = plan_deploy(project, target)
+
+    assert plan["copy"] == 1
+
+
+def test_uninstall_plugin_accepts_absolute_profile(tmp_path: Path) -> None:
+    plugins = tmp_path / "abs" / "plugins"
+    plugin = plugins / "test_plugin"
+    plugin.mkdir(parents=True)
+    (plugin / "keep.txt").write_text("x", encoding="utf-8")
+    project = tmp_path / "project"
+    project.mkdir()
+    (project / "metadata.txt").write_text(
+        "[general]\nname=Test Plugin\n", encoding="utf-8"
+    )
+
+    removed = uninstall_plugin(project, profile=str(plugins))
+
+    assert removed == plugin
+    assert not plugin.exists()
+
+
+def test_resolve_profile_dir_rejects_root() -> None:
+    from qgis_manager.core.deploy import resolve_profile_dir
+
+    try:
+        resolve_profile_dir("/")
+    except ValueError as exc:
+        assert "filesystem root" in str(exc)
+    else:
+        raise AssertionError("filesystem root must be rejected")

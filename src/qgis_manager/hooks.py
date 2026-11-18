@@ -1,3 +1,4 @@
+import ast
 import importlib.util
 import logging
 import os
@@ -18,6 +19,14 @@ _HOOK_ENV_ALLOWLIST = (
     "TEMP",
     "TMP",
 )
+_STANDARD_HOOKS = (
+    "pre_deploy",
+    "post_deploy",
+    "pre_package",
+    "post_package",
+    "pre_compile",
+    "post_compile",
+)
 
 
 @dataclass(frozen=True)
@@ -37,6 +46,28 @@ class HookPolicy:
             }
         )
         return {**source, "QGIS_PROJECT_ROOT": str(project_root)}
+
+
+def discover_python_hooks(project_root: Path) -> list[str]:
+    """Return standard hook names without importing ``plugin_hooks.py``.
+
+    ``hooks list`` must not execute project-controlled code.  The file is read
+    and parsed, so a syntax error yields an empty list instead of a crash.
+    """
+    hooks_file = project_root / "plugin_hooks.py"
+    if not hooks_file.exists():
+        return []
+    try:
+        tree = ast.parse(hooks_file.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, SyntaxError) as exc:
+        logger.warning("Could not inspect %s: %s", hooks_file.name, exc)
+        return []
+    defined = {
+        node.name
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+    }
+    return [name for name in _STANDARD_HOOKS if name in defined]
 
 
 def execute_python_hook(

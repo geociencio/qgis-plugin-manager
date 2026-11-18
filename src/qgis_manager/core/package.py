@@ -145,6 +145,7 @@ def _collect_zip_items(
                 if _is_packable(file_path, matcher):
                     arcname = _zip_arcname(project_root, file_path, slug)
                     items.append((file_path, arcname))
+    items.sort(key=lambda entry: entry[1])
     return items
 
 

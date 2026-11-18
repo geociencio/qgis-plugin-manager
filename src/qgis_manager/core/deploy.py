@@ -19,6 +19,28 @@ from .platform import get_qgis_plugin_dir
 logger = logging.getLogger(__name__)
 
 
+def resolve_profile_dir(profile: str, qgis_version: int = 3) -> Path:
+    """Resolve a profile name or an absolute plugins directory.
+
+    Args:
+        profile: QGIS profile name or absolute plugins directory.
+        qgis_version: Major QGIS version used for named profiles.
+
+    Returns:
+        The plugins directory.
+
+    Raises:
+        ValueError: If an absolute profile points at a filesystem root.
+    """
+    candidate = Path(profile)
+    if candidate.is_absolute():
+        resolved = candidate.resolve()
+        if resolved.parent == resolved:
+            raise ValueError(f"Refusing to use filesystem root as profile: {profile}")
+        return resolved
+    return get_qgis_plugin_dir(profile, version=qgis_version)
+
+
 def uninstall_plugin(
     project_root: Path,
     profile: str = "default",
@@ -39,7 +61,7 @@ def uninstall_plugin(
     """
     metadata = get_plugin_metadata(project_root)
     slug = validate_slug(str(metadata["slug"]), source="plugin metadata")
-    plugins_dir = get_qgis_plugin_dir(profile, version=qgis_version)
+    plugins_dir = resolve_profile_dir(profile, qgis_version=qgis_version)
     plugin_dir = plugins_dir / slug
     if plugin_dir.parent != plugins_dir:
         raise ValueError(f"Refusing to remove unsafe path: {plugin_dir}")
@@ -246,18 +268,33 @@ def _backup_path(parent_dir: Path, slug: str) -> Path:
     return candidate
 
 
+def _count_destination_changes(src: Path, dst: Path, matcher: IgnoreMatcher) -> int:
+    """Count destination entries that a deploy would remove."""
+    if not dst.is_dir():
+        return 0
+    count = 0
+    for item in dst.iterdir():
+        source_item = src / item.name
+        if item.is_symlink():
+            count += 1
+        elif not source_item.exists() and not matcher.should_exclude(source_item):
+            count += 1
+    return count
+
+
 def plan_deploy(
     project_root: Path, target_path: Path, no_backup: bool = False
 ) -> dict[str, int | bool]:
     """Count files that a deploy would copy or delete without mutating anything."""
     matcher = IgnoreMatcher(project_root, include_dev=False)
     copy_count = 0
-    delete_count = 0
 
     def walk(src: Path, dst: Path) -> None:
-        nonlocal copy_count, delete_count
+        nonlocal copy_count
         for item in src.iterdir():
             if item.is_symlink() or matcher.should_exclude(item):
+                continue
+            if _is_same_or_nested(item, target_path):
                 continue
             dest_item = dst / item.name
             if item.is_dir():
@@ -268,19 +305,11 @@ def plan_deploy(
                 or _needs_copy(item, dest_item)
             ):
                 copy_count += 1
-        if not dst.is_dir():
-            return
-        for item in dst.iterdir():
-            source_item = src / item.name
-            if item.is_symlink():
-                delete_count += 1
-            elif not source_item.exists() and not matcher.should_exclude(source_item):
-                delete_count += 1
 
     walk(project_root, target_path)
     return {
         "copy": copy_count,
-        "delete": delete_count,
+        "delete": _count_destination_changes(project_root, target_path, matcher),
         "backup": target_path.exists() and not no_backup,
     }
 
@@ -305,7 +334,7 @@ def deploy_plugin(
     slug = validate_slug(str(metadata["slug"]), source="plugin metadata")
 
     if dest_dir is None:
-        dest_dir = get_qgis_plugin_dir(profile, version=qgis_version)
+        dest_dir = resolve_profile_dir(profile, qgis_version=qgis_version)
 
     target_path = dest_dir / slug
     if target_path.is_symlink():

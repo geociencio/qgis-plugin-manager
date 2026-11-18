@@ -200,3 +200,34 @@ class TestCorePackage(unittest.TestCase):
             with zipfile.ZipFile(zip_path) as archive:
                 date = archive.getinfo("demo_plugin/plugin.py").date_time
         self.assertEqual(date, (2023, 11, 14, 22, 13, 20))
+
+
+def test_package_zip_order_is_deterministic(tmp_path: Path) -> None:
+    outputs = []
+    for index, names in enumerate((("z.py", "a.py"), ("a.py", "z.py"))):
+        project = tmp_path / f"project-{index}"
+        project.mkdir()
+        (project / "metadata.txt").write_text(
+            "[general]\nname=Demo\nversion=1.0.0\n", encoding="utf-8"
+        )
+        (project / "__init__.py").write_text("", encoding="utf-8")
+        for name in names:
+            (project / name).write_text(name, encoding="utf-8")
+        outputs.append(
+            create_plugin_package(
+                project,
+                output_dir=tmp_path / f"out-{index}",
+                normalize_permissions=True,
+            )
+        )
+
+    import hashlib
+    import zipfile
+
+    with zipfile.ZipFile(outputs[0]) as first, zipfile.ZipFile(outputs[1]) as second:
+        assert first.namelist() == second.namelist()
+        assert first.namelist() == sorted(first.namelist())
+    assert (
+        hashlib.sha256(outputs[0].read_bytes()).hexdigest()
+        == hashlib.sha256(outputs[1].read_bytes()).hexdigest()
+    )

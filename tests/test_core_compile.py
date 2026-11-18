@@ -1,5 +1,7 @@
+import shutil
 import subprocess
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -404,3 +406,67 @@ class TestCoreCompile(unittest.TestCase):
 
             self.assertTrue(compile_qt_resources(root, res_type="resources"))
             mock_run.assert_not_called()
+
+    @patch(
+        "qgis_manager.core.compile.shutil.which", return_value="/usr/bin/sphinx-build"
+    )
+    @patch("subprocess.Popen")
+    def test_compile_docs_move_failure_restores_previous_output(
+        self, mock_popen, _mock_which
+    ):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            docs_source = tmp_path / "docs" / "source"
+            docs_source.mkdir(parents=True)
+            (docs_source / "conf.py").touch()
+            previous = tmp_path / "help" / "html" / "index.html"
+            previous.parent.mkdir(parents=True)
+            previous.write_text("previous docs", encoding="utf-8")
+
+            mock_process = MagicMock()
+            mock_process.stdout = []
+            mock_process.returncode = 0
+            mock_popen.return_value = mock_process
+            real_move = shutil.move
+
+            def failing_move(src, dst):
+                if Path(src).name.startswith("html-"):
+                    raise OSError("simulated move failure")
+                return real_move(src, dst)
+
+            with patch(
+                "qgis_manager.core.compile.shutil.move",
+                side_effect=failing_move,
+            ):
+                self.assertFalse(compile_docs(tmp_path))
+
+            self.assertTrue(previous.exists())
+            self.assertEqual(previous.read_text(encoding="utf-8"), "previous docs")
+            self.assertEqual(
+                list((tmp_path / "help").glob(".html.backup-*")),
+                [],
+            )
+
+    @patch("subprocess.run")
+    @patch("qgis_manager.core.compile.get_rcc_tool", return_value="pyside6-rcc")
+    def test_compile_qrc_jobs_emits_from_caller_thread(self, _mock_tool, _mock_run):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "a.qrc").touch()
+            (root / "b.qrc").touch()
+            threads: set[int] = set()
+            events: list[str] = []
+
+            def callback(line: str) -> None:
+                threads.add(threading.get_ident())
+                events.append(line)
+
+            self.assertTrue(
+                compile_qt_resources(root, "resources", callback=callback, jobs=2)
+            )
+
+            self.assertEqual(len(threads), 1)
+            self.assertIn("START:Resource a.qrc", events)
+            self.assertIn("START:Resource b.qrc", events)
+            self.assertIn("DONE:Resource a.qrc", events)
+            self.assertIn("DONE:Resource b.qrc", events)

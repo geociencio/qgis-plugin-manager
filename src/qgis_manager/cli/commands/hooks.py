@@ -3,7 +3,7 @@
 import argparse
 from pathlib import Path
 
-from ...hooks import execute_python_hook
+from ...hooks import discover_python_hooks, execute_python_hook
 from .. import console as click
 from ..base import BaseCommand
 
@@ -72,28 +72,8 @@ class HooksCommand(BaseCommand):
         """List all discovered hooks."""
         click.echo(click.style(f"🔍 Scanning for hooks in {root.name}...", bold=True))
 
-        # 1. Check plugin_hooks.py
-        hooks_file = root / "plugin_hooks.py"
-        py_hooks = []
-        if hooks_file.exists():
-            import importlib.util
-
-            spec = importlib.util.spec_from_file_location("plugin_hooks", hooks_file)
-            if spec and spec.loader:
-                module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-                # Traditional hook names
-                standard_hooks = [
-                    "pre_deploy",
-                    "post_deploy",
-                    "pre_package",
-                    "post_package",
-                    "pre_compile",
-                    "post_compile",
-                ]
-                for h in standard_hooks:
-                    if hasattr(module, h):
-                        py_hooks.append(h)
+        # 1. Inspect plugin_hooks.py without executing project code.
+        py_hooks = discover_python_hooks(root)
 
         # 2. Check pyproject.toml
         from ...config import Settings, load_project_config

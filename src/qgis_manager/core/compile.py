@@ -116,6 +116,24 @@ def _sphinx_command() -> list[str] | None:
     return None
 
 
+def _swap_compiled_docs(build_dir: Path, help_target: Path) -> Path | None:
+    """Move a compiled docs directory into place, returning a backup path."""
+    backup_dir: Path | None = None
+    if help_target.exists():
+        backup_dir = help_target.with_name(f".{help_target.name}.backup-{os.getpid()}")
+        if backup_dir.exists():
+            shutil.rmtree(backup_dir)
+        shutil.move(str(help_target), str(backup_dir))
+    try:
+        shutil.move(str(build_dir), str(help_target))
+    except OSError:
+        shutil.rmtree(help_target, ignore_errors=True)
+        if backup_dir is not None and backup_dir.exists():
+            shutil.move(str(backup_dir), str(help_target))
+        raise
+    return backup_dir
+
+
 def compile_docs(
     project_root: Path, callback: Callable[[str], Any] | None = None
 ) -> bool:
@@ -154,6 +172,7 @@ def compile_docs(
     help_parent = help_target.parent
     help_parent.mkdir(parents=True, exist_ok=True)
     build_dir = Path(tempfile.mkdtemp(prefix="html-", dir=help_parent))
+    backup_dir: Path | None = None
 
     try:
         cmd = [*command, "-b", "html", str(docs_source), str(build_dir)]
@@ -162,10 +181,9 @@ def compile_docs(
         # Clean up files not needed for deployment
         shutil.rmtree(build_dir / "_sources", ignore_errors=True)
         (build_dir / ".buildinfo").unlink(missing_ok=True)
-
-        if help_target.exists():
-            shutil.rmtree(help_target)
-        shutil.move(str(build_dir), str(help_target))
+        backup_dir = _swap_compiled_docs(build_dir, help_target)
+        if backup_dir is not None:
+            shutil.rmtree(backup_dir, ignore_errors=True)
 
         if callback:
             callback("DONE:Documentation")
@@ -174,6 +192,8 @@ def compile_docs(
     except (OSError, subprocess.SubprocessError, shutil.Error) as e:
         logger.error(f"  ❌ Error compiling documentation: {e}")
         shutil.rmtree(build_dir, ignore_errors=True)
+        if backup_dir is not None and backup_dir.exists() and not help_target.exists():
+            shutil.move(str(backup_dir), str(help_target))
         return False
 
 
@@ -362,12 +382,27 @@ def _run_jobs(
     items: list[Path],
     worker: Callable[[Path], tuple[bool, list[str]]],
     jobs: int,
+    on_result: Callable[[tuple[bool, list[str]]], object] | None = None,
 ) -> list[tuple[bool, list[str]]]:
-    """Run ``worker`` over items, preserving input order."""
+    """Run ``worker`` over items, preserving input order.
+
+    Results are delivered to ``on_result`` from the calling thread as they
+    become available, so progress callbacks never run inside worker threads.
+    """
+    results: list[tuple[bool, list[str]]] = []
     if jobs <= 1:
-        return [worker(item) for item in items]
+        for item in items:
+            result = worker(item)
+            results.append(result)
+            if on_result is not None:
+                on_result(result)
+        return results
     with ThreadPoolExecutor(max_workers=jobs) as executor:
-        return list(executor.map(worker, items))
+        for result in executor.map(worker, items):
+            results.append(result)
+            if on_result is not None:
+                on_result(result)
+    return results
 
 
 def _emit_result(context: CompileContext, result: tuple[bool, list[str]]) -> bool:
@@ -425,8 +460,13 @@ def compile_ui_files(
         events.append(f"DONE:UI {rel_ui.name}")
         return ok, events
 
-    results = _run_jobs(ui_files, work, jobs)
-    return all(_emit_result(context, result) for result in results)
+    results = _run_jobs(
+        ui_files,
+        work,
+        jobs,
+        on_result=lambda result: _emit_result(context, result),
+    )
+    return all(result[0] for result in results)
 
 
 def _compile_single_qrc(
@@ -470,9 +510,12 @@ def _compile_qrc_files(
         return False
     context = CompileContext(project_root, callback)
     results = _run_jobs(
-        qrc_files, lambda qrc: _compile_single_qrc(qrc, context, rcc_tool), jobs
+        qrc_files,
+        lambda qrc: _compile_single_qrc(qrc, context, rcc_tool),
+        jobs,
+        on_result=lambda result: _emit_result(context, result),
     )
-    return all(_emit_result(context, result) for result in results)
+    return all(result[0] for result in results)
 
 
 def _compile_single_ts(ts: Path, context: CompileContext) -> tuple[bool, list[str]]:
@@ -501,8 +544,9 @@ def _compile_ts_files(
         _iter_compile_sources(project_root, "*.ts"),
         lambda ts: _compile_single_ts(ts, context),
         jobs,
+        on_result=lambda result: _emit_result(context, result),
     )
-    return all(_emit_result(context, result) for result in results)
+    return all(result[0] for result in results)
 
 
 def compile_qt_resources(
