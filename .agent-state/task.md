@@ -1,9 +1,9 @@
-# Session Closed: Correctness Patch (0.16.1)
+# Release: v0.16.2 Security and Correctness
 
 ## Status
-- **Phase**: closed (2026-11-01)
-- **Releases**: 0.16.0 (zero runtime dependencies) and 0.16.1 (correctness).
-- **Quality**: 426 tests, 96.11 % statements, 90.33 % branches, 94.70 % combined,
+- **Phase**: 0.16.2 prepared locally (2026-11-18); push/tag/publication pending.
+- **Release**: 0.16.2 security/correctness patch; 0.16.0/0.16.1 released.
+- **Quality**: 434 tests, 96.20 % statements, 90.39 % branches, 94.79 % combined,
   C901 = 0; runtime dependencies = 0.
 
 ## Completed
@@ -14,6 +14,7 @@
 5. [x] Tool-only sdist and release content check.
 6. [x] Zero runtime dependencies and policy test.
 7. [x] 0.16.1 correctness findings.
+8. [x] 0.16.2 security/correctness findings.
 
 ## Next
 - No active phase. Remaining: B2 scaffold recursion/`pyproject.toml.tmpl`
