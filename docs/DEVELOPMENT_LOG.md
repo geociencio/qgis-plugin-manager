@@ -1,5 +1,14 @@
 # Development Log: qgis-manage
 
+## [2026-11-18] B7 — External Input Validation
+- **Achievement**: Hardened dependency, template, ZIP and analyzer boundaries.
+- **Changes**:
+    - Reject option-shaped dependencies and escaping install targets; use `--`.
+    - Whitelist scaffold templates and reject traversal.
+    - Bound ZIP member/total uncompressed reads.
+    - Add analyzer timeout and availability cache (with test reset fixture).
+- **Quality**: 456 tests, 96.05 % statements, 90.08 % branches, 94.63 % combined.
+
 ## [2026-11-18] B6 — Atomic TOML Updates
 - **Achievement**: Made pyproject version updates atomic and quote-aware.
 - **Changes**:

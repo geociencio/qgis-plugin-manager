@@ -1,9 +1,9 @@
 # Phase: 0.17.0 Refactor
 
 ## Status
-- **Phase**: B6 complete (2026-11-18); B7 next.
-- **Refactor**: B1–B6 complete (walker, workflows, console, errors, TOML).
-- **Quality**: 449 tests, 96.18 % statements, 90.45 % branches, 94.82 % combined,
+- **Phase**: B7 complete (2026-11-18); B8 release next.
+- **Refactor**: B1–B7 complete (walker, workflows, console, errors, TOML, security).
+- **Quality**: 456 tests, 96.05 % statements, 90.08 % branches, 94.63 % combined,
   C901 = 0; runtime dependencies = 0.
 
 ## Completed
@@ -13,9 +13,9 @@
 4. [x] B4 — console rename.
 5. [x] B5 — typed error boundary.
 6. [x] B6 — atomic TOML updates.
-7. [ ] B7 — external input validation.
+7. [x] B7 — external input validation.
 8. [ ] B8 — release 0.17.0.
 
 ## Next
-- B7: external input validation (install-deps, templates, ZIP, analyzer).
+- B8: release 0.17.0 after final validation.
 - Resume with `/start-session`.
