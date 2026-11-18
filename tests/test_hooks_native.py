@@ -1,4 +1,5 @@
 import shutil
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -60,6 +61,7 @@ def pre_deploy(context):
         self.assertTrue(marker_file.exists())
         self.assertEqual(marker_file.read_text(), "hello_context")
 
+    @unittest.skipIf(sys.platform == "win32", "touch is not available on Windows")
     def test_fallback_to_command(self):
         # No native hook, but a command
         # On linux 'touch' should work

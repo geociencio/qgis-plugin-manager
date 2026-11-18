@@ -347,11 +347,11 @@ def test_uninstall_plugin_accepts_absolute_profile(tmp_path: Path) -> None:
     assert not plugin.exists()
 
 
-def test_resolve_profile_dir_rejects_root() -> None:
+def test_resolve_profile_dir_rejects_root(tmp_path: Path) -> None:
     from qgis_manager.core.deploy import resolve_profile_dir
 
     try:
-        resolve_profile_dir("/")
+        resolve_profile_dir(tmp_path.anchor)
     except ValueError as exc:
         assert "filesystem root" in str(exc)
     else:

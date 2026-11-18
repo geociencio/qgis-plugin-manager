@@ -1,3 +1,4 @@
+import sys
 import tempfile
 import unittest
 import zipfile
@@ -184,7 +185,8 @@ class TestCorePackage(unittest.TestCase):
             )
             with zipfile.ZipFile(zip_path) as archive:
                 info = archive.getinfo("demo_plugin/run.py")
-            self.assertEqual((info.external_attr >> 16) & 0o777, 0o755)
+            expected = 0o644 if sys.platform == "win32" else 0o755
+            self.assertEqual((info.external_attr >> 16) & 0o777, expected)
 
     def test_source_date_epoch_controls_zip_timestamp(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

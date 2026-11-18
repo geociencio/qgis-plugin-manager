@@ -12,6 +12,8 @@ import sys
 import zipfile
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 CLI_CODE = "from qgis_manager.cli import main; main()"
 
@@ -422,6 +424,13 @@ def test_e2e_bump_patch_updates_version(tmp_path: Path) -> None:
 
 
 def _write_fake_tool(path: Path, body: str) -> None:
+    if sys.platform == "win32":
+        script = path.with_suffix(".py")
+        script.write_text(body, encoding="utf-8")
+        path.with_suffix(".cmd").write_text(
+            f'@"{sys.executable}" "{script}" %*\n', encoding="utf-8"
+        )
+        return
     path.write_text(f"#!{sys.executable}\n{body}", encoding="utf-8")
     path.chmod(0o755)
 
@@ -495,6 +504,9 @@ def test_package_rejects_release_version_mismatch_e2e(tmp_path: Path) -> None:
     assert not list(output.glob("*.zip"))
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="extensionless shebang tools are POSIX-only"
+)
 def test_compile_repeated_types_with_fake_tools(tmp_path: Path, monkeypatch) -> None:
     project = _make_project(tmp_path)
     tools = tmp_path / "bin"
