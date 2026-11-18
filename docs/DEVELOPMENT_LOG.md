@@ -1,5 +1,13 @@
 # Development Log: qgis-manage
 
+## [2026-11-18] B2 — DeployWorkflow
+- **Achievement**: Extracted deployment planning/execution from the CLI command.
+- **Changes**:
+    - Added `DeployRequest`, `DeployPlan`, `DeployResult`, `DeployWorkflow`.
+    - `DeployCommand.execute` reduced to 29 lines; purge asks once.
+    - Injected metadata/deploy boundaries keep tests and behavior intact.
+- **Quality**: 442 tests, 96.22 % statements, 90.41 % branches, 94.83 % combined.
+
 ## [2026-11-18] B1 — PathPolicy and ProjectWalker
 - **Achievement**: Centralized all project tree walks behind one policy.
 - **Changes**:
