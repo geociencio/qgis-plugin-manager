@@ -1,58 +1,28 @@
 """Removal of build artifacts, caches and compiled outputs."""
 
 import logging
-import os
 import shutil
 import subprocess
-from collections.abc import Iterator
 from pathlib import Path
+
+from ..paths import PathPolicy, ProjectWalker
 
 logger = logging.getLogger(__name__)
 
-_EXCLUDED_DIRS = {
-    ".git",
-    ".mypy_cache",
-    ".pytest_cache",
-    ".ruff_cache",
-    ".venv",
-    "__pycache__",
-    "build",
-    "dist",
-    "env",
-    "libs",
-    "node_modules",
-    "venv",
-}
-_CACHE_DIRS = {"__pycache__", ".pytest_cache", ".ruff_cache"}
 
-
-def _walk_project(
-    project_root: Path, include_cache_dirs: bool = False
-) -> Iterator[tuple[Path, list[str], list[str]]]:
-    """Yield (root, cache_dirs, filenames) without entering excluded dirs."""
-    for current, dirnames, filenames in os.walk(project_root, topdown=True):
-        root = Path(current)
-        cache_dirs = (
-            [name for name in dirnames if name in _CACHE_DIRS]
-            if include_cache_dirs
-            else []
-        )
-        dirnames[:] = sorted(
-            name
-            for name in dirnames
-            if (include_cache_dirs and name in _CACHE_DIRS)
-            or (name not in _EXCLUDED_DIRS and not (root / name).is_symlink())
-        )
-        yield root, cache_dirs, filenames
+def _walker(project_root: Path, *, include_cache_dirs: bool = False) -> ProjectWalker:
+    return ProjectWalker(
+        project_root,
+        PathPolicy.for_purpose("clean"),
+        include_cache_dirs=include_cache_dirs,
+    )
 
 
 def _remove_cache_dirs(project_root: Path, dry_run: bool, actions: list[str]) -> None:
     """Remove tool cache directories outside environments/dependencies."""
-    for root, cache_dirs, _filenames in _walk_project(
-        project_root, include_cache_dirs=True
-    ):
-        for name in cache_dirs:
-            path = root / name
+    for entry in _walker(project_root, include_cache_dirs=True).entries():
+        for name in entry.cache_dirs:
+            path = entry.root / name
             actions.append(f"remove {path.relative_to(project_root)}")
             if not dry_run:
                 shutil.rmtree(path)
@@ -61,15 +31,13 @@ def _remove_cache_dirs(project_root: Path, dry_run: bool, actions: list[str]) ->
 
 def _remove_cache_files(project_root: Path, dry_run: bool, actions: list[str]) -> None:
     """Remove compiled bytecode and QGIS sidecar files."""
-    for root, _cache_dirs, filenames in _walk_project(project_root):
-        for name in filenames:
-            if not name.endswith((".pyc", ".qpj", ".cpg")):
-                continue
-            path = root / name
-            actions.append(f"remove {path.relative_to(project_root)}")
-            if not dry_run:
-                path.unlink()
-                logger.debug(f"  🗑️ {path.relative_to(project_root)}")
+    for path in _walker(project_root).files():
+        if not path.name.endswith((".pyc", ".qpj", ".cpg")):
+            continue
+        actions.append(f"remove {path.relative_to(project_root)}")
+        if not dry_run:
+            path.unlink()
+            logger.debug(f"  🗑️ {path.relative_to(project_root)}")
 
 
 def _is_tracked(project_root: Path, path: Path) -> bool:
@@ -99,26 +67,25 @@ def _remove_compiled_outputs(
     actions: list[str],
 ) -> None:
     """Remove Python modules generated from ``.ui``/``.qrc`` sources."""
-    for root, _cache_dirs, filenames in _walk_project(project_root):
-        for name in filenames:
-            suffix = Path(name).suffix.lower()
-            if suffix not in {".ui", ".qrc"}:
-                continue
-            compiled = root / f"{Path(name).stem}.py"
-            if not compiled.is_file():
-                continue
-            if keep_generated:
-                actions.append(f"keep {compiled.relative_to(project_root)}")
-                continue
-            if _is_tracked(project_root, compiled):
-                actions.append(
-                    f"warning: {compiled.relative_to(project_root)} is tracked by Git; "
-                    "use --keep-generated to preserve it"
-                )
-            actions.append(f"remove {compiled.relative_to(project_root)}")
-            if not dry_run:
-                compiled.unlink()
-                logger.debug(f"  🗑️ {compiled.relative_to(project_root)}")
+    for source in _walker(project_root).files():
+        suffix = source.suffix.lower()
+        if suffix not in {".ui", ".qrc"}:
+            continue
+        compiled = source.with_suffix(".py")
+        if not compiled.is_file():
+            continue
+        if keep_generated:
+            actions.append(f"keep {compiled.relative_to(project_root)}")
+            continue
+        if _is_tracked(project_root, compiled):
+            actions.append(
+                f"warning: {compiled.relative_to(project_root)} is tracked by Git; "
+                "use --keep-generated to preserve it"
+            )
+        actions.append(f"remove {compiled.relative_to(project_root)}")
+        if not dry_run:
+            compiled.unlink()
+            logger.debug(f"  🗑️ {compiled.relative_to(project_root)}")
 
 
 def _remove_docs_output(project_root: Path, dry_run: bool, actions: list[str]) -> None:

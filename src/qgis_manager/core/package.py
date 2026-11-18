@@ -15,6 +15,7 @@ from ..discovery import get_source_files
 from ..ignore import IgnoreMatcher
 from ..metadata import get_plugin_metadata, update_general_keys
 from ..naming import validate_slug
+from ..paths import PathPolicy, ProjectWalker
 
 logger = logging.getLogger(__name__)
 
@@ -119,17 +120,16 @@ def _zip_arcname(project_root: PurePath, file_path: PurePath, slug: str) -> str:
     return f"{slug}/{file_path.relative_to(project_root).as_posix()}"
 
 
-def _iter_package_files(directory: Path) -> Iterator[Path]:
-    """Yield files under ``directory`` without following symlinks."""
-    for current, dirnames, filenames in os.walk(directory, followlinks=False):
-        root = Path(current)
-        dirnames[:] = sorted(
-            name for name in dirnames if not (root / name).is_symlink()
-        )
-        for name in sorted(filenames):
-            path = root / name
-            if not path.is_symlink():
-                yield path
+def _iter_package_files(
+    directory: Path, project_root: Path, include_dev: bool = False
+) -> Iterator[Path]:
+    """Yield files under ``directory`` using the package path policy."""
+    walker = ProjectWalker(
+        directory,
+        PathPolicy.for_purpose("package", include_dev=include_dev),
+        project_root=project_root,
+    )
+    yield from walker.files()
 
 
 def _collect_zip_items(
@@ -141,7 +141,9 @@ def _collect_zip_items(
         if item.is_file():
             items.append((item, _zip_arcname(project_root, item, slug)))
         elif item.is_dir():
-            for file_path in _iter_package_files(item):
+            for file_path in _iter_package_files(
+                item, project_root, include_dev=include_dev
+            ):
                 if _is_packable(file_path, matcher):
                     arcname = _zip_arcname(project_root, file_path, slug)
                     items.append((file_path, arcname))

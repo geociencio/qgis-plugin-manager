@@ -14,26 +14,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from ..paths import PathPolicy, ProjectWalker
+
 logger = logging.getLogger(__name__)
 
 #: Maximum time a single external compiler may run.
 COMPILE_TIMEOUT_SECONDS = 300
-
-#: Directories that never contain project sources to compile.
-_COMPILE_EXCLUDED_DIRS = {
-    ".git",
-    ".mypy_cache",
-    ".pytest_cache",
-    ".ruff_cache",
-    ".venv",
-    "__pycache__",
-    "build",
-    "dist",
-    "env",
-    "libs",
-    "node_modules",
-    "venv",
-}
 
 #: Qt binding import prefixes emitted by uic/rcc that must be redirected to
 #: the binding shipped with QGIS (PyQt5, PyQt6, PySide2 or PySide6).
@@ -46,24 +32,13 @@ _QT_IMPORT_PREFIXES = (
 
 
 def _iter_compile_sources(project_root: Path, pattern: str) -> list[Path]:
-    """Return matching source files, excluding vendor/build/cache directories."""
-    matches: list[Path] = []
-    for current, dirnames, filenames in os.walk(project_root):
-        root = Path(current)
-        dirnames[:] = sorted(
-            name
-            for name in dirnames
-            if name not in _COMPILE_EXCLUDED_DIRS and not (root / name).is_symlink()
-        )
-        for name in sorted(filenames):
-            path = root / name
-            if (
-                fnmatch.fnmatch(name, pattern)
-                and path.is_file()
-                and not path.is_symlink()
-            ):
-                matches.append(path)
-    return matches
+    """Return matching source files using the shared path policy."""
+    walker = ProjectWalker(project_root, PathPolicy.for_purpose("compile"))
+    return [
+        path
+        for path in walker.files()
+        if fnmatch.fnmatch(path.name, pattern) and path.is_file()
+    ]
 
 
 def _run_sphinx(cmd: list[str], callback: Callable[[str], Any] | None) -> None:

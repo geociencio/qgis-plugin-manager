@@ -36,6 +36,7 @@ from .metadata import (
     sync_metadata_version,
 )
 from .naming import slugify, validate_slug
+from .paths import PathPolicy, ProjectWalker
 
 logger = logging.getLogger(__name__)
 
@@ -93,10 +94,9 @@ def get_source_files(project_root: Path, include_dev: bool = False) -> Iterator[
         Path objects for the root-level items to include in the package.
     """
     matcher = IgnoreMatcher(project_root, include_dev=include_dev)
-
-    # We copy everything except excluded items at the root level
-    for item in project_root.iterdir():
-        if item.is_symlink() or matcher.should_exclude(item):
-            continue
-
-        yield item
+    walker = ProjectWalker(
+        project_root,
+        PathPolicy.for_purpose("package", include_dev=include_dev),
+        extra_exclude=matcher.should_exclude,
+    )
+    yield from walker.root_items()
