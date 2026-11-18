@@ -1,5 +1,13 @@
 # Development Log: qgis-manage
 
+## [2026-11-18] B5 — Typed Error Boundary
+- **Achievement**: Separated expected CLI errors from unexpected bugs.
+- **Changes**:
+    - Added `CliError` with stable exit codes; project-root failures use it.
+    - Unexpected exceptions reach the app boundary; `--debug` prints tracebacks.
+    - Added tests for expected exit codes and debug tracebacks.
+- **Quality**: 447 tests, 96.17 % statements, 90.45 % branches, 94.82 % combined.
+
 ## [2026-11-18] B4 — Console Rename
 - **Achievement**: Removed the legacy `console as click` alias everywhere.
 - **Changes**:
