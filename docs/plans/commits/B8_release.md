@@ -1,6 +1,6 @@
 # B8 — Release 0.17.0
 
-**Status**: Planned
+**Status**: In progress (release 0.17.0)
 **Implementation commit**: pending
 **Parent plan**: `../v0.17.0_refactor_plan.md`
 

@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-11-18
+
+### Changed
+- **Unified path policy**: compile, package, clean, repository validation and discovery now use `PathPolicy`/`ProjectWalker` with deterministic, symlink-safe traversal.
+- **Deploy workflow**: `DeployRequest`/`DeployPlan`/`DeployResult`/`DeployWorkflow` separate preparation and execution from the CLI; `execute` is 29 lines and purge asks once.
+- **Package workflow**: `PackageRequest`/`PackageResult`/`PackageWorkflow` provide a single package call and JSON envelopes on failure.
+- **CLI internals**: removed the `console as click` alias, added `CliError`, `--debug` tracebacks and project-root error mapping.
+- **TOML updates**: pyproject version edits are atomic and support single/double quotes.
+- **External input hardening**: dependency requirements and targets are validated, templates are whitelisted, ZIP reads are bounded, and the analyzer has a timeout/cache.
+
+### Compatibility
+- No CLI syntax or exit-code changes.
+- Runtime dependencies remain empty.
+- Hooks still require explicit trust for execution; listing is inert.
+
+
+
 ### Documentation
 - Close-session maintenance log and handover refreshed; no runtime changes.
 

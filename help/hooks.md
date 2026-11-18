@@ -1,7 +1,7 @@
 # qgis-manage hooks
 
 ```text
-qgis-manage hooks v0.16.2
+qgis-manage hooks v0.17.0
 Manage and test plugin hooks
 
 Usage: qgis-manage hooks [-h] [--path PATH] SUBCOMMAND ...

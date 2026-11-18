@@ -1,5 +1,14 @@
 # Development Log: qgis-manage
 
+## [2026-11-18] Release v0.17.0 — Structural Refactor
+- **Achievement**: Completed B1–B7 and published the refactor.
+- **Changes**:
+    - PathPolicy/ProjectWalker, DeployWorkflow and PackageWorkflow.
+    - Console rename, typed errors/--debug, atomic TOML.
+    - Dependency/template/ZIP/analyzer hardening.
+- **Quality**: 456 tests, 96.05 % statements, 90.08 % branches, 94.63 % combined, C901 = 0.
+- **Release**: `v0.17.0` published on GitHub and PyPI.
+
 ## [2026-11-18] B7 — External Input Validation
 - **Achievement**: Hardened dependency, template, ZIP and analyzer boundaries.
 - **Changes**:

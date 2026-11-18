@@ -1,7 +1,7 @@
 # qgis-manage install-deps
 
 ```text
-qgis-manage install-deps v0.16.2
+qgis-manage install-deps v0.17.0
 Install plugin dependencies to a local folder
 
 Usage: qgis-manage install-deps [-h] [--path PATH] [--target TARGET]
