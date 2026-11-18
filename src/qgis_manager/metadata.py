@@ -11,11 +11,11 @@ from __future__ import annotations
 
 import configparser
 import logging
-import os
 import re
 from pathlib import Path
 from typing import Any
 
+from .atomic import write_text_atomic as write_text_atomic
 from .naming import slugify
 from .toml_utils import get_project_version
 
@@ -133,27 +133,6 @@ def update_general_keys(text: str, updates: dict[str, str]) -> str:
 
     _insert_missing_keys(out, general_tail, updates, applied)
     return "\n".join(out)
-
-
-def write_text_atomic(path: Path, text: str) -> None:
-    """Write ``text`` to ``path`` atomically, preserving nothing but content.
-
-    A temporary file is created next to the destination and moved over it with
-    :func:`os.replace`, so a failure cannot leave a half-written file.
-
-    Args:
-        path: Destination file.
-        text: Content to write as UTF-8.
-
-    Raises:
-        OSError: If the temporary file cannot be written or moved.
-    """
-    tmp_path = path.with_name(f".{path.name}.tmp")
-    try:
-        tmp_path.write_text(text, encoding="utf-8")
-        os.replace(tmp_path, path)
-    finally:
-        tmp_path.unlink(missing_ok=True)
 
 
 def get_plugin_metadata(project_root: Path) -> dict[str, Any]:

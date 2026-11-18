@@ -5,6 +5,8 @@ import tomllib
 from pathlib import Path
 from typing import Any
 
+from .atomic import write_text_atomic
+
 
 def load_toml(path: Path) -> dict[str, Any]:
     """Load a TOML file into a dictionary.
@@ -55,7 +57,7 @@ def set_project_version(pyproject: Path, version: str) -> bool:
     content = pyproject.read_text(encoding="utf-8")
     updated, changed = _replace_project_version(content, version)
     if changed:
-        pyproject.write_text(updated, encoding="utf-8")
+        write_text_atomic(pyproject, updated)
     return changed
 
 
@@ -73,8 +75,9 @@ def _replace_project_version(content: str, version: str) -> tuple[str, bool]:
             in_project = stripped == "[project]"
             continue
         if in_project:
-            match = re.match(r'^(\s*version\s*=\s*)"[^"]*"(.*)$', line)
+            match = re.match(r'^(\s*version\s*=\s*)([\'"])(.*?)\2(.*)$', line)
             if match:
-                lines[i] = f'{match.group(1)}"{version}"{match.group(2)}'
+                quote = match.group(2)
+                lines[i] = f"{match.group(1)}{quote}{version}{quote}{match.group(4)}"
                 return "\n".join(lines), True
     return content, False

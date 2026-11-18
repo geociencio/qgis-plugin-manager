@@ -1,6 +1,7 @@
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from qgis_manager.toml_utils import (
     get_project_version,
@@ -73,6 +74,28 @@ class TestTomlUtils(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp_dir:
             pyproject = self._write(Path(tmp_dir), '[project]\nname = "demo"\n')
             self.assertFalse(set_project_version(pyproject, "1.0.0"))
+
+    def test_set_project_version_supports_single_quotes(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            pyproject = self._write(
+                Path(tmp_dir),
+                "[project]\nname = 'demo'\nversion = '0.1.0'  # comment\n",
+            )
+            self.assertTrue(set_project_version(pyproject, "0.2.0"))
+            content = pyproject.read_text(encoding="utf-8")
+            self.assertIn("version = '0.2.0'  # comment", content)
+
+    def test_set_project_version_atomic_failure_keeps_original(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            original = '[project]\nname = "demo"\nversion = "0.1.0"\n'
+            pyproject = self._write(Path(tmp_dir), original)
+            with patch(
+                "qgis_manager.toml_utils.write_text_atomic",
+                side_effect=OSError("boom"),
+            ):
+                with self.assertRaises(OSError):
+                    set_project_version(pyproject, "0.2.0")
+            self.assertEqual(pyproject.read_text(encoding="utf-8"), original)
 
 
 if __name__ == "__main__":
