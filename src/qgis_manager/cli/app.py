@@ -3,8 +3,10 @@
 import argparse
 import logging
 import sys
+import traceback
 
 from .base import BaseCommand
+from .errors import CliError
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +63,11 @@ class CLIApp:
             "--log-file",
             help="Path to log file",
         )
+        parser.add_argument(
+            "--debug",
+            action="store_true",
+            help="Show tracebacks for unexpected errors",
+        )
 
         subparsers = parser.add_subparsers(dest="command", metavar="SUBCOMMAND")
 
@@ -105,10 +112,10 @@ class CLIApp:
         """
         import logging
 
-        level = logging.DEBUG if args.verbose >= 1 else logging.INFO
+        level = logging.DEBUG if args.debug or args.verbose >= 1 else logging.INFO
 
         log_format = "%(message)s"
-        if args.verbose >= 1:
+        if args.debug or args.verbose >= 1:
             log_format = "%(levelname)s: %(message)s"
 
         handlers: list[logging.Handler] = [logging.StreamHandler()]
@@ -131,6 +138,7 @@ class CLIApp:
         if argv is None:
             argv = sys.argv[1:]
 
+        args: argparse.Namespace | None = None
         try:
             args = parser.parse_args(argv)
 
@@ -146,9 +154,21 @@ class CLIApp:
             logger.info("Interrupted by user.")
             sys.stdout.write("\n⏹️ Interrupted.\n")
             return 1
-        except Exception as e:
-            logger.error(f"Top-level CLI error: {e}")
+        except CliError as exc:
             from . import console
 
-            console.echo(console.style(f"❌ Error: {e}", fg="red", bold=True), err=True)
+            console.echo(
+                console.style(f"❌ Error: {exc}", fg="red", bold=True), err=True
+            )
+            return exc.exit_code
+        except Exception as exc:
+            debug = bool(getattr(args, "debug", False))
+            logger.error("Unexpected CLI error: %s", exc)
+            if debug:
+                traceback.print_exc()
+            from . import console
+
+            console.echo(
+                console.style(f"❌ Error: {exc}", fg="red", bold=True), err=True
+            )
             return 1

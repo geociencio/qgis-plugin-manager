@@ -230,6 +230,24 @@ class TestCLI(unittest.TestCase):
         self.assertTrue(commands)
         self.assertFalse(any(command.name == "broken" for command in commands))
 
+    @patch("qgis_manager.cli.commands.deploy.DeployCommand.execute")
+    def test_cli_expected_error_uses_exit_code(self, mock_exec):
+        from qgis_manager.cli.errors import CliError
+
+        mock_exec.side_effect = CliError("expected", exit_code=2)
+        exit_code, _, error = self._invoke(["deploy"])
+        self.assertEqual(exit_code, 2)
+        self.assertIn("expected", error)
+        self.assertNotIn("Traceback", error)
+
+    @patch("qgis_manager.cli.commands.deploy.DeployCommand.execute")
+    def test_cli_debug_shows_traceback(self, mock_exec):
+        mock_exec.side_effect = RuntimeError("unexpected")
+        exit_code, _, error = self._invoke(["--debug", "deploy"])
+        self.assertEqual(exit_code, 1)
+        self.assertIn("Traceback", error)
+        self.assertIn("unexpected", error)
+
 
 if __name__ == "__main__":
     unittest.main()

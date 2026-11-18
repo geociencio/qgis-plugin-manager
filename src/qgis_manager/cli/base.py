@@ -6,6 +6,7 @@ from pathlib import Path
 
 from ..discovery import find_project_root
 from . import console
+from .errors import CliError
 
 
 class BaseCommand(ABC):
@@ -37,19 +38,22 @@ class BaseCommand(ABC):
 
     def project_root(self, args: argparse.Namespace) -> Path:
         """Resolve the project root from the common ``path`` argument."""
-        return find_project_root(Path(args.path))
+        try:
+            return find_project_root(Path(args.path))
+        except FileNotFoundError as exc:
+            raise CliError(str(exc)) from exc
 
     def run(self, args: argparse.Namespace) -> int:
-        """Run the command, mapping unexpected errors to a CLI exit code."""
+        """Run the command, printing expected errors with their exit code."""
         try:
             return self.execute(args)
         except KeyboardInterrupt:
             raise
-        except Exception as exc:
+        except CliError as exc:
             console.echo(
                 console.style(f"❌ Error: {exc}", fg="red", bold=True), err=True
             )
-            return 1
+            return exc.exit_code
 
     def add_common_args(
         self,
