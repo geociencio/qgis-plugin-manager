@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Documentation
 - Close-session maintenance log and handover refreshed; no runtime changes.
 
+## [0.16.2] - 2026-11-18
+
+### Fixed
+- **Hooks inspection**: `hooks list` now parses `plugin_hooks.py` with AST instead of importing and executing project code.
+- **Deploy dry-run**: nested destination directories are skipped, so dry-run counts match the real deploy.
+- **Documentation build**: compiled docs are swapped atomically and the previous `help/html` is restored if the move fails.
+- **Dclean profiles**: absolute `--profile` plugin directories are resolved consistently with `deploy`.
+- **Compile progress**: worker results are emitted from the caller thread in order, so `--jobs > 1` updates progress deterministically.
+- **Reproducible ZIP**: package members are sorted by archive name before writing.
+
 ## [0.16.1] - 2026-11-01
 
 ### Fixed

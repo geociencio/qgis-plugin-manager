@@ -1,7 +1,7 @@
 # qgis-manage security
 
 ```text
-qgis-manage security v0.16.1
+qgis-manage security v0.16.2
 Run a security audit (secrets and PyQGIS rules)
 
 Usage: qgis-manage security [-h] [--strict] [-o OUTPUT] [--portal]

@@ -1,5 +1,14 @@
 # Development Log: qgis-manage
 
+## [2026-11-18] Release v0.16.2 — Security and Correctness
+- **Achievement**: Closed the critical findings from the manual code-smell review.
+- **Changes**:
+    - AST-based `hooks list`; no project execution.
+    - Nested deploy guard, atomic docs swap, absolute `dclean` profiles.
+    - Ordered compile callbacks and sorted ZIP members.
+- **Quality**: 434 tests, 96.20 % statements, 90.39 % branches, 94.79 % combined, C901 = 0.
+- **Release**: `v0.16.2` published on GitHub and PyPI.
+
 ## [2026-11-01] Close Session — Correctness Patch
 - **Achievement**: Closed the analysis cycle with 0.16.0 (zero deps) and 0.16.1 (correctness).
 - **Changes**:
