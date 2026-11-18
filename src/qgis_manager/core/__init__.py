@@ -58,6 +58,9 @@ from .deploy import (
     uninstall_plugin,
 )
 from .package import (
+    PackageRequest,
+    PackageResult,
+    PackageWorkflow,
     create_plugin_package,
     get_git_info,
     is_prerelease,
@@ -72,6 +75,9 @@ __all__ = [
     "compile_qt_resources",
     "compile_ui_files",
     "count_compile_steps",
+    "PackageRequest",
+    "PackageResult",
+    "PackageWorkflow",
     "create_plugin_package",
     "DeployPlan",
     "DeployRequest",

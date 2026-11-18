@@ -7,6 +7,7 @@ import re
 import subprocess
 import zipfile
 from collections.abc import Callable, Iterator
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path, PurePath
 from typing import Any
@@ -18,6 +19,52 @@ from ..naming import validate_slug
 from ..paths import PathPolicy, ProjectWalker
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class PackageRequest:
+    """Inputs for creating a distributable plugin ZIP."""
+
+    project_root: Path
+    output_dir: Path | None = None
+    include_dev: bool = False
+    stamp: bool = False
+    release_version: str | None = None
+    normalize_permissions: bool = False
+
+
+@dataclass(frozen=True)
+class PackageResult:
+    """Result of a package operation."""
+
+    zip_path: Path
+
+
+class PackageWorkflow:
+    """Create a package through an injectable boundary."""
+
+    def __init__(
+        self,
+        package: Callable[..., Path] | None = None,
+    ) -> None:
+        self.package = package or create_plugin_package
+
+    def create(
+        self,
+        request: PackageRequest,
+        callback: Callable[[int], Any] | None = None,
+    ) -> PackageResult:
+        """Create the ZIP and return its path."""
+        zip_path = self.package(
+            request.project_root,
+            output_dir=request.output_dir,
+            include_dev=request.include_dev,
+            callback=callback,
+            stamp=request.stamp,
+            release_version=request.release_version,
+            normalize_permissions=request.normalize_permissions,
+        )
+        return PackageResult(zip_path=zip_path)
 
 
 def is_prerelease(version: str) -> bool:

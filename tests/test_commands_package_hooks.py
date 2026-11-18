@@ -226,6 +226,22 @@ class TestPackageCommand(_CommandTestBase):
         self.assertEqual(exit_code, 0)
         self.assertTrue(mock_package.call_args.kwargs["normalize_permissions"])
 
+    @patch(
+        "qgis_manager.cli.commands.package.install_external_libs", return_value=False
+    )
+    @patch("qgis_manager.cli.base.find_project_root")
+    def test_package_json_failure_emits_envelope(self, mock_find, _mock_install):
+        import json
+
+        mock_find.return_value = Path(tempfile.mkdtemp())
+        exit_code, output, _ = self._invoke(["package", "--json"])
+
+        self.assertEqual(exit_code, 1)
+        payload = json.loads(output)
+        self.assertEqual(payload["command"], "package")
+        self.assertFalse(payload["success"])
+        self.assertIn("dependency", payload["errors"][0])
+
 
 class TestHooksCommand(_CommandTestBase):
     @patch("qgis_manager.cli.base.find_project_root")

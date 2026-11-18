@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 from ...config import Settings, load_config, load_project_config
-from ...core import create_plugin_package
+from ...core import PackageRequest, PackageWorkflow, create_plugin_package
 from ...dependencies import get_dependencies, install_external_libs
 from ...metadata import get_plugin_metadata, sync_metadata_version
 from ...toml_utils import get_project_version
@@ -81,16 +81,16 @@ class PackageCommand(BaseCommand):
         settings = load_project_config(root, load_config())
         self._sync_version(root, args)
         if not self._validate_release_version(root, args):
-            return 1
+            return self._failure(args, "release version validation failed")
         if not self._require_docs(root, args, settings):
-            return 1
+            return self._failure(args, "required documentation is missing")
         if not self._install_dependencies(root, args):
-            return 1
+            return self._failure(args, "dependency installation failed")
         if not self._check_compliance(root, args):
-            return 1
+            return self._failure(args, "package compliance failed")
         zip_path = self._build_package(root, args, settings)
         if args.repo_check and not self._audit_artifact(zip_path, settings):
-            return 1
+            return self._failure(args, "artifact validation failed")
         if args.json:
             emit_json(
                 "package",
@@ -100,6 +100,12 @@ class PackageCommand(BaseCommand):
         else:
             click.echo(click.style(f"✅ Package created: {zip_path}", fg="green"))
         return 0
+
+    @staticmethod
+    def _failure(args: argparse.Namespace, message: str) -> int:
+        if getattr(args, "json", False):
+            emit_json("package", False, errors=[message])
+        return 1
 
     def _sync_version(self, root: Path, args: argparse.Namespace) -> None:
         if not args.sync_version:
@@ -222,14 +228,17 @@ class PackageCommand(BaseCommand):
     def _build_package(
         self, root: Path, args: argparse.Namespace, settings: Settings
     ) -> Path:
-        options = {
-            "output_dir": Path(args.output) if args.output else None,
-            "include_dev": args.dev,
-            "stamp": args.stamp,
-            "release_version": args.release_version,
-        }
+        request = PackageRequest(
+            project_root=root,
+            output_dir=Path(args.output) if args.output else None,
+            include_dev=args.dev,
+            stamp=args.stamp,
+            release_version=args.release_version,
+            normalize_permissions=args.repo_check or settings.normalize_permissions,
+        )
+        workflow = PackageWorkflow(package=create_plugin_package)
         if args.json:
-            return create_plugin_package(root, **options)
+            return workflow.create(request).zip_path
         with click.progressbar(
             length=100,
             label="📦 Packaging files",
@@ -245,12 +254,4 @@ class PackageCommand(BaseCommand):
                 else:
                     bar.update(n)
 
-            return create_plugin_package(
-                root,
-                output_dir=Path(args.output) if args.output else None,
-                include_dev=args.dev,
-                callback=update_bar,
-                stamp=args.stamp,
-                release_version=args.release_version,
-                normalize_permissions=args.repo_check or settings.normalize_permissions,
-            )
+            return workflow.create(request, callback=update_bar).zip_path

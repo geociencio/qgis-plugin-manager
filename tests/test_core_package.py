@@ -231,3 +231,35 @@ def test_package_zip_order_is_deterministic(tmp_path: Path) -> None:
         hashlib.sha256(outputs[0].read_bytes()).hexdigest()
         == hashlib.sha256(outputs[1].read_bytes()).hexdigest()
     )
+
+
+def test_package_workflow_passes_request_and_callback(tmp_path: Path) -> None:
+    from typing import Any
+
+    from qgis_manager.core.package import PackageRequest, PackageWorkflow
+
+    calls: list[dict[str, Any]] = []
+    expected = tmp_path / "demo.zip"
+
+    def fake_package(*args: Any, **kwargs: Any) -> Path:
+        calls.append({"args": args, "kwargs": kwargs})
+        return expected
+
+    request = PackageRequest(
+        project_root=tmp_path,
+        output_dir=tmp_path / "out",
+        include_dev=True,
+        stamp=True,
+        release_version="2.0.0",
+        normalize_permissions=True,
+    )
+    callback = lambda _n: None  # noqa: E731
+    result = PackageWorkflow(package=fake_package).create(request, callback=callback)
+
+    assert result.zip_path == expected
+    assert calls[0]["kwargs"]["output_dir"] == tmp_path / "out"
+    assert calls[0]["kwargs"]["include_dev"] is True
+    assert calls[0]["kwargs"]["stamp"] is True
+    assert calls[0]["kwargs"]["release_version"] == "2.0.0"
+    assert calls[0]["kwargs"]["normalize_permissions"] is True
+    assert calls[0]["kwargs"]["callback"] is callback
