@@ -1,5 +1,13 @@
 # Development Log: qgis-manage
 
+## [2026-11-18] B3 — PackageWorkflow
+- **Achievement**: Extracted package creation and fixed the JSON failure contract.
+- **Changes**:
+    - Added `PackageRequest`, `PackageResult`, `PackageWorkflow`.
+    - One `create_plugin_package` call for JSON and progress modes.
+    - JSON envelope now emitted for release/docs/dependency/compliance/artifact failures.
+- **Quality**: 444 tests, 96.25 % statements, 90.43 % branches, 94.86 % combined.
+
 ## [2026-11-18] B2 — DeployWorkflow
 - **Achievement**: Extracted deployment planning/execution from the CLI command.
 - **Changes**:
