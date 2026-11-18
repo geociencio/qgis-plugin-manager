@@ -1,21 +1,21 @@
 # Phase: 0.17.0 Refactor
 
 ## Status
-- **Phase**: B3 complete (2026-11-18); B4 next.
-- **Refactor**: B1 path walker, B2 deploy workflow, B3 package workflow complete.
-- **Quality**: 444 tests, 96.25 % statements, 90.43 % branches, 94.86 % combined,
+- **Phase**: B4 complete (2026-11-18); B5 next.
+- **Refactor**: B1 path walker, B2 deploy, B3 package, B4 console rename complete.
+- **Quality**: 445 tests, 96.25 % statements, 90.43 % branches, 94.86 % combined,
   C901 = 0; runtime dependencies = 0.
 
 ## Completed
 1. [x] B1 — PathPolicy and ProjectWalker.
 2. [x] B2 — DeployWorkflow.
 3. [x] B3 — PackageWorkflow.
-4. [ ] B4 — console rename.
+4. [x] B4 — console rename.
 5. [ ] B5 — typed error boundary.
 6. [ ] B6 — atomic TOML updates.
 7. [ ] B7 — external input validation.
 8. [ ] B8 — release 0.17.0.
 
 ## Next
-- B4: rename `console as click` to `console`.
+- B5: typed error boundary and `--debug`.
 - Resume with `/start-session`.

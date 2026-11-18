@@ -1,5 +1,13 @@
 # Development Log: qgis-manage
 
+## [2026-11-18] B4 — Console Rename
+- **Achievement**: Removed the legacy `console as click` alias everywhere.
+- **Changes**:
+    - Production and test patch targets now use `console.*`.
+    - Added a regression guard against reintroducing the alias.
+    - No CLI behavior change.
+- **Quality**: 445 tests, 96.25 % statements, 90.43 % branches, 94.86 % combined.
+
 ## [2026-11-18] B3 — PackageWorkflow
 - **Achievement**: Extracted package creation and fixed the JSON failure contract.
 - **Changes**:
